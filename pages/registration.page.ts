@@ -2,15 +2,19 @@ import { Page, Locator, expect } from '@playwright/test';
 import { BasePage } from './base.page';
 
 /**
- * Patient Registration list at /hospital/newregistration — reached from the launcher by
- * expanding the REGISTRATION menu in the left drawer and clicking PATIENT REGISTRATION.
+ * Patient Registration list at /hospital/newregistration.
  *
- * The page is a MudBlazor data grid: a "Show From"/"Show To" date filter, a free-text
- * search, an "Add New" button that opens the create-patient wizard, and one row per
- * patient with an edit link in the ACTION column.
+ * Reached the way a user reaches it: click the REGISTRATION tile on the launcher, which
+ * loads that module's menu into the left drawer, then click PATIENT REGISTRATION there.
+ * The drawer carries only Notifications/Messages until a module tile is picked, so the
+ * sidebar link genuinely does not exist before that first click.
  *
- * MudBlazor generates input ids per render ("mudinputsntkjoh6"), so every field here is
- * located by label, placeholder or href — never by id.
+ * The page itself is a MudBlazor data grid: a "Show From"/"Show To" date filter, a
+ * free-text search, an "Add New" button opening the create-patient wizard, and one row
+ * per patient with an edit link in the ACTION column.
+ *
+ * MudBlazor regenerates input ids on every render ("mudinputsntkjoh6"), so every field
+ * here is located by label, placeholder or href — never by id.
  */
 export class RegistrationPage extends BasePage {
   protected readonly path = '/hospital/newregistration';
@@ -19,9 +23,12 @@ export class RegistrationPage extends BasePage {
    *  is title case but CSS uppercases it, and innerText follows the CSS. */
   static readonly COLUMNS = [/name/i, /uhid/i, /reg date/i, /phone number/i, /dob/i, /action/i];
 
-  /** Left drawer — present on every authenticated page, not just this one. */
+  /** REGISTRATION tile on the launcher — main content, not the drawer. */
+  readonly moduleTile: Locator;
   readonly sidebar: Locator;
-  readonly registrationMenu: Locator;
+  /** REGISTRATION group header inside the drawer; a MudNavGroup toggle, so it is a
+   *  <button> with no href and carries no link role. */
+  readonly sidebarMenu: Locator;
   readonly patientRegistrationLink: Locator;
 
   readonly heading: Locator;
@@ -35,12 +42,12 @@ export class RegistrationPage extends BasePage {
 
   constructor(page: Page) {
     super(page);
+    this.moduleTile = page.locator('.menu-text').filter({ hasText: /^REGISTRATION$/ });
     this.sidebar = page.locator('aside.mud-drawer');
-    // The menu is an <a> without href — a MudNavGroup toggle, so it has no link role.
-    this.registrationMenu = this.sidebar.getByText('REGISTRATION', { exact: true });
+    this.sidebarMenu = this.sidebar.locator('.mud-nav-link').filter({ hasText: /^REGISTRATION$/ });
     this.patientRegistrationLink = this.sidebar.locator(`a.mud-nav-link[href="${this.path}"]`);
 
-    this.heading = page.getByText('PATIENT REGISTRATION', { exact: true }).last();
+    this.heading = page.locator('h4.page-title');
     this.showFrom = this.dateFilter('Show From');
     this.showTo = this.dateFilter('Show To');
     this.showButton = page.getByRole('button', { name: 'Show', exact: true });
@@ -57,18 +64,18 @@ export class RegistrationPage extends BasePage {
   }
 
   /**
-   * Opens the page the way a user does: expand REGISTRATION in the drawer, then click
-   * PATIENT REGISTRATION. Assumes the launcher (or any authenticated page) is open.
+   * Opens the page the way a user does: REGISTRATION tile on the launcher, then
+   * PATIENT REGISTRATION in the drawer it populates. Expects the launcher to be open.
    */
-  async openFromSidebar(): Promise<void> {
-    await this.registrationMenu.click();
+  async openFromLauncher(): Promise<void> {
+    await this.moduleTile.click();
     await expect(this.patientRegistrationLink).toBeVisible();
     await this.patientRegistrationLink.click();
   }
 
   async expectLoaded(): Promise<void> {
     await expect(this.page).toHaveURL(new RegExp(this.path));
-    await expect(this.heading).toBeVisible({ timeout: 30_000 });
+    await expect(this.heading).toHaveText(/patient registration/i, { timeout: 30_000 });
     await expect(this.table).toBeVisible({ timeout: 30_000 });
   }
 

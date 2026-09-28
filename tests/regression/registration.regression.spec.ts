@@ -6,27 +6,29 @@ import { RegistrationPage } from '../../pages';
  *
  * Signed-in suite: it runs on the session saved by tests/auth.setup.ts.
  *
- * Covers the route a user actually takes — launcher → REGISTRATION menu in the left
- * drawer → PATIENT REGISTRATION — and then the patient list that route lands on.
+ * Covers the route a user actually takes — REGISTRATION tile on the launcher, which
+ * loads that module's menu into the left drawer, then PATIENT REGISTRATION in the
+ * drawer — and then the patient list that route lands on.
  *
  * The grid holds live hospital data, so no test hard-codes a patient. The search cases
  * read a name out of the first row and search for that, which holds whatever the ward
  * registered today.
  */
 test.describe('Registration @regression', () => {
-  test('TC_REG_001 REGISTRATION menu reveals PATIENT REGISTRATION in the sidebar', async ({
+  test('TC_REG_001 REGISTRATION tile loads the module menu into the sidebar', async ({
     homePage,
     registrationPage,
   }) => {
     await homePage.goto();
     await homePage.expectLoaded();
 
-    // Collapsed to begin with: the child link is in the DOM only once the menu expands.
+    // The drawer carries no module menu until a tile is picked.
     await expect(registrationPage.sidebar).toBeVisible();
     await expect(registrationPage.patientRegistrationLink).toHaveCount(0);
 
-    await registrationPage.registrationMenu.click();
+    await registrationPage.moduleTile.click();
 
+    await expect(registrationPage.sidebarMenu).toBeVisible();
     await expect(registrationPage.patientRegistrationLink).toBeVisible();
     await expect(registrationPage.patientRegistrationLink).toHaveAttribute(
       'href',
@@ -41,7 +43,7 @@ test.describe('Registration @regression', () => {
     await homePage.goto();
     await homePage.expectLoaded();
 
-    await registrationPage.openFromSidebar();
+    await registrationPage.openFromLauncher();
 
     await registrationPage.expectLoaded();
     await expect(registrationPage.page).toHaveURL(/\/hospital\/newregistration$/);
@@ -123,9 +125,7 @@ test.describe('Registration @regression', () => {
     await registrationPage.addNew.click();
 
     await expect(registrationPage.page).toHaveURL(/\/hospital\/patients\/new$/);
-    await expect(
-      registrationPage.page.getByText('CREATE PATIENT', { exact: true })
-    ).toBeVisible({ timeout: 30_000 });
+    await expect(registrationPage.heading).toHaveText(/create patient/i, { timeout: 30_000 });
   });
 });
 
