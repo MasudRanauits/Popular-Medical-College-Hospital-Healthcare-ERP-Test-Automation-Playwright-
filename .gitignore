@@ -1,0 +1,13 @@
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# Saved auth session - keep the folder, never commit the session itself
+/playwright/.auth/*
+!/playwright/.auth/.gitkeep
+
+# Local environment
+.env
