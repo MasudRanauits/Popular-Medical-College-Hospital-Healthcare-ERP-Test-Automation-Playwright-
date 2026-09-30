@@ -2,7 +2,7 @@ import { test, expect } from '../../fixtures';
 import { RegistrationPage, CreatePatientPage } from '../../pages';
 
 /**
- * Registration @regression — TC_REG_001 … TC_REG_017.
+ * Registration @regression — TC_REG_001 … TC_REG_009.
  *
  * Signed-in suite: it runs on the session saved by tests/auth.setup.ts.
  *
@@ -14,8 +14,10 @@ import { RegistrationPage, CreatePatientPage } from '../../pages';
  * Two things shape how these cases are written:
  *  - the grid holds live hospital data, so no test hard-codes a patient; the search
  *    cases read a name out of the first row and search for that;
- *  - nothing submits the wizard, because confirming a registration against the live
- *    database would leave a real patient record behind on every run.
+ *  - nothing here submits the wizard, because confirming a registration against the live
+ *    database leaves a real patient record behind on every run. Registering a patient for
+ *    real is part of TC_FLOW_001, in tests/regression/admission.regression.spec.ts, which
+ *    goes on to admit the patient it registered.
  */
 test.describe('Registration @regression', () => {
   test('TC_REG_001 REGISTRATION tile loads the module menu into the sidebar', async ({
@@ -105,8 +107,4 @@ test.describe('Registration @regression', () => {
     await expect(createPatientPage.contactPersonTab).toHaveAttribute('aria-selected', 'false');
     await expect(createPatientPage.corporateClientTab).toHaveAttribute('aria-selected', 'false');
   });
-
 });
-
-
-

@@ -23,43 +23,66 @@ export abstract class BasePage {
   }
 
   /**
-   * Waits for either `ready` — whatever marks the real page — or the router's
-   * "Access Denied", and re-navigates when it is the latter.
+   * Waits for `ready` - whatever marks the real page - to finish rendering.
    *
-   * Opening a module route intermittently renders Access Denied even though the session
-   * is an administrator's, at a rate of roughly one load in twenty. It is the ERP, not
-   * the session: the same saved state loads the page fine before and after, and a
-   * *fresh* attempt clears it while an immediate re-navigation does not — so the pause
-   * between attempts is what does the work here, the same way gotoTolerant waits out the
-   * host's 429s.
+   * The app prerenders its NotAuthorized template before the Blazor circuit connects, so
+   * "Access Denied" is on screen within ~50ms of every module route and is swapped for the
+   * real page about a third of a second later. This used to race the two and re-navigate
+   * whenever the denial won, which is always - so every page load paid a 5s wait and a
+   * reload, sometimes two, for a denial that was never real.
    *
-   * Racing the two outcomes is what makes the check reliable at all: sampling with
-   * isVisible() asks before Blazor has rendered either one and always sees neither.
-   *
-   * A genuine permission failure outlives every attempt, so the caller's own assertion
-   * still fails — with its own message rather than this one.
+   * Now it simply waits for the real page. A re-navigation is kept as a last resort, for
+   * when the page never arrives and the denial is still on screen: the one load in twenty
+   * that genuinely comes back denied clears on a fresh attempt, and a real permission
+   * failure outlives that too, so the caller's own assertion still reports it.
    */
-  protected async settleAuthorization(ready: Locator, attempts = 3): Promise<void> {
-    for (let attempt = 0; attempt < attempts; attempt++) {
-      const appeared = await Promise.race([
-        this.visible(ready, 'ready'),
-        this.visible(this.accessDenied, 'denied'),
-      ]);
-      if (appeared !== 'denied') return;
+  protected async settleAuthorization(ready: Locator, attempts = 2): Promise<void> {
+    for (let attempt = 1; attempt <= attempts; attempt++) {
+      if ((await this.visible(ready, 'ready')) === 'ready') return;
+      if (attempt === attempts) return;
 
-      await this.page.waitForTimeout(5_000);
+      // Not denied, just missing: leave it to the caller to say what it expected and fail.
+      if (!(await this.accessDenied.first().isVisible().catch(() => false))) return;
+
       await gotoTolerant(this.page, this.path);
       await waitForAppReady(this.page);
     }
   }
 
-  /** Resolves to `tag` once `locator` is visible, or to 'timeout' if it never is. */
-  private async visible<T extends string>(locator: Locator, tag: T): Promise<T | 'timeout'> {
+  /**
+   * Clicks `trigger` until `appears` shows up, re-fetching `path` between attempts.
+   *
+   * Two different things go wrong with the launcher tiles and they look identical. The
+   * tiles are painted before Blazor wires their handlers, so a click landing in that gap is
+   * swallowed - clicking again fixes that. And when the host is answering 429, which it
+   * does for about ten seconds after the login suite's bad-password cases, the circuit never
+   * starts at all and no number of clicks will help: the page has to be fetched again.
+   *
+   * Silent on failure - the caller asserts on `appears` and reports it in its own words.
+   */
+  protected async clickUntilVisible(
+    trigger: Locator,
+    appears: Locator,
+    path: string,
+    attempts = 3
+  ): Promise<void> {
+    for (let attempt = 1; attempt <= attempts; attempt++) {
+      await trigger.click().catch(() => {});
+      if (await this.visible(appears, true, 10_000)) return;
+      if (attempt === attempts) return;
+
+      await gotoTolerant(this.page, path);
+      await waitForAppReady(this.page);
+    }
+  }
+
+  /** Resolves to `tag` once `locator` is visible, or to the fallback if it never is. */
+  private async visible<T, F>(locator: Locator, tag: T, timeout = 30_000, fallback?: F) {
     return locator
       .first()
-      .waitFor({ state: 'visible', timeout: 30_000 })
+      .waitFor({ state: 'visible', timeout })
       .then(() => tag)
-      .catch(() => 'timeout' as const);
+      .catch(() => fallback as F);
   }
 
   get toast(): Locator {

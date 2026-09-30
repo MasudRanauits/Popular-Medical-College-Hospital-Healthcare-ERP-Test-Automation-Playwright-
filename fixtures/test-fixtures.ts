@@ -1,5 +1,11 @@
 import { test as base, expect } from '@playwright/test';
-import { LoginPage, HomePage, RegistrationPage, CreatePatientPage } from '../pages';
+import {
+  LoginPage,
+  HomePage,
+  RegistrationPage,
+  CreatePatientPage,
+  AdmissionPage,
+} from '../pages';
 
 /**
  * Page objects injected as fixtures, so specs read as
@@ -11,6 +17,7 @@ type Pages = {
   homePage: HomePage;
   registrationPage: RegistrationPage;
   createPatientPage: CreatePatientPage;
+  admissionPage: AdmissionPage;
 };
 
 export const test = base.extend<Pages>({
@@ -25,6 +32,9 @@ export const test = base.extend<Pages>({
   },
   createPatientPage: async ({ page }, use) => {
     await use(new CreatePatientPage(page));
+  },
+  admissionPage: async ({ page }, use) => {
+    await use(new AdmissionPage(page));
   },
 });
 

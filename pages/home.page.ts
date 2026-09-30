@@ -32,6 +32,21 @@ export class HomePage extends BasePage {
     return this.page.getByText(name, { exact: true }).first();
   }
 
+  /**
+   * Opens the launcher tile `module` and returns the drawer link to `href`, once that
+   * module's menu has loaded into the drawer.
+   *
+   * The click goes through clickUntilVisible because a tile click can be swallowed - see
+   * there for the two ways that happens.
+   */
+  async openModule(module: string | RegExp, href: string): Promise<Locator> {
+    const link = this.page.locator(`aside.mud-drawer a.mud-nav-link[href="${href}"]`);
+
+    await this.clickUntilVisible(this.module(module), link, this.path);
+
+    await expect(link).toBeVisible();
+    return link;
+  }
   async expectLoaded(): Promise<void> {
     await expect(this.tenantName).toBeVisible({ timeout: 30_000 });
     await expect(this.userRole).toBeVisible();

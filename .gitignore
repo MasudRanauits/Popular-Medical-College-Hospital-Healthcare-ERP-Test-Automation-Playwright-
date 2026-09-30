@@ -9,5 +9,8 @@ node_modules/
 /playwright/.auth/*
 !/playwright/.auth/.gitkeep
 
+# Run counters that keep test records apart between runs
+/playwright/.run-counters.json
+
 # Local environment
 .env

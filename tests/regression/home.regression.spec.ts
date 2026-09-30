@@ -1,4 +1,5 @@
 import { test, expect } from '../../fixtures';
+import { reloadTolerant } from '../../utils/helpers';
 
 /**
  * Home / module launcher @regression — TC_HOME_001 … TC_HOME_007.
@@ -61,7 +62,9 @@ test.describe('Home @regression', () => {
     await homePage.goto();
     await homePage.expectLoaded();
 
-    await homePage.page.reload({ waitUntil: 'domcontentloaded' });
+    // Tolerant of the host throttle: a raw reload throws outright on the 429 the login
+    // suite's bad-password cases leave behind, which has nothing to do with this case.
+    await reloadTolerant(homePage.page);
 
     await homePage.expectLoaded();
     await expect(homePage.module(CORE_MODULES[0])).toBeVisible();
