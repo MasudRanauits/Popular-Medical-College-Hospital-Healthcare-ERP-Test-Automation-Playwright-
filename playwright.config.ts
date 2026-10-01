@@ -47,7 +47,7 @@ export default defineConfig({
     /* Self-signed certificate on the ERP host. */
     ignoreHTTPSErrors: true,
     /* Headless everywhere. Pass --headed to watch a run. */
-    headless: false,
+    headless: true,
     /* No fixed viewport - the page fills the whole browser window instead of the
        1280x720 the device presets pin it to. With --start-maximized below, a headed
        Chromium run covers the full screen. */
