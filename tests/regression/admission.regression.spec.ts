@@ -1,6 +1,6 @@
 import { test, expect } from '../../fixtures';
 import { primaryUser } from '../../data/users';
-import { admissionData, registrationPatient } from '../../data/test-data';
+import { admissionData, medicineIndent, registrationPatient } from '../../data/test-data';
 
 /**
  * Admission @regression — TC_ADM_001 … TC_ADM_002, TC_FLOW_001.
@@ -16,7 +16,8 @@ import { admissionData, registrationPatient } from '../../data/test-data';
  *
  * TC_ADM_001 and TC_ADM_002 stop short of submitting the wizard. Admitting a patient end
  * to end is TC_FLOW_001, in the second describe below, which registers the patient it
- * admits rather than picking one out of live data.
+ * admits rather than picking one out of live data, and carries the admission on to the
+ * ward that will treat them.
  */
 test.describe('Admission @regression', () => {
   /** UHID of the most recently registered patient, taken from the registration grid. */
@@ -74,19 +75,24 @@ test.describe('Admission @regression', () => {
  * Patient journey @regression — TC_FLOW_001.
  *
  * One patient, followed the way the hospital actually takes one on: log in, register them
- * at the front desk, then admit them to a ward through the New Admission wizard.
+ * at the front desk, admit them to a ward through the New Admission wizard, and then -
+ * from the ward itself - raise the first medicine indent against that admission.
  *
- * Why it is one test and not three. The admission wizard needs a patient who is registered
- * and not already on a ward, and the only way to be sure of that is to have just registered
- * them. Split into separate tests, the admission half would have to go hunting for a UHID
- * in live data and would re-admit the same person on a second run.
+ * Why it is one test and not four. Each half needs what the half before it produced, and
+ * needs it to be *new*: the admission wizard needs a patient who is registered and not
+ * already on a ward, and the Nurse Station needs an admission number that is on the ward
+ * now. The only way to be sure of either is to have just made it. Split into separate
+ * tests, the later halves would have to go hunting through live data for a UHID and an
+ * admission number, and would re-admit or re-indent the same person on a second run.
  *
  * It runs signed out, because logging in is the first thing it checks. The rest of the
  * regression suite runs on the session tests/auth.setup.ts saves.
  *
- * This test writes to the live database, twice: a patient record and an admission holding a
- * real bed and real advance payments. Neither is undone by deleting a row - cancelling an
- * admission is its own workflow under Hospital > Admission Cancel. Run it deliberately.
+ * This test writes to the live database three times: a patient record, an admission
+ * holding a real bed and real advance payments, and a medicine indent the pharmacy will
+ * see as Pending. None of the three is undone by deleting a row - cancelling an admission
+ * is its own workflow under Hospital > Admission Cancel, and an indent is cancelled from
+ * Nurse Station > Verify Indent. Run it deliberately.
  */
 test.describe('Patient journey @regression', () => {
   test.use({ storageState: { cookies: [], origins: [] } });
@@ -96,19 +102,21 @@ test.describe('Patient journey @regression', () => {
   // a second one rather than tell us anything new.
   test.describe.configure({ retries: 0 });
 
-  test('TC_FLOW_001 logs in, registers a patient, then admits them', async ({
+  test('TC_FLOW_001 logs in, registers a patient, admits them, then indents for them', async ({
     loginPage,
     homePage,
     createPatientPage,
     admissionPage,
     admissionDashboardPage,
+    nurseStationPage,
   }) => {
-    // Three form-filling passes and four printed documents over a slow host; the 90s
-    // project default is not enough.
-    test.setTimeout(600_000);
+    // Four form-filling passes, four printed documents and a ten-line indent over a slow
+    // host; the 90s project default is not enough.
+    test.setTimeout(900_000);
 
     const patient = registrationPatient();
     const admission = admissionData();
+    const indent = medicineIndent(10);
     const expectedTotal =
       Number(admission.payment.cardAmount) +
       Number(admission.payment.bkash) +
@@ -202,7 +210,58 @@ test.describe('Patient journey @regression', () => {
       return no;
     });
 
+    await test.step('the ward raises a medicine indent against the new admission', async () => {
+      // The admission number the dashboard gave back, now used the way the ward uses it:
+      // it is how the nurse finds the patient in the Nurse Station list. This is the step
+      // that says the admission is not merely on a report - it is live enough for the ward
+      // to work against, which is the thing a patient actually needs it to be.
+      await nurseStationPage.goto();
+      await nurseStationPage.expectLoaded();
+
+      // Read before the indent is filed, so the one filed below can be named rather than
+      // guessed at - see NurseStationPage.latestIndent for why the grid cannot just be
+      // read afterwards.
+      const before = await nurseStationPage.latestIndent();
+      await nurseStationPage.openTab('ADD INDENT');
+
+      const onWard = await nurseStationPage.selectPatient(admissionNo);
+
+      // The patient the nurse has on screen is the one this flow registered and admitted.
+      // The Nurse Station prints the title in front of the name, so the registered name is
+      // contained in it rather than equal to it.
+      expect(onWard.name, `${admissionNo} is somebody else on the ward`).toContain(
+        patient.fullName
+      );
+      expect(onWard.cabin).toContain(admission.detail.admittedTo);
+
+      await nurseStationPage.choosePriority(indent.priority);
+      const ordered = await nurseStationPage.addItems(indent.productSearch, indent.quantities);
+      expect(await nurseStationPage.items()).toEqual(ordered);
+
+      expect(await nurseStationPage.saveIndent()).toMatch(/successful save/i);
+      await expect(nurseStationPage.itemRows).toHaveCount(0, { timeout: 30_000 });
+
+      // And the pharmacy can see it: raised against this patient's bed, at the priority
+      // asked for, waiting to be served.
+      const raised = await nurseStationPage.waitForIndentAfter(before?.indentNo);
+      expect(raised.cabinNo).toBe(onWard.cabin);
+      expect(raised.priority).toBe(indent.priority);
+      expect(raised.status).toMatch(/pending/i);
+
+      test.info().annotations.push({
+        type: 'indent',
+        description:
+          `${raised.indentNo} for ${onWard.name} (${onWard.cabin}), ${indent.priority}: ` +
+          ordered.map((line) => `${line.product} x${line.quantity}`).join('; '),
+      });
+    });
+
     await test.step('the admission can be found by its number and printed', async () => {
+      // Back to the dashboard: the step before this one left the browser on the Nurse
+      // Station.
+      await admissionDashboardPage.goto();
+      await admissionDashboardPage.expectLoaded();
+
       // The same admission, reached the other way the dashboard is used - by the number the
       // front desk is given rather than by the patient's name.
       await admissionDashboardPage.searchFor(admissionNo);
