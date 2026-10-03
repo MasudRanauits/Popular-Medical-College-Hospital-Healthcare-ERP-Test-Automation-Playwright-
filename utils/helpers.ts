@@ -18,15 +18,31 @@ export async function waitForAppReady(page: Page): Promise<void> {
  * 429 and `Retry-After: 60` — measured, it clears in about 10s. A login regression run
  * spends that budget quickly, so a test that merely happens to navigate during the
  * cool-off would fail for a reason unrelated to what it asserts.
+ *
+ * A navigation that throws is waited out the same way, for the same reason. Back-to-back
+ * suites against this host turn up net::ERR_ABORTED and friends on a load that would have
+ * been fine a second later - a smoke case died that way at its opening `goto`, before it
+ * had asserted anything. reloadTolerant has always absorbed those; this now matches it.
  */
 export async function gotoTolerant(page: Page, path: string, maxWaitMs = 90_000): Promise<void> {
   const deadline = Date.now() + maxWaitMs;
+  let lastProblem = 'no response';
+
   for (;;) {
     // The app's own assets load slowly; `load` routinely outlives the test timeout.
-    const response = await page.goto(path, { waitUntil: 'domcontentloaded' });
-    if (response?.status() !== 429) return;
+    const response = await page
+      .goto(path, { waitUntil: 'domcontentloaded' })
+      .catch((error: Error) => {
+        lastProblem = error.message.split('\n')[0];
+        return null;
+      });
+    if (response && response.status() !== 429) return;
+    if (response) lastProblem = 'HTTP 429 (rate-limited)';
+
     if (Date.now() >= deadline) {
-      throw new Error(`${path} is still rate-limited (HTTP 429) after ${Math.round(maxWaitMs / 1000)}s.`);
+      throw new Error(
+        `${path} never loaded within ${Math.round(maxWaitMs / 1000)}s (${lastProblem}).`
+      );
     }
     await page.waitForTimeout(5_000);
   }
@@ -62,6 +78,11 @@ export async function reloadTolerant(page: Page, maxWaitMs = 90_000): Promise<vo
 /** Unique suffix for test data, so parallel runs never collide on a patient/invoice name. */
 export function uniqueSuffix(): string {
   return `${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+}
+
+/** A whole number in [min, max], both ends included. */
+export function randomInt(min: number, max: number): number {
+  return min + Math.floor(Math.random() * (max - min + 1));
 }
 
 /** Formats a Date the way the ERP date pickers expect. Adjust if the app uses another format. */

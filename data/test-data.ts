@@ -1,4 +1,4 @@
-import { nextRunNumber, uniqueSuffix } from '../utils/helpers';
+import { nextRunNumber, randomInt, uniqueSuffix } from '../utils/helpers';
 
 /** Builders keep specs readable and guarantee unique records per run. */
 export const patientFactory = (overrides: Partial<Patient> = {}): Patient => ({
@@ -131,5 +131,39 @@ export function admissionData(): AdmissionData {
       cash: '3000',
     },
     detail: { department: 'HDU', admittedTo: 'HDU', doctorSearch: 'Dr' },
+  };
+}
+
+/** One medicine indent's worth of input for the Nurse Station. */
+export interface MedicineIndentData {
+  priority: string;
+  /**
+   * What goes into the Product Code lookup. One term rather than ten: the catalogue is
+   * live, and a term that matches a whole page of brands lets the indent take a different
+   * medicine per line without ten separate searches that each have to hit something.
+   */
+  productSearch: string;
+  /** One quantity per line, so the indent's length is however long this is. */
+  quantities: number[];
+}
+
+/**
+ * A medicine indent of `lines` medicines, each in a random quantity.
+ *
+ * The quantities are random on purpose - a ward orders what it needs, not a round number -
+ * and they stay inside 1..10 so a run cannot order a thousand of anything into a live
+ * pharmacy. Zero is excluded deliberately: the form refuses it, and that refusal is its
+ * own test case rather than something the data should stumble into.
+ *
+ * The priority varies with the run number so the cases do not file every indent under
+ * "Routine", and the run number is what tells one run's indents from another's on the
+ * Verify Indent tab.
+ */
+export function medicineIndent(lines = 10): MedicineIndentData {
+  const rotation = ['Routine', 'Urgent', 'Critical Care'];
+  return {
+    priority: rotation[nextRunNumber('indent') % rotation.length],
+    productSearch: 'Tablet',
+    quantities: Array.from({ length: lines }, () => randomInt(1, 10)),
   };
 }

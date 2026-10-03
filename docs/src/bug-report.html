@@ -1,0 +1,1076 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bug Report — PMCH Healthcare ERP</title>
+    <link rel="stylesheet" href="doc.css" />
+    <style>
+      @page {
+        size: A4 portrait;
+        margin: 14mm 14mm 15mm;
+      }
+      body {
+        max-width: 820px;
+        margin: 0 auto;
+        padding: 0 16px 28px;
+      }
+      .defects-break {
+        break-before: page;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="cover">
+      <p class="eyebrow">Popular Medical College &amp; Hospital Ltd · Healthcare ERP (HIS)</p>
+      <h1>Bug Report</h1>
+      <p class="subtitle">
+        Defects raised from the Playwright regression cycle of 03 October 2026. Eight entries:
+        one reproduced with screenshot, video and trace; seven raised from observed behaviour
+        during the automation build.
+      </p>
+    </header>
+
+    <h2>1. Document control</h2>
+    <table class="meta">
+      <tbody>
+        <tr>
+          <th>Document</th>
+          <td>Bug Report — PMCH Healthcare ERP Test Automation</td>
+        </tr>
+        <tr>
+          <th>Version</th>
+          <td>1.0</td>
+        </tr>
+        <tr>
+          <th>Date raised</th>
+          <td>03 October 2026</td>
+        </tr>
+        <tr>
+          <th>Raised by</th>
+          <td>QA Automation — EMSL Dev Team</td>
+        </tr>
+        <tr>
+          <th>Test cycle</th>
+          <td>
+            Regression run of 03 Oct 2026, 08:04 UTC — 24 tests in 3 m 18 s, 23 passed,
+            1 failed.
+          </td>
+        </tr>
+        <tr>
+          <th>Companion document</th>
+          <td>
+            <span class="mono">docs/TEST_CASES.pdf</span> — the 35 cases these defects were
+            found against.
+          </td>
+        </tr>
+        <tr>
+          <th>Evidence</th>
+          <td>
+            <span class="mono">docs/assets/failures/</span> — screenshots, videos, Playwright
+            traces and page snapshots, with
+            <span class="mono">manifest.json</span> describing the run. Regenerate with
+            <span class="mono">npm run docs:evidence</span>.
+          </td>
+        </tr>
+        <tr>
+          <th>Video playback</th>
+          <td>
+            This PDF cannot play video. Open
+            <span class="mono">docs/src/bug-report.html</span> in a browser for the inline
+            players, or open the <span class="mono">.webm</span> files directly — paths are
+            given with each defect and in section 5.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>2. Environment</h2>
+    <table class="meta">
+      <tbody>
+        <tr>
+          <th>Application</th>
+          <td>HIS ERP — Healthcare Information System (Blazor Server / MudBlazor)</td>
+        </tr>
+        <tr>
+          <th>Tenant</th>
+          <td>Popular Medical College and Hospital Limited</td>
+        </tr>
+        <tr>
+          <th>Host</th>
+          <td>
+            Hospital server over HTTPS, port 9006 (<span class="mono">BASE_URL</span> in
+            <span class="mono">.env</span>). Live database.
+          </td>
+        </tr>
+        <tr>
+          <th>Account</th>
+          <td>Administrator (credentials held in <span class="mono">.env</span>, not in this document)</td>
+        </tr>
+        <tr>
+          <th>Client</th>
+          <td>Chromium (Desktop Chrome profile), 1920×1080, headed, single worker</td>
+        </tr>
+        <tr>
+          <th>Harness</th>
+          <td>Playwright Test 1.63 · TypeScript · Windows 11</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. Legend</h2>
+    <table class="meta">
+      <tbody>
+        <tr>
+          <th>Severity</th>
+          <td>
+            <strong>Critical</strong> — data loss or the module cannot be used ·
+            <strong>High</strong> — a core workflow produces a wrong result ·
+            <strong>Medium</strong> — workflow completes but behaves wrongly or needs a
+            workaround · <strong>Low</strong> — cosmetic.
+          </td>
+        </tr>
+        <tr>
+          <th>Priority</th>
+          <td>
+            <strong>P1</strong> fix before release · <strong>P2</strong> fix this cycle ·
+            <strong>P3</strong> backlog.
+          </td>
+        </tr>
+        <tr>
+          <th>Evidence strength</th>
+          <td>
+            <span class="badge fail">reproduced</span> captured in the 03 Oct run with
+            artifacts attached ·
+            <span class="badge warn">observed</span> seen repeatedly while building the suite
+            and recorded in the test code, but not captured as an artifact in this run.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>4. Defect summary</h2>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 9%">ID</th>
+          <th style="width: 36%">Title</th>
+          <th style="width: 15%">Module</th>
+          <th style="width: 11%">Severity</th>
+          <th style="width: 7%">Pri</th>
+          <th style="width: 22%">Evidence</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="mono"><strong>BUG-001</strong></td>
+          <td>Patient Registration list opens empty — Show From / Show To default to today</td>
+          <td>Registration</td>
+          <td>Medium</td>
+          <td>P2</td>
+          <td><span class="badge fail">reproduced</span> screenshot, 2 videos, trace</td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-002</strong></td>
+          <td>Advance payment taken in the admission wizard never reaches the Advance Dashboard</td>
+          <td>Admission / Accounts</td>
+          <td>High</td>
+          <td>P1</td>
+          <td><span class="badge warn">observed</span> across runs</td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-003</strong></td>
+          <td>Brute-force throttle answers <em>every</em> request from the IP with HTTP 429</td>
+          <td>Authentication</td>
+          <td>Medium</td>
+          <td>P2</td>
+          <td><span class="badge warn">observed</span>, measured</td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-004</strong></td>
+          <td>Patient Registration grid can take over 30 seconds to render its first row</td>
+          <td>Registration</td>
+          <td>Medium</td>
+          <td>P2</td>
+          <td><span class="badge fail">reproduced</span> run timings</td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-005</strong></td>
+          <td>Blazor circuit is dropped when more than one browser session is open</td>
+          <td>Platform</td>
+          <td>Medium</td>
+          <td>P2</td>
+          <td><span class="badge warn">observed</span></td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-006</strong></td>
+          <td>Every module route paints "Access Denied" for a third of a second before the real page</td>
+          <td>Platform</td>
+          <td>Medium</td>
+          <td>P2</td>
+          <td><span class="badge warn">observed</span></td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-007</strong></td>
+          <td>ERP host is served over HTTPS with a self-signed certificate</td>
+          <td>Infrastructure</td>
+          <td>Medium</td>
+          <td>P2</td>
+          <td><span class="badge warn">observed</span></td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-008</strong></td>
+          <td>Two misspelled buttons on the create-patient wizard: "Registeration", "Previews"</td>
+          <td>Registration</td>
+          <td>Low</td>
+          <td>P3</td>
+          <td><span class="badge warn">observed</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="note">
+      One further item is an <strong>automation defect</strong>, not an application defect, and
+      is tracked separately in section 6: TC_ADM_002 assumes the registration grid is never
+      empty, which is why BUG-001 took the run down with it.
+    </p>
+
+    <h2 class="defects-break">5. Defect detail</h2>
+
+    <!-- ------------------------------------------------------------ BUG-001 -->
+    <section class="bug">
+      <h3><span class="mono">BUG-001</span> — Patient Registration list opens empty because the date filter defaults to today</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Registration &gt; Patient Registration (<span class="mono">/hospital/newregistration</span>)</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>Medium / P2</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge fail">open</span> — reproduced on both attempts of the 03 Oct run</td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td>
+              <span class="mono">TC_ADM_002</span> —
+              <span class="mono">tests/regression/admission.regression.spec.ts:52</span>
+            </td>
+          </tr>
+          <tr>
+            <th>Reproducibility</th>
+            <td>
+              Deterministic. Any day before the first patient of the day is registered — in
+              this run, both attempts, 08:04 and 08:04 UTC.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Sign in as Administrator.</li>
+        <li>Click the <strong>REGISTRATION</strong> tile on the module launcher.</li>
+        <li>Click <strong>PATIENT REGISTRATION</strong> in the left drawer.</li>
+        <li>Look at the grid without touching the date filter.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>
+        The patient list opens on a range that shows work in progress — the recent
+        registrations — so a user arriving at the page can find and open a patient record
+        without first reaching for the date pickers.
+      </p>
+
+      <h4>Actual result</h4>
+      <p>
+        <strong>Show From</strong> and <strong>Show To</strong> are both set to today
+        (<span class="mono">10/3/2026</span>), so the grid shows only patients registered today.
+        Before the day's first registration that is nobody: the headers render, the body is
+        empty, and the pager reads <strong>0-0 of 0</strong>. The page gives no indication that
+        a filter is responsible — there is no empty-state message and no hint that widening the
+        range would bring rows back.
+      </p>
+
+      <h4>Evidence</h4>
+      <figure>
+        <!-- 21% of the image width is the top 400px of a 1904x985 capture: the header,
+             the date filter and the whole grid. The rest is empty page. -->
+        <div class="crop" style="padding-top: 21%">
+          <img
+            src="../assets/failures/TC_ADM_002/screenshot-1.png"
+            alt="Patient Registration list with Show From and Show To both set to 10/3/2026, an empty grid body, and a pager reading 0-0 of 0"
+          />
+        </div>
+        <figcaption>
+          <strong>Screenshot</strong> —
+          <span class="mono">assets/failures/TC_ADM_002/screenshot-1.png</span>, cropped to the
+          filter bar and the grid; the file itself is the full page. Both date filters read
+          <strong>10/3/2026</strong>, the grid body is empty under its six headers, and the
+          pager reads <strong>0-0 of 0</strong>.
+        </figcaption>
+      </figure>
+
+      <figure>
+        <video controls preload="metadata" src="../assets/failures/TC_ADM_002/video-1.webm"></video>
+        <figcaption>
+          <strong>Video, attempt 1</strong> — <span class="mono">assets/failures/TC_ADM_002/video-1.webm</span>
+          (479 KB). The page loads, the grid paints its headers, and nothing arrives for the
+          30 seconds the test waits.
+          <span class="note">Not playable in the PDF — open the HTML or the file itself.</span>
+        </figcaption>
+      </figure>
+
+      <figure>
+        <video controls preload="metadata" src="../assets/failures/TC_ADM_002/video-2.webm"></video>
+        <figcaption>
+          <strong>Video, attempt 2 (retry)</strong> —
+          <span class="mono">assets/failures/TC_ADM_002/video-2.webm</span> (525 KB). Identical
+          behaviour on the retry, which is what rules out a transient load failure.
+        </figcaption>
+      </figure>
+
+      <ul class="evidence-list">
+        <li>
+          <strong>Playwright trace</strong> —
+          <span class="mono">assets/failures/TC_ADM_002/trace-2.zip</span>. Open with
+          <span class="mono">npx playwright show-trace docs/assets/failures/TC_ADM_002/trace-2.zip</span>
+          for the DOM snapshot, network log and console at each step.
+        </li>
+        <li>
+          <strong>Page snapshot</strong> —
+          <span class="mono">assets/failures/TC_ADM_002/error-context-1.md</span> and
+          <span class="mono">error-context-2.md</span>. The accessibility tree at the moment of
+          failure, including the empty row groups and the <span class="mono">0-0 of 0</span>
+          pager.
+        </li>
+      </ul>
+
+      <h4>Error as the run reported it</h4>
+      <pre>TimeoutError: locator.innerText: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator('table.mud-table-root')
+      .locator('tbody tr').first().locator('td').nth(1)
+
+  at tests/regression/admission.regression.spec.ts:32
+     const uhid = (await registrationPage.rows.first()
+                     .locator('td').nth(1).innerText()).trim();</pre>
+
+      <h4>Analysis</h4>
+      <p>
+        The grid did not fail to load — it loaded correctly and returned nothing, because the
+        filter it loaded with asks for one day. The run itself proves the filter is the cause
+        rather than the data: <span class="mono">TC_REG_004</span>, which asserts the same grid
+        has at least one row, <em>passed</em> in the same run. It runs after
+        <span class="mono">TC_FLOW_001</span>, which registers a patient — so by the time
+        TC_REG_004 looked, there was one registration dated today and the same default filter
+        returned it. TC_ADM_002 ran before that, and saw an empty day.
+      </p>
+
+      <h4>Suggested fix</h4>
+      <ul>
+        <li>
+          Default <strong>Show From</strong> to a range that covers recent work — the last 7 or
+          30 days — rather than today, with <strong>Show To</strong> staying at today.
+        </li>
+        <li>
+          Failing that, render an empty state in the grid that names the filter: <em>"No
+          patients registered between 10/3/2026 and 10/3/2026. Widen the date range to see
+          earlier registrations."</em>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-002 -->
+    <section class="bug">
+      <h3><span class="mono">BUG-002</span> — Advance payment taken in the admission wizard never reaches the Advance Dashboard</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>
+              Hospital &gt; New Admission (<span class="mono">/hospital/patientadmission</span>)
+              → Hospital &gt; Advance Dashboard
+            </td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>High / P1 — money is collected at the counter and does not appear against the admission</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge warn">open</span> — needs confirmation from the module owners</td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td>
+              <span class="mono">TC_FLOW_001</span> —
+              <span class="mono">tests/regression/admission.regression.spec.ts:121</span>
+            </td>
+          </tr>
+          <tr>
+            <th>Reproducibility</th>
+            <td>Every run of the end-to-end flow so far.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Sign in as Administrator and register a patient.</li>
+        <li>Open <strong>New Admission</strong> and search the new UHID.</li>
+        <li>Fill the <strong>Contact Person</strong> tab.</li>
+        <li>
+          On <strong>Advance Payment</strong>, enter all three: card VISA / EBL POS
+          <strong>1000</strong>, bKash <strong>2000</strong>, cash <strong>3000</strong>.
+        </li>
+        <li>Confirm the <strong>Total:</strong> panel reads <strong>6000</strong>.</li>
+        <li>Complete <strong>Admission Detail</strong> and press <strong>Create Patient Admission</strong>.</li>
+        <li>Open <strong>Hospital &gt; Advance Dashboard</strong> and look for the admission.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>
+        The 6000 taken at admission is recorded against the new admission and shows on the
+        Advance Dashboard, so the billing desk can see what the patient has already paid.
+      </p>
+
+      <h4>Actual result</h4>
+      <p>
+        The admission is created correctly — it appears on
+        <strong>Patient Dashboard For Billing Dept</strong> with the right bed, ward, mobile and
+        blood group — but the Advance Dashboard carries <strong>no row</strong> for it. The
+        wizard's own Total panel had summed the three amounts to 6000 immediately before the
+        submit, so the figures were accepted by the form and lost somewhere between the submit
+        and the advance ledger.
+      </p>
+
+      <h4>Evidence</h4>
+      <ul class="evidence-list">
+        <li>
+          No screenshot: the run that produced this observation predates the evidence
+          collector, and <span class="mono">TC_FLOW_001</span> passes, so Playwright captures
+          nothing for a passing test.
+        </li>
+        <li>
+          The observation is recorded in the test itself, at
+          <span class="mono">tests/regression/admission.regression.spec.ts:189</span>, as the
+          reason the advance total is deliberately not asserted after the submit.
+        </li>
+        <li>
+          The pre-submit total <em>is</em> asserted (<span class="mono">Total: 6000</span>), so
+          every passing run is standing evidence that the amounts reached the form.
+        </li>
+      </ul>
+
+      <h4>Open question for the module owners</h4>
+      <p>
+        It is not yet established whether this is a defect or a missing step:
+        <strong>Advance Collection</strong> is its own page, and it may be that the wizard's
+        Advance Payment tab only records an intent and the money has to be receipted
+        separately. The answer decides whether this is a code fix or a documentation and
+        training issue — and either way the wizard should not present a Total that then goes
+        nowhere.
+      </p>
+
+      <h4>Suggested fix</h4>
+      <ul>
+        <li>
+          If the wizard is meant to post the advance: fix the posting and add the Advance
+          Dashboard assertion to <span class="mono">TC_FLOW_001</span> so the fix stays fixed.
+        </li>
+        <li>
+          If it is not: remove or relabel the Advance Payment tab so it does not read as money
+          taken, and state where the receipt is actually raised.
+        </li>
+      </ul>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-003 -->
+    <section class="bug sev-medium">
+      <h3><span class="mono">BUG-003</span> — Brute-force throttle answers every request from the IP with HTTP 429, not just login attempts</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Authentication — affects the whole application</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>Medium / P2</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge warn">open</span></td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td>
+              The negative login cases (<span class="mono">TC_LOGIN_003</span>–<span class="mono">007</span>),
+              whose after-effects reached unrelated pages.
+            </td>
+          </tr>
+          <tr>
+            <th>Reproducibility</th>
+            <td>Consistent, after roughly seven failed logins from one address.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>From one IP address, attempt to log in with a wrong password about seven times.</li>
+        <li>
+          From the <em>same</em> IP, on a different machine or browser, request any page —
+          including one an already-signed-in user is working on.
+        </li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>
+        Throttling protects the sign-in endpoint and the account being attacked. Other users on
+        the same network, and other routes, keep working.
+      </p>
+
+      <h4>Actual result</h4>
+      <p>
+        The host answers <strong>every</strong> request from that address with
+        <strong>HTTP 429</strong> and <span class="mono">Retry-After: 60</span>. Measured, it
+        clears in about ten seconds rather than the sixty advertised. During the cool-off a
+        Blazor page load does not degrade gracefully: the circuit never starts, so the page
+        renders as dead chrome rather than showing a "too many attempts, try again shortly"
+        message.
+      </p>
+
+      <h4>Why it matters beyond the test suite</h4>
+      <p>
+        A hospital floor is behind one NAT address. One person mistyping their password several
+        times locks out <em>everyone</em> on that floor for the cool-off — reception, billing
+        and the wards alike — with no message explaining why the ERP has stopped responding.
+      </p>
+
+      <h4>Evidence</h4>
+      <ul class="evidence-list">
+        <li>
+          Worked around in <span class="mono">utils/helpers.ts</span> —
+          <span class="mono">gotoTolerant()</span> and <span class="mono">reloadTolerant()</span>
+          retry past the 429, and their comments record the measured behaviour.
+        </li>
+        <li>
+          <span class="mono">reloadTolerant()</span> also documents a second symptom: a plain
+          reload during the cool-off does not surface the 429 at all, it throws
+          <span class="mono">net::ERR_HTTP_RESPONSE_CODE_FAILURE</span>.
+        </li>
+      </ul>
+
+      <h4>Suggested fix</h4>
+      <ul>
+        <li>Scope the throttle to the sign-in endpoint and the account being attempted, not to every route from the IP.</li>
+        <li>Make <span class="mono">Retry-After</span> truthful — advertise the ten seconds actually enforced.</li>
+        <li>Serve a readable 429 page instead of letting the Blazor circuit fail silently.</li>
+      </ul>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-004 -->
+    <section class="bug sev-medium">
+      <h3><span class="mono">BUG-004</span> — Patient Registration grid can take over 30 seconds to render its first row</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Registration &gt; Patient Registration (<span class="mono">/hospital/newregistration</span>)</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>Medium / P2</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge fail">open</span> — measured in the 03 Oct run</td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td>
+              <span class="mono">TC_REG_004</span> —
+              <span class="mono">tests/regression/registration.regression.spec.ts:71</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Sign in as Administrator.</li>
+        <li>Open <strong>Registration &gt; Patient Registration</strong>.</li>
+        <li>Time how long it takes for the first row to appear, on a range that has data.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>A single page of ten rows renders in a couple of seconds, like every other page in the suite.</p>
+
+      <h4>Actual result</h4>
+      <p>
+        <span class="mono">TC_REG_004</span> took <strong>33.8 seconds</strong> in the 03 Oct
+        run, against a suite median of about 2 seconds. It does nothing but open the page, read
+        six column headers and wait for one row — the time is the grid. The same slowness is
+        why the project raises Playwright's default timeouts across the board: 90 s per test,
+        30 s per action, 45 s per navigation.
+      </p>
+
+      <h4>Evidence</h4>
+      <ul class="evidence-list">
+        <li>
+          Run timings in <span class="mono">docs/assets/failures/manifest.json</span>, and in
+          the HTML report under <span class="mono">playwright-report/</span>. Comparison, same
+          run, same session: TC_REG_003 (same page, no row wait) 2.4 s; TC_REG_002 4.4 s;
+          TC_REG_008 3.8 s.
+        </li>
+      </ul>
+
+      <h4>Suggested fix</h4>
+      <ul>
+        <li>
+          Profile the query behind the grid — a 10-row page should not be fetching the whole
+          patient table before paging it.
+        </li>
+        <li>Show a loading indicator while the fetch is in flight, so the page does not read as empty while it works.</li>
+      </ul>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-005 -->
+    <section class="bug sev-medium">
+      <h3><span class="mono">BUG-005</span> — Blazor circuit is dropped when more than one browser session is open</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Platform — the Blazor Server circuit, all modules</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>Medium / P2</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge warn">open</span></td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td>Suite configuration — the reason <span class="mono">workers: 1</span> is forced in <span class="mono">playwright.config.ts</span>.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Sign in as the same account in two or more browsers at once against this host.</li>
+        <li>Work in both.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>Each session keeps its own circuit. A second browser does not disturb the first.</p>
+
+      <h4>Actual result</h4>
+      <p>
+        Sessions are dropped. Running the suite with more than one worker produced lost
+        sessions and failures unrelated to what the tests asserted, which is why the whole
+        suite is pinned to a single worker — and why the Firefox and WebKit projects are
+        commented out rather than run alongside Chromium.
+      </p>
+
+      <h4>Impact</h4>
+      <p>
+        Beyond the suite: a user who opens the ERP on a second machine, or a shared account
+        used at two counters, can knock the other session out. It also puts a ceiling on test
+        throughput — the full suite is serial, so it runs in minutes where it could run in
+        under one.
+      </p>
+
+      <h4>Evidence</h4>
+      <ul class="evidence-list">
+        <li><span class="mono">playwright.config.ts</span> — <span class="mono">workers: 1</span>, with the reason recorded in the comment above it.</li>
+        <li>The Firefox and WebKit project blocks in the same file, commented out for the same reason.</li>
+      </ul>
+
+      <h4>Suggested fix</h4>
+      <p>
+        Review circuit and session handling on the server — in particular whether sessions are
+        keyed by account rather than by circuit, and what the configured circuit retention
+        limits are.
+      </p>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-006 -->
+    <section class="bug sev-medium">
+      <h3><span class="mono">BUG-006</span> — Every module route paints "Access Denied" before the real page arrives</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Platform — every module route</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>Medium / P2</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge warn">open</span></td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td>Page-object navigation — <span class="mono">BasePage.settleAuthorization()</span> in <span class="mono">pages/base.page.ts</span>.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Sign in as Administrator.</li>
+        <li>Navigate to any module route — for example <span class="mono">/hospital/newregistration</span>.</li>
+        <li>Watch the first half-second of the load.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>
+        A user with permission never sees a denial. The route renders a loading state, then the
+        page.
+      </p>
+
+      <h4>Actual result</h4>
+      <p>
+        The app prerenders its <strong>NotAuthorized</strong> template before the Blazor
+        circuit connects, so <strong>"Access Denied"</strong> is on screen within about 50 ms of
+        every module route and is swapped for the real page roughly a third of a second later.
+        The denial is never real — but it is what the user sees first, on every navigation.
+      </p>
+
+      <h4>Impact</h4>
+      <p>
+        Visible to staff as a flash of a permissions error on every page change, which trains
+        people to distrust the screen. It also makes a genuine permission failure
+        indistinguishable from the false one, for a user and for a test: the suite had to be
+        taught to wait for the real page rather than believe the denial, and a run of about one
+        in twenty does come back genuinely denied and needs a second navigation.
+      </p>
+
+      <h4>Evidence</h4>
+      <ul class="evidence-list">
+        <li>
+          <span class="mono">pages/base.page.ts</span> —
+          <span class="mono">settleAuthorization()</span>, whose comment records the measured
+          50 ms / 300 ms timings and the one-in-twenty genuine denial.
+        </li>
+      </ul>
+
+      <h4>Suggested fix</h4>
+      <p>
+        Render an authorizing/loading state during prerender instead of the NotAuthorized
+        template, and only show the denial once authorization has actually been evaluated.
+      </p>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-007 -->
+    <section class="bug sev-medium">
+      <h3><span class="mono">BUG-007</span> — ERP host is served over HTTPS with a self-signed certificate</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Infrastructure — the whole host</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>Medium / P2</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge warn">open</span></td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td>Suite configuration — <span class="mono">ignoreHTTPSErrors: true</span> is required in <span class="mono">playwright.config.ts</span>.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Open the ERP URL in a browser with no certificate exception configured.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>A certificate the browser trusts. No warning, no exception for the user to click through.</p>
+
+      <h4>Actual result</h4>
+      <p>
+        The browser presents a certificate warning that the user has to bypass. The test suite
+        has to set <span class="mono">ignoreHTTPSErrors</span> for the same reason.
+      </p>
+
+      <h4>Impact</h4>
+      <p>
+        Patient data is involved, and the warning is on a page where staff enter credentials.
+        Training people to click through certificate warnings removes the one signal that would
+        tell them about a real interception, and the suite's blanket
+        <span class="mono">ignoreHTTPSErrors</span> would not catch one either.
+      </p>
+
+      <h4>Suggested fix</h4>
+      <p>
+        Issue a certificate from a CA the hospital's machines trust — an internal CA is enough
+        for an internal host. Then drop <span class="mono">ignoreHTTPSErrors</span> from the
+        config so the suite starts failing if the certificate goes wrong again.
+      </p>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-008 -->
+    <section class="bug sev-low">
+      <h3><span class="mono">BUG-008</span> — Two misspelled buttons on the create-patient wizard</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Registration &gt; Add New — create-patient wizard (<span class="mono">/hospital/patients/new</span>)</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>Low / P3</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge warn">open</span></td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td>
+              Page object — <span class="mono">pages/registration.page.ts:219–222</span>, where
+              both locators match the app's spelling.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Open <strong>Registration &gt; Patient Registration &gt; Add New</strong>.</li>
+        <li>Read the wizard footer buttons.</li>
+      </ol>
+
+      <h4>Expected / actual</h4>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 34%">Expected label</th>
+            <th style="width: 34%">Actual label</th>
+            <th style="width: 32%">Where</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Confirm Registration</td>
+            <td><strong>Confirm Registeration</strong></td>
+            <td>Wizard footer — the primary action, and the most-read label in the module</td>
+          </tr>
+          <tr>
+            <td>Previous</td>
+            <td><strong>Previews</strong></td>
+            <td>Wizard footer — back navigation between the three tabs</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        "Previews" is the worse of the two: it is not a misspelling of anything, it is a
+        different word, and it sits next to <em>Next</em> where a user is reading quickly.
+      </p>
+
+      <h4>Note for whoever fixes it</h4>
+      <p>
+        The automation locators currently match both misspellings on purpose, so that they
+        match the live buttons. Correcting the labels will break
+        <span class="mono">pages/registration.page.ts</span> and
+        <span class="mono">TC_FLOW_001</span> — please flag the change so the locators are
+        updated in the same release.
+      </p>
+    </section>
+
+    <h2 class="defects-break">6. Automation defect (not an application defect)</h2>
+    <section class="bug sev-medium">
+      <h3><span class="mono">AUT-001</span> — TC_ADM_002 assumes the registration grid is never empty</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Where</th>
+            <td>
+              <span class="mono">tests/regression/admission.regression.spec.ts:29–34</span>
+              (<span class="mono">newestUhid()</span>)
+            </td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>Medium / P2 — it is why the 03 Oct run came back red</td>
+          </tr>
+          <tr>
+            <th>Related</th>
+            <td>BUG-001 (the application behaviour the test runs into)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>What is wrong</h4>
+      <p>
+        <span class="mono">newestUhid()</span> opens the patient list and reads the UHID out of
+        the first row without widening the date filter or checking that a row exists. On a day
+        with no registrations yet the grid is legitimately empty (BUG-001), so the read waits
+        the full 30 seconds and the test fails with a timeout that says nothing about what the
+        case was meant to prove. The same unguarded assumption sits in
+        <span class="mono">TC_SMK_ADM_003</span>.
+      </p>
+
+      <h4>Why it matters</h4>
+      <p>
+        The failure reads as "the admission wizard is broken" when the wizard was never
+        reached. It also makes the suite's result depend on the time of day it runs, which is
+        the kind of flakiness that gets a red build ignored.
+      </p>
+
+      <h4>Fix</h4>
+      <ol>
+        <li>
+          Widen <strong>Show From</strong> to cover the last 30 days before reading the grid,
+          then press <strong>Show</strong> — the same thing a user would do.
+        </li>
+        <li>
+          Assert the grid has at least one row first, with a message that names the real cause:
+          <em>"no patients in the registration grid for the selected range"</em>.
+        </li>
+        <li>
+          Keep BUG-001 open regardless. The test working around the default filter does not
+          make the default filter right.
+        </li>
+      </ol>
+    </section>
+
+    <h2>7. Evidence index</h2>
+    <p>
+      Everything below is under <span class="mono">docs/assets/failures/</span> and was written
+      by <span class="mono">npm run docs:evidence</span>, which reads the Playwright HTML report
+      from the last run. Re-running it rebuilds the folder for whatever the latest run contains.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 38%">File</th>
+          <th style="width: 10%">Size</th>
+          <th style="width: 52%">What it shows</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="mono">TC_ADM_002/screenshot-1.png</td>
+          <td>52 KB</td>
+          <td>The empty grid at the moment of failure, both date filters on 10/3/2026, pager 0-0 of 0.</td>
+        </tr>
+        <tr>
+          <td class="mono">TC_ADM_002/screenshot-2.png</td>
+          <td>52 KB</td>
+          <td>The retry. Byte-identical to attempt 1 — the behaviour is deterministic.</td>
+        </tr>
+        <tr>
+          <td class="mono">TC_ADM_002/video-1.webm</td>
+          <td>479 KB</td>
+          <td>Attempt 1, full recording: navigation, grid paint, the 30 s wait.</td>
+        </tr>
+        <tr>
+          <td class="mono">TC_ADM_002/video-2.webm</td>
+          <td>525 KB</td>
+          <td>Attempt 2 (retry), same sequence.</td>
+        </tr>
+        <tr>
+          <td class="mono">TC_ADM_002/trace-2.zip</td>
+          <td>1.7 MB</td>
+          <td>
+            Playwright trace of the retry — DOM snapshots, network, console, per-step timings.
+            <span class="mono">npx playwright show-trace &lt;file&gt;</span>
+          </td>
+        </tr>
+        <tr>
+          <td class="mono">TC_ADM_002/error-context-1.md</td>
+          <td>12 KB</td>
+          <td>Accessibility-tree snapshot of the page at failure, plus the failing source lines.</td>
+        </tr>
+        <tr>
+          <td class="mono">TC_ADM_002/error-context-2.md</td>
+          <td>12 KB</td>
+          <td>The same for the retry.</td>
+        </tr>
+        <tr>
+          <td class="mono">manifest.json</td>
+          <td>3 KB</td>
+          <td>Run statistics, per-attempt status and timings, and the error text, as machine-readable JSON.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>8. Recommended order of work</h2>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 10%">Order</th>
+          <th style="width: 14%">ID</th>
+          <th style="width: 76%">Reason</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td class="mono">BUG-002</td>
+          <td>Money is collected and not recorded. Highest value, and it needs a decision from the module owners before any code is written.</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td class="mono">BUG-001 + AUT-001</td>
+          <td>One day's work between them, and together they turn the suite green and make the patient list usable first thing in the morning.</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td class="mono">BUG-003</td>
+          <td>One mistyped password can stall a whole floor behind the same NAT address.</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td class="mono">BUG-006, BUG-004</td>
+          <td>Both are visible to staff on every working day — a false permissions error on every navigation, and a grid that takes half a minute.</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td class="mono">BUG-007, BUG-005</td>
+          <td>Infrastructure and platform work; schedule with the next maintenance window.</td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td class="mono">BUG-008</td>
+          <td>Cosmetic, but they are the two most-read labels in the registration module. Coordinate with the automation locators.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <footer class="doc-footer">
+      Bug Report v1.0 · Popular Medical College &amp; Hospital Ltd — Healthcare ERP Test
+      Automation · 03 October 2026 · generated from
+      <span class="mono">docs/src/bug-report.html</span> by <span class="mono">npm run docs</span>.
+    </footer>
+  </body>
+</html>

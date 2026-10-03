@@ -150,12 +150,58 @@ export class AdmissionPage extends BasePage {
     await expect(dialog).toBeVisible({ timeout: 60_000 });
     return (await dialog.innerText()).replace(/\s+/g, ' ').trim();
   }
-  /** Looks the patient up by UHID and waits for the Patient tab to fill itself in. */
-  async searchByUhid(uhid: string): Promise<void> {
-    await this.uhid.fill(uhid);
-    await this.search.click();
-    // The lookup is a round trip; the name arriving is what says it came back.
-    await expect(this.fullName).not.toHaveValue('', { timeout: 60_000 });
+  /**
+   * Looks the patient up by UHID and waits for the Patient tab to fill itself in.
+   *
+   * Searched more than once on purpose. The page paints before Blazor wires its handlers,
+   * so a click landing in that gap is swallowed and nothing is ever sent - the same thing
+   * BasePage.clickUntilVisible exists for on the launcher tiles. Waited out in one stretch,
+   * that read as a 60s hang and then "expected not to have value ''", which says nothing
+   * about which half went wrong; TC_ADM_002 failed that way at 1.1m.
+   *
+   * So each attempt gets a shorter wait and a lost one is re-sent rather than waited on.
+   * The page is re-fetched between attempts because the other reason nothing comes back is
+   * that the circuit never started at all - the host answering 429 - which no number of
+   * clicks will fix. The budget overall is about the same 60s as before.
+   */
+  async searchByUhid(uhid: string, attempts = 3): Promise<void> {
+    const said: string[] = [];
+
+    for (let attempt = 1; attempt <= attempts; attempt++) {
+      await this.uhid.fill(uhid);
+      await this.search.click();
+
+      // The lookup is a round trip, so this has to poll - the field is on screen from the
+      // start, and reading its value once, straight after the click, only ever catches a
+      // reply that beat the read.
+      const arrived = await expect(this.fullName)
+        .not.toHaveValue('', { timeout: 20_000 })
+        .then(() => true)
+        .catch(() => false);
+      if (arrived) return;
+
+      // Read before the re-navigation below, which wipes whatever the page was showing.
+      said.push(`attempt ${attempt}: ${await this.searchFeedback()}`);
+      if (attempt < attempts) await this.goto();
+    }
+
+    throw new Error(
+      `UHID ${uhid} never loaded into the Patient tab after ${attempts} searches. ` +
+        said.join('; ')
+    );
+  }
+
+  /**
+   * Whatever the page is showing instead of a patient - an "already admitted" modal, a
+   * toast, a "no record found" alert. Worth more to whoever reads the failure than the
+   * bare timeout, which only ever said the Full Name box was still empty.
+   */
+  private async searchFeedback(): Promise<string> {
+    const notice = this.page
+      .locator('.modal:visible, [role="dialog"]:visible, .toast:visible, .alert:visible')
+      .first();
+    if (!(await notice.isVisible().catch(() => false))) return 'nothing on screen';
+    return (await notice.innerText()).replace(/\s+/g, ' ').trim();
   }
 
   /** Picks `option` in the native <select> labelled `label`, e.g. choose('Admitted to', 'HDU'). */

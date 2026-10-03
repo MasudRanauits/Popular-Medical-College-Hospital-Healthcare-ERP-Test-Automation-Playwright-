@@ -1,5 +1,4 @@
 import { test, expect } from '../../fixtures';
-import type { Page } from '@playwright/test';
 import { primaryUser } from '../../data/users';
 import { admissionData, registrationPatient } from '../../data/test-data';
 
@@ -97,35 +96,16 @@ test.describe('Patient journey @regression', () => {
   // a second one rather than tell us anything new.
   test.describe.configure({ retries: 0 });
 
-  /**
-   * The admitted-patient row for `name` on Hospital > Patient Dashboard For Billing Dept:
-   * ADMISSIONNO, ADMISSION DATE, PATIENT NAME, MOBILENO, BLOODGROUP, BEDNO, ASSIGNDOC, ...
-   *
-   * This is where a new admission shows up whole, and it is what the last step proves
-   * itself against. The confirmation modal is not enough on its own: the wizard puts modals
-   * up for other reasons too, so asserting that one appeared would pass whether or not the
-   * admission was written.
-   */
-  async function admittedRow(page: Page, name: string): Promise<string> {
-    await page.goto('/hospital/patient-dashboard-for-billing-dept', { waitUntil: 'domcontentloaded' });
-
-    const rows = page.locator('tbody tr');
-    await expect(rows.first()).toBeVisible({ timeout: 60_000 });
-    await page.getByPlaceholder('Search...').first().fill(name);
-
-    const row = rows.filter({ hasText: name }).first();
-    await expect(row, `no admission on the ward for ${name}`).toBeVisible({ timeout: 30_000 });
-    return (await row.innerText()).replace(/\s+/g, ' ').trim();
-  }
-
   test('TC_FLOW_001 logs in, registers a patient, then admits them', async ({
     loginPage,
     homePage,
     createPatientPage,
     admissionPage,
+    admissionDashboardPage,
   }) => {
-    // Three form-filling passes over a slow host; the 90s project default is not enough.
-    test.setTimeout(420_000);
+    // Three form-filling passes and four printed documents over a slow host; the 90s
+    // project default is not enough.
+    test.setTimeout(600_000);
 
     const patient = registrationPatient();
     const admission = admissionData();
@@ -184,8 +164,24 @@ test.describe('Patient journey @regression', () => {
       test.info().annotations.push({ type: 'confirmation', description: confirmation });
     });
 
-    await test.step('the admission is on the books', async () => {
-      const row = await admittedRow(admissionPage.page, patient.fullName);
+    const admissionNo = await test.step('the admission is on the books', async () => {
+      // Hospital > Dashboard, the list of everyone currently admitted. This is where a new
+      // admission shows up whole, and it is what this step proves itself against. The
+      // wizard's confirmation modal is not enough on its own: the wizard puts modals up for
+      // other reasons too, so asserting that one appeared would pass whether or not the
+      // admission was written.
+      await admissionDashboardPage.goto();
+      await admissionDashboardPage.expectLoaded();
+
+      // Searched by the name as registered. The grid prints the patient's title in front of
+      // it ("Mr Masud Rana Test-12") but the search matches the name without it, so the
+      // registered name is the term that works - see AdmissionDashboardPage.searchFor.
+      await admissionDashboardPage.searchFor(patient.fullName);
+
+      const row = admissionDashboardPage.rowFor(patient.fullName);
+      await expect(row, `no admission on the ward for ${patient.fullName}`).toBeVisible({
+        timeout: 30_000,
+      });
 
       // Deliberately not asserted here: that the advance payments reached the admission.
       // On the runs so far they did not - Hospital > Advance Dashboard carried no row for the
@@ -197,10 +193,38 @@ test.describe('Patient journey @regression', () => {
 
       // Admission number, then the details that prove it is this patient on the ward asked
       // for - the ward name is part of the bed number the wizard assigned.
-      expect(row, `admission row for UHID ${uhid}`).toMatch(/^\d{10,}/);
-      expect(row).toContain(patient.mobileNo);
-      expect(row).toContain(patient.bloodGroup);
-      expect(row).toContain(admission.detail.admittedTo);
+      const no = await admissionDashboardPage.cell(row, 'admissionNo');
+      expect(no, `admission number for UHID ${uhid}`).toMatch(/^\d{10,}$/);
+      expect(await admissionDashboardPage.cell(row, 'phone')).toBe(patient.mobileNo);
+      expect(await admissionDashboardPage.cell(row, 'cabinNo')).toContain(
+        admission.detail.admittedTo
+      );
+      return no;
+    });
+
+    await test.step('the admission can be found by its number and printed', async () => {
+      // The same admission, reached the other way the dashboard is used - by the number the
+      // front desk is given rather than by the patient's name.
+      await admissionDashboardPage.searchFor(admissionNo);
+      await expect(admissionDashboardPage.rows).toHaveCount(1, { timeout: 30_000 });
+
+      const row = admissionDashboardPage.rows.first();
+      expect(await admissionDashboardPage.cell(row, 'name')).toContain(patient.fullName);
+
+      // The paperwork that goes with a new admission, printed one button at a time. Each
+      // opens its own tab on a PDF the browser built, so what came out is checked as bytes -
+      // a tab opens whether or not the document rendered. See AdmissionDashboardPage.printAll.
+      const printed = await admissionDashboardPage.printAll(row);
+      expect(printed.length, 'print buttons in the Action cell').toBeGreaterThanOrEqual(4);
+      for (const document of printed) {
+        expect(document.header, `document ${document.index + 1} is not a PDF`).toMatch(/^%PDF-/);
+        expect(document.size, `document ${document.index + 1} is empty`).toBeGreaterThan(1_000);
+      }
+
+      test.info().annotations.push({
+        type: 'printed',
+        description: printed.map((d) => `#${d.index + 1}: ${d.size} bytes`).join(', '),
+      });
     });
   });
 });

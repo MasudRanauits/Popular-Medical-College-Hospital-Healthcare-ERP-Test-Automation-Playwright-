@@ -27,6 +27,7 @@ so a fresh clone runs green out of the box.
 | `npm run test:ui` | Playwright UI mode |
 | `npm run test:debug` | Inspector / step debugging |
 | `npm run report` | Open the last HTML report |
+| `npm run docs` | Rebuild the QA documents in [docs/](docs/) from the last run |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run codegen` | Record a test against the app |
 
@@ -43,7 +44,29 @@ fixtures/           Custom Playwright fixtures that inject page objects / API co
 utils/              env.ts (config + credentials), helpers.ts (waits, formatters)
 data/               Test users and data builders
 playwright/.auth/   Saved storage state (git-ignored)
+docs/               Test Case Document and Bug Report — PDF, HTML source, evidence
+scripts/            Document build: evidence collector, HTML-to-PDF printer
 ```
+
+## QA documents
+
+Two deliverables live in [docs/](docs/), each its own file:
+
+| Document | What it is |
+| --- | --- |
+| [docs/TEST_CASES.pdf](docs/TEST_CASES.pdf) | All 35 test cases in one PDF — steps, data, expected result, priority and last-run status per case |
+| [docs/BUG_REPORT.pdf](docs/BUG_REPORT.pdf) | The defects raised from the last cycle, with screenshots, videos and traces |
+
+```bash
+npm run docs            # evidence + both PDFs
+npm run docs:evidence   # pull screenshots/videos/traces out of playwright-report/
+npm run docs:pdf        # re-print docs/src/*.html to PDF
+```
+
+The prose is hand-written in `docs/src/*.html`; only the evidence under
+`docs/assets/failures/` is generated. A PDF cannot play video — open
+`docs/src/bug-report.html` in a browser for the inline players. See
+[docs/README.md](docs/README.md).
 
 ## How authentication works
 

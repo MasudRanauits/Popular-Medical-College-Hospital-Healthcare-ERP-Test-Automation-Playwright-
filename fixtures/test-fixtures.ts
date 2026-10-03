@@ -5,6 +5,8 @@ import {
   RegistrationPage,
   CreatePatientPage,
   AdmissionPage,
+  AdmissionDashboardPage,
+  NurseStationPage,
 } from '../pages';
 
 /**
@@ -18,6 +20,8 @@ type Pages = {
   registrationPage: RegistrationPage;
   createPatientPage: CreatePatientPage;
   admissionPage: AdmissionPage;
+  admissionDashboardPage: AdmissionDashboardPage;
+  nurseStationPage: NurseStationPage;
 };
 
 export const test = base.extend<Pages>({
@@ -35,6 +39,12 @@ export const test = base.extend<Pages>({
   },
   admissionPage: async ({ page }, use) => {
     await use(new AdmissionPage(page));
+  },
+  admissionDashboardPage: async ({ page }, use) => {
+    await use(new AdmissionDashboardPage(page));
+  },
+  nurseStationPage: async ({ page }, use) => {
+    await use(new NurseStationPage(page));
   },
 });
 

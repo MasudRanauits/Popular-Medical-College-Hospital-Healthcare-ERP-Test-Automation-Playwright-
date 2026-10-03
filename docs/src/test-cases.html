@@ -1,0 +1,1636 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Test Case Document — PMCH Healthcare ERP</title>
+    <link rel="stylesheet" href="doc.css" />
+    <style>
+      /* Landscape: the case matrix needs eight columns side by side. */
+      @page {
+        size: A4 landscape;
+        margin: 11mm 12mm 13mm;
+      }
+      body {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 0 16px 28px;
+      }
+      table.cases col.c-id {
+        width: 8%;
+      }
+      table.cases col.c-title {
+        width: 14%;
+      }
+      table.cases col.c-pre {
+        width: 12%;
+      }
+      table.cases col.c-steps {
+        width: 24%;
+      }
+      table.cases col.c-data {
+        width: 11%;
+      }
+      table.cases col.c-exp {
+        width: 21%;
+      }
+      table.cases col.c-pri {
+        width: 4%;
+      }
+      table.cases col.c-status {
+        width: 6%;
+      }
+      .suite-break {
+        break-before: page;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="cover">
+      <p class="eyebrow">Popular Medical College &amp; Hospital Ltd · Healthcare ERP (HIS)</p>
+      <h1>Test Case Document</h1>
+      <p class="subtitle">
+        Playwright automation suite — Login, Home launcher, Patient Registration, Patient
+        Admission, the admission dashboard, and the end-to-end patient journey. 42 cases, all
+        automated.
+      </p>
+    </header>
+
+    <h2>1. Document control</h2>
+    <table class="meta">
+      <tbody>
+        <tr>
+          <th>Document</th>
+          <td>Test Case Document — PMCH Healthcare ERP Test Automation</td>
+        </tr>
+        <tr>
+          <th>Version</th>
+          <td>1.0</td>
+        </tr>
+        <tr>
+          <th>Date</th>
+          <td>03 October 2026</td>
+        </tr>
+        <tr>
+          <th>Prepared by</th>
+          <td>QA Automation — EMSL Dev Team</td>
+        </tr>
+        <tr>
+          <th>Application under test</th>
+          <td>Popular Medical College and Hospital Limited — HIS ERP (Blazor / MudBlazor)</td>
+        </tr>
+        <tr>
+          <th>Automation framework</th>
+          <td>Playwright Test 1.63 · TypeScript · Page Object Model</td>
+        </tr>
+        <tr>
+          <th>Source of truth</th>
+          <td>
+            <span class="mono">tests/</span> in this repository. Every case below maps to one
+            <span class="mono">test()</span> — the spec file and line are given in each row.
+          </td>
+        </tr>
+        <tr>
+          <th>Results reflected</th>
+          <td>
+            Regression run of 03 Oct 2026, 08:04 UTC (24 tests, 3 m 18 s): 23 passed, 1 failed,
+            plus the admission dashboard suite added later the same day (7 tests, 32 s): all
+            passed. The smoke and API suites were not part of that cycle and are marked
+            <span class="badge idle">not run</span>.
+          </td>
+        </tr>
+        <tr>
+          <th>Companion document</th>
+          <td><span class="mono">docs/BUG_REPORT.pdf</span> — defects raised from this cycle, with screenshots and video.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>2. Scope and environment</h2>
+    <table class="meta">
+      <tbody>
+        <tr>
+          <th>In scope</th>
+          <td>
+            Authentication, module launcher, Patient Registration list and create-patient
+            wizard, New Admission wizard (Patient / Contact Person / Advance Payment /
+            Admission Detail), the admission dashboard — looking an admission up and printing
+            its paperwork — host availability, and one end-to-end register-then-admit flow.
+          </td>
+        </tr>
+        <tr>
+          <th>Out of scope</th>
+          <td>
+            OPD, Pharmacy, Diagnostic, HR, Accounts and Billing modules; the ID-card print and
+            the admission dashboard's list-level <em>Print List</em> / <em>Print Package
+            List</em> buttons; what is <em>inside</em> a printed document, which is checked as
+            a valid, non-empty PDF and no further; role-based permissions beyond the
+            Administrator account; performance and security testing.
+          </td>
+        </tr>
+        <tr>
+          <th>Environment</th>
+          <td>
+            ERP web application over HTTPS on the hospital host (<span class="mono">BASE_URL</span>
+            in <span class="mono">.env</span>; self-signed certificate, so
+            <span class="mono">ignoreHTTPSErrors</span> is on). Live database — see the warning
+            in section 5.
+          </td>
+        </tr>
+        <tr>
+          <th>Browser</th>
+          <td>
+            Chromium (Desktop Chrome profile) at 1920×1080, headed, one worker. Firefox and
+            WebKit projects exist in <span class="mono">playwright.config.ts</span> but are
+            commented out; mobile viewports are not enabled.
+          </td>
+        </tr>
+        <tr>
+          <th>Test account</th>
+          <td>
+            Administrator account read from <span class="mono">ERP_USERNAME</span> /
+            <span class="mono">ERP_PASSWORD</span>. Credentials never appear in source control
+            or in this document.
+          </td>
+        </tr>
+        <tr>
+          <th>Session handling</th>
+          <td>
+            <span class="mono">tests/auth.setup.ts</span> logs in once and saves the browser
+            state to <span class="mono">playwright/.auth/user.json</span>. Signed-in suites
+            reuse it; signed-out suites clear it with
+            <span class="mono">test.use({ storageState: { cookies: [], origins: [] } })</span>.
+          </td>
+        </tr>
+        <tr>
+          <th>Timeouts</th>
+          <td>
+            90 s per test, 15 s per assertion, 30 s per action, 45 s per navigation — raised
+            from the Playwright defaults because the host is slow. Three cases raise their own
+            further (noted in their rows).
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>3. Legend</h2>
+    <table class="meta">
+      <tbody>
+        <tr>
+          <th>Priority</th>
+          <td>
+            <strong>P1</strong> — blocks the release if it fails (login, core patient flow).
+            <strong>P2</strong> — important, has a workaround.
+            <strong>P3</strong> — cosmetic or defensive.
+          </td>
+        </tr>
+        <tr>
+          <th>Status</th>
+          <td>
+            <span class="badge pass">pass</span> passed in the 03 Oct 2026 run ·
+            <span class="badge fail">fail</span> failed, defect raised ·
+            <span class="badge idle">not run</span> not part of that cycle
+          </td>
+        </tr>
+        <tr>
+          <th>Writes to live data</th>
+          <td>
+            Rows marked <span class="badge warn">writes</span> leave a real record in the
+            hospital database. Every other case is read-only.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>4. Coverage summary</h2>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 23%">Suite</th>
+          <th style="width: 30%">Spec file</th>
+          <th style="width: 9%">Cases</th>
+          <th style="width: 9%">Pass</th>
+          <th style="width: 9%">Fail</th>
+          <th style="width: 10%">Not run</th>
+          <th style="width: 10%">Session</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>API — Health</td>
+          <td class="mono">tests/api/health.spec.ts</td>
+          <td>2</td>
+          <td>—</td>
+          <td>—</td>
+          <td>2</td>
+          <td>None</td>
+        </tr>
+        <tr>
+          <td>Setup — Authentication</td>
+          <td class="mono">tests/auth.setup.ts</td>
+          <td>1</td>
+          <td>1</td>
+          <td>—</td>
+          <td>—</td>
+          <td>Creates it</td>
+        </tr>
+        <tr>
+          <td>Smoke — Login</td>
+          <td class="mono">tests/smoke/login.smoke.spec.ts</td>
+          <td>5</td>
+          <td>—</td>
+          <td>—</td>
+          <td>5</td>
+          <td>Signed out</td>
+        </tr>
+        <tr>
+          <td>Smoke — Admission</td>
+          <td class="mono">tests/smoke/admission.smoke.spec.ts</td>
+          <td>4</td>
+          <td>—</td>
+          <td>—</td>
+          <td>4</td>
+          <td>Signed in</td>
+        </tr>
+        <tr>
+          <td>Regression — Login</td>
+          <td class="mono">tests/regression/login.regression.spec.ts</td>
+          <td>7</td>
+          <td>7</td>
+          <td>—</td>
+          <td>—</td>
+          <td>Signed out</td>
+        </tr>
+        <tr>
+          <td>Regression — Home</td>
+          <td class="mono">tests/regression/home.regression.spec.ts</td>
+          <td>7</td>
+          <td>7</td>
+          <td>—</td>
+          <td>—</td>
+          <td>Signed in (007 signed out)</td>
+        </tr>
+        <tr>
+          <td>Regression — Registration</td>
+          <td class="mono">tests/regression/registration.regression.spec.ts</td>
+          <td>6</td>
+          <td>6</td>
+          <td>—</td>
+          <td>—</td>
+          <td>Signed in</td>
+        </tr>
+        <tr>
+          <td>Regression — Admission</td>
+          <td class="mono">tests/regression/admission.regression.spec.ts</td>
+          <td>2</td>
+          <td>1</td>
+          <td>1</td>
+          <td>—</td>
+          <td>Signed in</td>
+        </tr>
+        <tr>
+          <td>Regression — Patient journey</td>
+          <td class="mono">tests/regression/admission.regression.spec.ts</td>
+          <td>1</td>
+          <td>1</td>
+          <td>—</td>
+          <td>—</td>
+          <td>Signed out</td>
+        </tr>
+        <tr>
+          <td>Regression — Admission dashboard</td>
+          <td class="mono">tests/regression/admission-dashboard.regression.spec.ts</td>
+          <td>7</td>
+          <td>7</td>
+          <td>—</td>
+          <td>—</td>
+          <td>Signed in</td>
+        </tr>
+        <tr>
+          <td><strong>Total</strong></td>
+          <td></td>
+          <td><strong>42</strong></td>
+          <td><strong>30</strong></td>
+          <td><strong>1</strong></td>
+          <td><strong>11</strong></td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>5. Data safety</h2>
+    <p>
+      Two cases write to the live hospital database and nothing in the suite undoes them:
+      <span class="mono">TC_SMK_ADM_004</span> stops short of the submit but fills the wizard,
+      and <span class="mono">TC_FLOW_001</span> registers a patient <em>and</em> admits them,
+      which holds a real bed and records real advance payments. Cancelling an admission is its
+      own workflow under <strong>Hospital &gt; Admission Cancel</strong>. Run
+      <span class="mono">TC_FLOW_001</span> deliberately, and expect a
+      <span class="mono">Masud Rana Test-&lt;n&gt;</span> patient after each run. Every other
+      case is read-only: the registration and admission cases deliberately stop before any
+      Confirm button, and the admission dashboard cases only search and print — a printed
+      document changes nothing in the record it is printed from.
+    </p>
+
+    <h2 class="suite-break">6. API — Health</h2>
+    <p class="note">
+      Spec: <span class="mono">tests/api/health.spec.ts</span> · Project
+      <span class="mono">api</span> · no browser, no session.
+    </p>
+    <table class="cases">
+      <colgroup>
+        <col class="c-id" /><col class="c-title" /><col class="c-pre" /><col class="c-steps" />
+        <col class="c-data" /><col class="c-exp" /><col class="c-pri" /><col class="c-status" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Case ID</th>
+          <th>Title</th>
+          <th>Pre-conditions</th>
+          <th>Test steps</th>
+          <th>Test data</th>
+          <th>Expected result</th>
+          <th>Pri</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="id">TC_API_001<br /><span class="note">health.spec.ts:6</span></td>
+          <td>Health endpoint reports the host is healthy</td>
+          <td>ERP host reachable at <span class="mono">API_URL</span>.</td>
+          <td>
+            <ol>
+              <li>Send <span class="mono">GET /health</span> with the API request context.</li>
+              <li>Read the status code and the response body.</li>
+            </ol>
+          </td>
+          <td><span class="mono">GET /health</span></td>
+          <td>
+            <ul>
+              <li>Status is <strong>200</strong>.</li>
+              <li>Body, trimmed, is exactly <span class="mono">Healthy</span>.</li>
+            </ul>
+          </td>
+          <td>P1</td>
+          <td><span class="badge idle">not run</span></td>
+        </tr>
+        <tr>
+          <td class="id">TC_API_002<br /><span class="note">health.spec.ts:13</span></td>
+          <td>Login page is served by the identity provider</td>
+          <td>ERP host reachable at <span class="mono">API_URL</span>.</td>
+          <td>
+            <ol>
+              <li>Send <span class="mono">GET /Account/Login</span>.</li>
+              <li>Read the status code and the HTML body.</li>
+            </ol>
+          </td>
+          <td><span class="mono">GET /Account/Login</span></td>
+          <td>
+            <ul>
+              <li>Status is <strong>200</strong>.</li>
+              <li>Body contains <span class="mono">Input.Email</span>, proving the sign-in form rendered.</li>
+            </ul>
+          </td>
+          <td>P1</td>
+          <td><span class="badge idle">not run</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>7. Setup — Authentication</h2>
+    <p class="note">
+      Spec: <span class="mono">tests/auth.setup.ts</span> · runs before every UI project; if it
+      fails, every signed-in case is skipped.
+    </p>
+    <table class="cases">
+      <colgroup>
+        <col class="c-id" /><col class="c-title" /><col class="c-pre" /><col class="c-steps" />
+        <col class="c-data" /><col class="c-exp" /><col class="c-pri" /><col class="c-status" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Case ID</th>
+          <th>Title</th>
+          <th>Pre-conditions</th>
+          <th>Test steps</th>
+          <th>Test data</th>
+          <th>Expected result</th>
+          <th>Pri</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="id">TC_SETUP_001<br /><span class="note">auth.setup.ts:10</span></td>
+          <td>Log in once and persist the session for the suite</td>
+          <td>
+            <span class="mono">.env</span> holds valid
+            <span class="mono">ERP_USERNAME</span> / <span class="mono">ERP_PASSWORD</span>.
+          </td>
+          <td>
+            <ol>
+              <li>Open <span class="mono">/Account/Login</span>.</li>
+              <li>Enter the administrator username and password; submit.</li>
+              <li>Wait for the module launcher to load.</li>
+              <li>Save the browser storage state to disk.</li>
+            </ol>
+          </td>
+          <td>Administrator account from <span class="mono">.env</span></td>
+          <td>
+            <ul>
+              <li>Launcher loads with the tenant name and user role.</li>
+              <li><span class="mono">playwright/.auth/user.json</span> is written and reused by every signed-in project.</li>
+            </ul>
+          </td>
+          <td>P1</td>
+          <td><span class="badge pass">pass</span><br /><span class="note">3.5 s</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 class="suite-break">8. Smoke — Login</h2>
+    <p class="note">
+      Spec: <span class="mono">tests/smoke/login.smoke.spec.ts</span> · signed out — the suite
+      clears the saved session so nothing is inherited.
+    </p>
+    <table class="cases">
+      <colgroup>
+        <col class="c-id" /><col class="c-title" /><col class="c-pre" /><col class="c-steps" />
+        <col class="c-data" /><col class="c-exp" /><col class="c-pri" /><col class="c-status" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Case ID</th>
+          <th>Title</th>
+          <th>Pre-conditions</th>
+          <th>Test steps</th>
+          <th>Test data</th>
+          <th>Expected result</th>
+          <th>Pri</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="id">TC_SMK_LOGIN_001<br /><span class="note">login.smoke.spec.ts:12</span></td>
+          <td>Login page renders every field</td>
+          <td>No session.</td>
+          <td>
+            <ol>
+              <li>Open the login page.</li>
+              <li>Wait for the form to load.</li>
+              <li>Inspect each control.</li>
+            </ol>
+          </td>
+          <td>—</td>
+          <td>
+            <ul>
+              <li>Username placeholder is <em>Enter your username</em>.</li>
+              <li>Password placeholder is <em>Enter your password</em>.</li>
+              <li>Submit button reads <em>Log in</em>.</li>
+              <li>Remember-me and Forgot-password are visible.</li>
+            </ul>
+          </td>
+          <td>P1</td>
+          <td><span class="badge idle">not run</span></td>
+        </tr>
+        <tr>
+          <td class="id">TC_SMK_LOGIN_002<br /><span class="note">login.smoke.spec.ts:23</span></td>
+          <td>Valid credentials land on the module launcher</td>
+          <td>No session; administrator account is active.</td>
+          <td>
+            <ol>
+              <li>Open the login page.</li>
+              <li>Enter the administrator username and password; submit.</li>
+              <li>Wait for the launcher.</li>
+            </ol>
+          </td>
+          <td>Administrator account from <span class="mono">.env</span></td>
+          <td>
+            <ul>
+              <li>Launcher is displayed.</li>
+              <li>Tenant reads <em>Popular Medical College and Hospital</em>.</li>
+              <li>Role reads <em>Administrator</em>.</li>
+            </ul>
+          </td>
+          <td>P1</td>
+          <td><span class="badge idle">not run</span></td>
+        </tr>
+        <tr>
+          <td class="id">TC_SMK_LOGIN_003<br /><span class="note">login.smoke.spec.ts:35</span></td>
+          <td>Invalid password is rejected</td>
+          <td>No session.</td>
+          <td>
+            <ol>
+              <li>Open the login page.</li>
+              <li>Enter a known username with a deliberately wrong password; submit.</li>
+            </ol>
+          </td>
+          <td><span class="mono">admin</span> / <span class="mono">wrong-password-on-purpose</span></td>
+          <td>
+            <ul>
+              <li>Invalid-login error is shown.</li>
+              <li>User stays on the login page; no session is created.</li>
+            </ul>
+          </td>
+          <td>P1</td>
+          <td><span class="badge idle">not run</span></td>
+        </tr>
+        <tr>
+          <td class="id">TC_SMK_LOGIN_004<br /><span class="note">login.smoke.spec.ts:42</span></td>
+          <td>Unknown user is rejected</td>
+          <td>No session.</td>
+          <td>
+            <ol>
+              <li>Open the login page.</li>
+              <li>Enter a username that does not exist with any password; submit.</li>
+            </ol>
+          </td>
+          <td><span class="mono">no-such-user-12345</span> / <span class="mono">whatever</span></td>
+          <td>
+            <ul>
+              <li>Invalid-login error is shown.</li>
+              <li>The message does not reveal whether the account exists.</li>
+            </ul>
+          </td>
+          <td>P1</td>
+          <td><span class="badge idle">not run</span></td>
+        </tr>
+        <tr>
+          <td class="id">TC_SMK_LOGIN_005<br /><span class="note">login.smoke.spec.ts:49</span></td>
+          <td>Unauthenticated visit redirects to login</td>
+          <td>No session.</td>
+          <td>
+            <ol>
+              <li>Navigate straight to the application root <span class="mono">/</span>.</li>
+            </ol>
+          </td>
+          <td>—</td>
+          <td>
+            <ul>
+              <li>URL becomes <span class="mono">/Account/Login</span>.</li>
+              <li>The login form is rendered.</li>
+            </ul>
+          </td>
+          <td>P1</td>
+          <td><span class="badge idle">not run</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 class="suite-break">9. Smoke — New Admission wizard</h2>
+    <p class="note">
+      Spec: <span class="mono">tests/smoke/admission.smoke.spec.ts</span> · signed in on the
+      saved session · page <span class="mono">/hospital/patientadmission</span>. Nothing here
+      presses <em>Create Patient Admission</em>; the end-to-end submit is TC_FLOW_001.
+    </p>
+    <table class="cases">
+      <colgroup>
+        <col class="c-id" /><col class="c-title" /><col class="c-pre" /><col class="c-steps" />
+        <col class="c-data" /><col class="c-exp" /><col class="c-pri" /><col class="c-status" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Case ID</th>
+          <th>Title</th>
+          <th>Pre-conditions</th>
+          <th>Test steps</th>
+          <th>Test data</th>
+          <th>Expected result</th>
+          <th>Pri</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="id">TC_SMK_ADM_001<br /><span class="note">admission.smoke.spec.ts:18</span></td>
+          <td>Wizard opens on the Patient tab with its required fields ready</td>
+          <td>Signed in as Administrator.</td>
+          <td>
+            <ol>
+              <li>Open the New Admission wizard.</li>
+              <li>Wait for the page to load.</li>
+              <li>Inspect the Patient tab and its fields.</li>
+            </ol>
+          </td>
+          <td>—</td>
+          <td>
+            <ul>
+              <li>Patient tab is active.</li>
+              <li>UHID is editable.</li>
+              <li>Full Name, Surname, Patient Mobile are editable; DOB and Blood Group are visible.</li>
+            </ul>
+          </td>
+          <td>P1</td>
+          <td><span class="badge idle">not run</span></td>
+        </tr>
+        <tr>
+          <td class="id">TC_SMK_ADM_002<br /><span class="note">admission.smoke.spec.ts:34</span></td>
+          <td>The four marked tabs open in order</td>
+          <td>Signed in; wizard loaded.</td>
+          <td>
+            <ol>
+              <li>Open <strong>Patient</strong> — check Full Name rendered.</li>
+              <li>Open <strong>Contact Person</strong> — check Guardian Name and Relation.</li>
+              <li>Open <strong>Advance Payment</strong> — check Select Card, BKash Payment, Payment (Cash).</li>
+              <li>Open <strong>Admission Detail</strong> — check Select Department, Admitted to, Bed/Cabin.</li>
+            </ol>
+          </td>
+          <td>—</td>
+          <td>
+            <ul>
+              <li>Each tab goes active when opened.</li>
+              <li>The pane behind each tab renders its own fields — a tab that switches without its fields arriving still fails.</li>
+            </ul>
+          </td>
+          <td>P1</td>
+          <td><span class="badge idle">not run</span></td>
+        </tr>
+        <tr>
+          <td class="id">TC_SMK_ADM_003<br /><span class="note">admission.smoke.spec.ts:57</span></td>
+          <td>A patient loads by UHID into the Patient tab</td>
+          <td>
+            Signed in; at least one patient in the Patient Registration grid for the selected
+            date range.
+          </td>
+          <td>
+            <ol>
+              <li>Open Patient Registration and read the UHID from the first grid row.</li>
+              <li>Open the New Admission wizard.</li>
+              <li>Search that UHID.</li>
+            </ol>
+          </td>
+          <td>UHID read live from the grid (10+ digits)</td>
+          <td>
+            <ul>
+              <li>Full Name, Patient Mobile and DOB are all filled from the registration record — none is empty.</li>
+            </ul>
+          </td>
+          <td>P1</td>
+          <td><span class="badge idle">not run</span></td>
+        </tr>
+        <tr>
+          <td class="id">TC_SMK_ADM_004<br /><span class="note">admission.smoke.spec.ts:80</span></td>
+          <td>
+            The tabs take entry in order, up to the submit
+            <br /><span class="badge warn">writes</span>
+          </td>
+          <td>Signed in; wizard loaded. Test timeout raised to 240 s.</td>
+          <td>
+            <ol>
+              <li>Fill the Contact Person tab; confirm Guardian Name holds what was typed.</li>
+              <li>Fill the Advance Payment tab (card, bKash, cash).</li>
+              <li>Read the page's own <em>Total:</em> panel.</li>
+              <li>Press Next into Admission Detail; choose Department and Admitted-to.</li>
+              <li>Wait for the bed list to populate, pick the first real bed.</li>
+              <li>Search and pick an assigned doctor.</li>
+            </ol>
+          </td>
+          <td>
+            Guardian <span class="mono">Test-&lt;n&gt;</span> · Card VISA 1000, bKash 2000, Cash
+            3000 · HDU / HDU · doctor search <span class="mono">Dr</span>
+          </td>
+          <td>
+            <ul>
+              <li>Total panel shows <strong>6000</strong> — the app's own sum, which is the honest proof all three amounts registered.</li>
+              <li>Bed list loads more than the placeholder option and a bed is selected.</li>
+              <li>Assigned doctor contains the searched text.</li>
+              <li><em>Create Patient Admission</em> is enabled — and deliberately not pressed.</li>
+            </ul>
+          </td>
+          <td>P1</td>
+          <td><span class="badge idle">not run</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 class="suite-break">10. Regression — Login</h2>
+    <p class="note">
+      Spec: <span class="mono">tests/regression/login.regression.spec.ts</span> · signed out.
+      The form relies on HTML5 <span class="mono">required</span> rather than a server-rendered
+      validation summary, so the empty-field cases assert constraint validity plus "the form
+      was never submitted" instead of hunting for an error banner.
+    </p>
+    <table class="cases">
+      <colgroup>
+        <col class="c-id" /><col class="c-title" /><col class="c-pre" /><col class="c-steps" />
+        <col class="c-data" /><col class="c-exp" /><col class="c-pri" /><col class="c-status" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Case ID</th>
+          <th>Title</th>
+          <th>Pre-conditions</th>
+          <th>Test steps</th>
+          <th>Test data</th>
+          <th>Expected result</th>
+          <th>Pri</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="id">TC_LOGIN_001<br /><span class="note">login.regression.spec.ts:16</span></td>
+          <td>Login page is displayed with all required elements</td>
+          <td>No session.</td>
+          <td>
+            <ol>
+              <li>Open the login page and wait for it to load.</li>
+              <li>Inspect each field, the submit button and the error area.</li>
+            </ol>
+          </td>
+          <td>—</td>
+          <td>
+            <ul>
+              <li>Username editable, placeholder <em>Enter your username</em>.</li>
+              <li>Password editable, <span class="mono">type="password"</span>, placeholder <em>Enter your password</em>.</li>
+              <li>Submit enabled and reads <em>Log in</em>.</li>
+              <li>Remember-me and Forgot-password visible; no error banner.</li>
+            </ul>
+          </td>
+          <td>P1</td>
+          <td><span class="badge pass">pass</span><br /><span class="note">1.9 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">TC_LOGIN_002<br /><span class="note">login.regression.spec.ts:79</span></td>
+          <td>Valid credentials land on the home page</td>
+          <td>No session; administrator account active.</td>
+          <td>
+            <ol>
+              <li>Open the login page.</li>
+              <li>Enter the administrator username and password; submit.</li>
+              <li>Wait for the launcher.</li>
+            </ol>
+          </td>
+          <td>Administrator account from <span class="mono">.env</span></td>
+          <td>
+            <ul>
+              <li>Launcher loads.</li>
+              <li>Tenant reads <em>Popular Medical College and Hospital</em>; role reads <em>Administrator</em>.</li>
+              <li>No error banner.</li>
+            </ul>
+          </td>
+          <td>P1</td>
+          <td><span class="badge pass">pass</span><br /><span class="note">2.6 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">TC_LOGIN_003<br /><span class="note">login.regression.spec.ts:32</span></td>
+          <td>Invalid username with a valid password is rejected</td>
+          <td>No session.</td>
+          <td>
+            <ol>
+              <li>Open the login page.</li>
+              <li>Enter a non-existent username with the real password; submit.</li>
+            </ol>
+          </td>
+          <td><span class="mono">no_such_user_9912</span> + real password</td>
+          <td>
+            <ul>
+              <li>Invalid-login error is shown; the user is not signed in.</li>
+            </ul>
+          </td>
+          <td>P1</td>
+          <td><span class="badge pass">pass</span><br /><span class="note">2.2 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">TC_LOGIN_004<br /><span class="note">login.regression.spec.ts:41</span></td>
+          <td>Valid username with an invalid password is rejected</td>
+          <td>No session.</td>
+          <td>
+            <ol>
+              <li>Open the login page.</li>
+              <li>Enter the real username with a wrong password; submit.</li>
+            </ol>
+          </td>
+          <td>Real username + <span class="mono">WrongPass!123</span></td>
+          <td>
+            <ul>
+              <li>Invalid-login error is shown; the user is not signed in.</li>
+            </ul>
+          </td>
+          <td>P1</td>
+          <td><span class="badge pass">pass</span><br /><span class="note">2.3 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">TC_LOGIN_005<br /><span class="note">login.regression.spec.ts:50</span></td>
+          <td>Empty username is blocked by field validation</td>
+          <td>No session.</td>
+          <td>
+            <ol>
+              <li>Open the login page.</li>
+              <li>Leave Username blank, fill Password; submit.</li>
+            </ol>
+          </td>
+          <td>Username <em>(blank)</em> + real password</td>
+          <td>
+            <ul>
+              <li>Username reports a required-field constraint violation.</li>
+              <li>The form is never submitted — the browser stays on the login page.</li>
+            </ul>
+          </td>
+          <td>P2</td>
+          <td><span class="badge pass">pass</span><br /><span class="note">2.6 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">TC_LOGIN_006<br /><span class="note">login.regression.spec.ts:60</span></td>
+          <td>Empty password is blocked by field validation</td>
+          <td>No session.</td>
+          <td>
+            <ol>
+              <li>Open the login page.</li>
+              <li>Fill Username, leave Password blank; submit.</li>
+            </ol>
+          </td>
+          <td>Real username + password <em>(blank)</em></td>
+          <td>
+            <ul>
+              <li>Password reports a required-field constraint violation.</li>
+              <li>The form is never submitted.</li>
+            </ul>
+          </td>
+          <td>P2</td>
+          <td><span class="badge pass">pass</span><br /><span class="note">2.1 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">TC_LOGIN_007<br /><span class="note">login.regression.spec.ts:70</span></td>
+          <td>Both fields empty are blocked by field validation</td>
+          <td>No session.</td>
+          <td>
+            <ol>
+              <li>Open the login page.</li>
+              <li>Submit with both fields blank.</li>
+            </ol>
+          </td>
+          <td>—</td>
+          <td>
+            <ul>
+              <li>Both fields report a required-field constraint violation.</li>
+              <li>The form is never submitted.</li>
+            </ul>
+          </td>
+          <td>P2</td>
+          <td><span class="badge pass">pass</span><br /><span class="note">2.5 s</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 class="suite-break">11. Regression — Home / module launcher</h2>
+    <p class="note">
+      Spec: <span class="mono">tests/regression/home.regression.spec.ts</span> · signed in,
+      except TC_HOME_007. The launcher is a MudBlazor shell, so module tiles are plain text
+      nodes rather than links — they are matched exactly, because a substring match also hits
+      the hidden language dropdown.
+    </p>
+    <table class="cases">
+      <colgroup>
+        <col class="c-id" /><col class="c-title" /><col class="c-pre" /><col class="c-steps" />
+        <col class="c-data" /><col class="c-exp" /><col class="c-pri" /><col class="c-status" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Case ID</th>
+          <th>Title</th>
+          <th>Pre-conditions</th>
+          <th>Test steps</th>
+          <th>Test data</th>
+          <th>Expected result</th>
+          <th>Pri</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="id">TC_HOME_001<br /><span class="note">home.regression.spec.ts:19</span></td>
+          <td>Home page is displayed with all required elements</td>
+          <td>Signed in as Administrator.</td>
+          <td>
+            <ol>
+              <li>Open the home page and wait for it to load.</li>
+              <li>Inspect the header chrome.</li>
+            </ol>
+          </td>
+          <td>—</td>
+          <td>
+            <ul>
+              <li>Tenant name visible and not empty.</li>
+              <li>User name, user role and language selector all visible.</li>
+            </ul>
+          </td>
+          <td>P1</td>
+          <td><span class="badge pass">pass</span><br /><span class="note">2.1 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">TC_HOME_002<br /><span class="note">home.regression.spec.ts:30</span></td>
+          <td>Core ERP modules are listed on the launcher</td>
+          <td>Signed in as Administrator.</td>
+          <td>
+            <ol>
+              <li>Open the home page.</li>
+              <li>Look for each core module tile by exact name.</li>
+            </ol>
+          </td>
+          <td>REGISTRATION, OPD, Pharmacy, Diagnostic, HR, ACCOUNT</td>
+          <td>
+            <ul>
+              <li>All six tiles are visible; the failure message names the missing module.</li>
+            </ul>
+          </td>
+          <td>P1</td>
+          <td><span class="badge pass">pass</span><br /><span class="note">1.8 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">TC_HOME_003<br /><span class="note">home.regression.spec.ts:39</span></td>
+          <td>Tenant is the hospital the session belongs to</td>
+          <td>Signed in as Administrator.</td>
+          <td>
+            <ol>
+              <li>Open the home page.</li>
+              <li>Read the tenant name in the header.</li>
+            </ol>
+          </td>
+          <td>—</td>
+          <td>
+            <ul>
+              <li>Tenant matches <em>Popular Medical College and Hospital</em> (case-insensitive).</li>
+            </ul>
+          </td>
+          <td>P1</td>
+          <td><span class="badge pass">pass</span><br /><span class="note">1.9 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">TC_HOME_004<br /><span class="note">home.regression.spec.ts:46</span></td>
+          <td>Signed-in user context is shown</td>
+          <td>Signed in as Administrator.</td>
+          <td>
+            <ol>
+              <li>Open the home page.</li>
+              <li>Read the user role and user name.</li>
+            </ol>
+          </td>
+          <td>—</td>
+          <td>
+            <ul>
+              <li>Role matches <em>Administrator</em>.</li>
+              <li>User name is not empty.</li>
+            </ul>
+          </td>
+          <td>P2</td>
+          <td><span class="badge pass">pass</span><br /><span class="note">2.0 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">TC_HOME_005<br /><span class="note">home.regression.spec.ts:54</span></td>
+          <td>A module tile that does not exist is not rendered</td>
+          <td>Signed in as Administrator.</td>
+          <td>
+            <ol>
+              <li>Open the home page.</li>
+              <li>Look for a module name that cannot exist.</li>
+            </ol>
+          </td>
+          <td><span class="mono">NO_SUCH_MODULE_9912</span></td>
+          <td>
+            <ul>
+              <li>No such tile is rendered — negative control proving the tile matcher is not matching everything.</li>
+            </ul>
+          </td>
+          <td>P3</td>
+          <td><span class="badge pass">pass</span><br /><span class="note">2.0 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">TC_HOME_006<br /><span class="note">home.regression.spec.ts:61</span></td>
+          <td>Reloading keeps the user on the launcher</td>
+          <td>Signed in as Administrator.</td>
+          <td>
+            <ol>
+              <li>Open the home page.</li>
+              <li>Reload (tolerant of the host's HTTP 429 cool-off — see BUG-003).</li>
+              <li>Wait for the launcher again.</li>
+            </ol>
+          </td>
+          <td>—</td>
+          <td>
+            <ul>
+              <li>Launcher loads again; the session is not lost.</li>
+              <li>The REGISTRATION tile is still visible.</li>
+            </ul>
+          </td>
+          <td>P2</td>
+          <td><span class="badge pass">pass</span><br /><span class="note">2.2 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">TC_HOME_007<br /><span class="note">home.regression.spec.ts:78</span></td>
+          <td>An unauthenticated visitor is sent to the login page</td>
+          <td>Session deliberately cleared.</td>
+          <td>
+            <ol>
+              <li>Navigate to the home page with no session.</li>
+            </ol>
+          </td>
+          <td>—</td>
+          <td>
+            <ul>
+              <li>URL becomes <span class="mono">/Account/Login</span>.</li>
+              <li>The login form renders and the tenant header is hidden — no launcher content leaks.</li>
+            </ul>
+          </td>
+          <td>P1</td>
+          <td><span class="badge pass">pass</span><br /><span class="note">1.9 s</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 class="suite-break">12. Regression — Patient Registration</h2>
+    <p class="note">
+      Spec: <span class="mono">tests/regression/registration.regression.spec.ts</span> · signed
+      in. Follows the module the way a user reaches it — REGISTRATION tile on the launcher,
+      which loads that module's menu into the left drawer, then PATIENT REGISTRATION in the
+      drawer. Nothing here submits the create-patient wizard, because confirming a
+      registration would leave a real patient behind on every run.
+    </p>
+    <table class="cases">
+      <colgroup>
+        <col class="c-id" /><col class="c-title" /><col class="c-pre" /><col class="c-steps" />
+        <col class="c-data" /><col class="c-exp" /><col class="c-pri" /><col class="c-status" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Case ID</th>
+          <th>Title</th>
+          <th>Pre-conditions</th>
+          <th>Test steps</th>
+          <th>Test data</th>
+          <th>Expected result</th>
+          <th>Pri</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="id">TC_REG_001<br /><span class="note">registration.regression.spec.ts:23</span></td>
+          <td>REGISTRATION tile loads the module menu into the sidebar</td>
+          <td>Signed in; on the launcher.</td>
+          <td>
+            <ol>
+              <li>Open the home page.</li>
+              <li>Confirm the drawer carries no PATIENT REGISTRATION link yet.</li>
+              <li>Click the REGISTRATION tile.</li>
+            </ol>
+          </td>
+          <td>—</td>
+          <td>
+            <ul>
+              <li>Before the click: the link genuinely does not exist (count 0).</li>
+              <li>After: the REGISTRATION group and the PATIENT REGISTRATION link appear, the link pointing at <span class="mono">/hospital/newregistration</span>.</li>
+            </ul>
+          </td>
+          <td>P1</td>
+          <td><span class="badge pass">pass</span><br /><span class="note">4.1 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">TC_REG_002<br /><span class="note">registration.regression.spec.ts:44</span></td>
+          <td>PATIENT REGISTRATION opens the patient list</td>
+          <td>Signed in; on the launcher.</td>
+          <td>
+            <ol>
+              <li>Click the REGISTRATION tile.</li>
+              <li>Click PATIENT REGISTRATION in the drawer.</li>
+            </ol>
+          </td>
+          <td>—</td>
+          <td>
+            <ul>
+              <li>The patient list page loads.</li>
+              <li>URL ends with <span class="mono">/hospital/newregistration</span>.</li>
+            </ul>
+          </td>
+          <td>P1</td>
+          <td><span class="badge pass">pass</span><br /><span class="note">4.4 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">TC_REG_003<br /><span class="note">registration.regression.spec.ts:57</span></td>
+          <td>Patient list is displayed with all required elements</td>
+          <td>Signed in; patient list open.</td>
+          <td>
+            <ol>
+              <li>Open the patient list.</li>
+              <li>Inspect the filter bar and toolbar.</li>
+            </ol>
+          </td>
+          <td>—</td>
+          <td>
+            <ul>
+              <li>Show From and Show To date filters visible; Show button enabled.</li>
+              <li>Add New visible and pointing at <span class="mono">/patients/new</span>.</li>
+              <li>Search box editable.</li>
+            </ul>
+          </td>
+          <td>P1</td>
+          <td><span class="badge pass">pass</span><br /><span class="note">2.4 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">TC_REG_004<br /><span class="note">registration.regression.spec.ts:71</span></td>
+          <td>The grid lists patients under the expected columns</td>
+          <td>
+            Signed in. <strong>At least one patient registered within the grid's default date
+            range</strong> (today) — see BUG-001.
+          </td>
+          <td>
+            <ol>
+              <li>Open the patient list.</li>
+              <li>Read the header row.</li>
+              <li>Wait for the first data row.</li>
+            </ol>
+          </td>
+          <td>Live hospital data</td>
+          <td>
+            <ul>
+              <li>Exactly six headers, in order: NAME, UHID, REG DATE, PHONE NUMBER, DOB, ACTION.</li>
+              <li>At least one data row is visible.</li>
+            </ul>
+          </td>
+          <td>P1</td>
+          <td><span class="badge pass">pass</span><br /><span class="note">33.8 s — slow</span></td>
+        </tr>
+        <tr>
+          <td class="id">TC_REG_008<br /><span class="note">registration.regression.spec.ts:87</span></td>
+          <td>Add New opens the create-patient form</td>
+          <td>Signed in; patient list open.</td>
+          <td>
+            <ol>
+              <li>Open the patient list.</li>
+              <li>Click Add New.</li>
+            </ol>
+          </td>
+          <td>—</td>
+          <td>
+            <ul>
+              <li>The create-patient wizard loads.</li>
+              <li>URL ends with <span class="mono">/hospital/patients/new</span>.</li>
+            </ul>
+          </td>
+          <td>P1</td>
+          <td><span class="badge pass">pass</span><br /><span class="note">3.8 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">TC_REG_009<br /><span class="note">registration.regression.spec.ts:100</span></td>
+          <td>The create-patient form opens on the Patient tab</td>
+          <td>Signed in; create-patient wizard open.</td>
+          <td>
+            <ol>
+              <li>Open the create-patient wizard directly.</li>
+              <li>Read the <span class="mono">aria-selected</span> state of each tab.</li>
+            </ol>
+          </td>
+          <td>—</td>
+          <td>
+            <ul>
+              <li>Patient tab is selected.</li>
+              <li>Contact Person and Corporate Client are not selected.</li>
+            </ul>
+          </td>
+          <td>P2</td>
+          <td><span class="badge pass">pass</span><br /><span class="note">4.1 s</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="note">
+      <strong>ID gap.</strong> TC_REG_005, TC_REG_006 and TC_REG_007 — the grid search and
+      row-action cases — were removed from the spec and are not currently automated. They are
+      listed as a coverage gap in section 15; the surviving IDs were left unrenumbered so that
+      earlier runs and defect reports still line up.
+    </p>
+
+    <h2 class="suite-break">13. Regression — New Admission</h2>
+    <p class="note">
+      Spec: <span class="mono">tests/regression/admission.regression.spec.ts</span> · signed in.
+      The wizard admits a patient who is already registered, so the UHID is read out of the
+      registration grid rather than hard-coded — the grid holds live hospital data and no
+      patient in it is guaranteed to still be there next week.
+    </p>
+    <table class="cases">
+      <colgroup>
+        <col class="c-id" /><col class="c-title" /><col class="c-pre" /><col class="c-steps" />
+        <col class="c-data" /><col class="c-exp" /><col class="c-pri" /><col class="c-status" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Case ID</th>
+          <th>Title</th>
+          <th>Pre-conditions</th>
+          <th>Test steps</th>
+          <th>Test data</th>
+          <th>Expected result</th>
+          <th>Pri</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="id">TC_ADM_001<br /><span class="note">admission.regression.spec.ts:36</span></td>
+          <td>New Admission opens from the Hospital module menu</td>
+          <td>Signed in; on the launcher.</td>
+          <td>
+            <ol>
+              <li>Open the home page.</li>
+              <li>Open the Hospital module and find the New Admission link.</li>
+              <li>Click it.</li>
+            </ol>
+          </td>
+          <td>Route <span class="mono">/hospital/patientadmission</span></td>
+          <td>
+            <ul>
+              <li>The admission wizard loads.</li>
+              <li>UHID is editable and the Patient tab is active.</li>
+            </ul>
+          </td>
+          <td>P1</td>
+          <td><span class="badge pass">pass</span><br /><span class="note">5.0 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">TC_ADM_002<br /><span class="note">admission.regression.spec.ts:51</span></td>
+          <td>Searching a UHID loads that patient into the wizard</td>
+          <td>
+            Signed in. <strong>At least one patient registered within the grid's default date
+            range</strong> (today).
+          </td>
+          <td>
+            <ol>
+              <li>Open Patient Registration.</li>
+              <li>Read the UHID and the patient name from the first grid row.</li>
+              <li>Open the New Admission wizard.</li>
+              <li>Search that UHID.</li>
+            </ol>
+          </td>
+          <td>UHID and name read live from the grid</td>
+          <td>
+            <ul>
+              <li>Full Name in the wizard equals the name in the grid.</li>
+              <li>Patient Mobile and DOB are filled from the registration record.</li>
+            </ul>
+          </td>
+          <td>P1</td>
+          <td>
+            <span class="badge fail">fail</span><br /><span class="note">66.7 s, 2 attempts —
+            <strong>BUG-001</strong></span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>14. Regression — Patient journey (end to end)</h2>
+    <p class="note">
+      Spec: <span class="mono">tests/regression/admission.regression.spec.ts</span> · signed
+      out, because logging in is the first thing it checks. One patient, followed the way the
+      hospital actually takes one on. It is one test and not three because the admission wizard
+      needs a patient who is registered and not already on a ward, and the only way to be sure
+      of that is to have just registered them. Retries are disabled: a retry would register a
+      second patient rather than tell us anything new.
+    </p>
+    <table class="cases">
+      <colgroup>
+        <col class="c-id" /><col class="c-title" /><col class="c-pre" /><col class="c-steps" />
+        <col class="c-data" /><col class="c-exp" /><col class="c-pri" /><col class="c-status" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Case ID</th>
+          <th>Title</th>
+          <th>Pre-conditions</th>
+          <th>Test steps</th>
+          <th>Test data</th>
+          <th>Expected result</th>
+          <th>Pri</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="id">TC_FLOW_001<br /><span class="note">admission.regression.spec.ts:99</span></td>
+          <td>
+            Log in, register a patient, then admit them
+            <br /><span class="badge warn">writes</span>
+          </td>
+          <td>
+            No session. A free bed in the target ward. Test timeout raised to 600 s; retries
+            disabled.
+          </td>
+          <td>
+            <ol>
+              <li><strong>Log in</strong> with the administrator account and reach the launcher.</li>
+              <li><strong>Register the patient:</strong> open the create-patient wizard, fill the Patient tab, confirm the DOB picker wrote <span class="mono">4/10/1998</span>, press Confirm Registeration and capture the new Patient ID.</li>
+              <li><strong>Admit them:</strong> open the New Admission wizard and search the UHID just issued.</li>
+              <li>Fill Contact Person, then Advance Payment; read the page's own <em>Total:</em> panel.</li>
+              <li>Press Next into Admission Detail; fill department, ward, bed and assigned doctor.</li>
+              <li>Press Create Patient Admission and capture the confirmation text.</li>
+              <li><strong>Verify on the ward:</strong> open Hospital &gt; Dashboard (the admission dashboard) and search the patient name as registered; read the admission number off the row.</li>
+              <li><strong>Find it by number and print:</strong> search that admission number, then press every print button in the row's Action cell, one after another, and read back the PDF each one produced.</li>
+            </ol>
+          </td>
+          <td>
+            Patient <span class="mono">Masud Rana Test-&lt;n&gt;</span>, Male, DOB 10 Apr 1998,
+            A+, mobile <span class="mono">01876765454</span>, NID
+            <span class="mono">98876756757</span>, Tangail / Bhuapur · Card VISA 1000, bKash
+            2000, Cash 3000 · HDU / HDU
+          </td>
+          <td>
+            <ul>
+              <li>Login succeeds and the launcher loads.</li>
+              <li>Registration returns a Patient ID of 10 or more digits.</li>
+              <li>The wizard pulls up that exact patient — name and mobile match what was registered.</li>
+              <li>Total panel shows <strong>6000</strong>.</li>
+              <li>The confirmation carries no <em>error / failed / invalid</em> wording.</li>
+              <li>An admission row exists on the admission dashboard: admission number of 10+ digits, carrying the patient's mobile and a bed in the ward admitted to.</li>
+              <li>Searching that admission number returns exactly one row, and it is this patient.</li>
+              <li>At least four print buttons, each producing a PDF (<span class="mono">%PDF-</span> header, over 1 KB).</li>
+            </ul>
+          </td>
+          <td>P1</td>
+          <td><span class="badge pass">pass</span><br /><span class="note">29.8 s</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="note">
+      <strong>Deliberately not asserted:</strong> that the advance payments reach the admission.
+      On the runs so far they did not — Hospital &gt; Advance Dashboard carried no row for the
+      admission this flow created, even though the wizard summed the three amounts to 6000
+      before the submit. The case asserts only what it can stand behind, and the gap is raised
+      separately as <strong>BUG-002</strong>.
+    </p>
+
+    <h2 class="suite-break">15. Regression — Admission dashboard</h2>
+    <p class="note">
+      Spec: <span class="mono">tests/regression/admission-dashboard.regression.spec.ts</span> ·
+      signed in. Route <span class="mono">/hospital/patientlist-dashboard</span> — Hospital
+      &gt; <strong>Dashboard</strong>, the list of everyone currently admitted. This is where
+      an admission is looked up after the fact, so the cases are the two things the page is
+      used for: finding one admission in it, and printing that admission's paperwork. The grid
+      holds live hospital data, so no case hard-codes an admission — each reads one out of the
+      first row and searches for what it just read. Read-only throughout.
+    </p>
+    <p class="note">
+      <strong>One trap, recorded here because it is not a defect:</strong> the NAME column
+      prints the patient's title in front of the name (<span class="mono">Mr Jalal Miah</span>)
+      but the search box matches the name as it was registered, without it. Searching a name
+      copied straight out of the grid returns nothing; <span class="mono">Jalal Miah</span>
+      returns the row. TC_ADMD_004 strips the title before searching.
+    </p>
+    <table class="cases">
+      <colgroup>
+        <col class="c-id" /><col class="c-title" /><col class="c-pre" /><col class="c-steps" />
+        <col class="c-data" /><col class="c-exp" /><col class="c-pri" /><col class="c-status" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Case ID</th>
+          <th>Title</th>
+          <th>Pre-conditions</th>
+          <th>Test steps</th>
+          <th>Test data</th>
+          <th>Expected result</th>
+          <th>Pri</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="id">TC_ADMD_001<br /><span class="note">admission-dashboard.regression.spec.ts:40</span></td>
+          <td>Dashboard opens from the Hospital module menu</td>
+          <td>Signed in; on the launcher.</td>
+          <td>
+            <ol>
+              <li>Open the home page.</li>
+              <li>Open the Hospital module and find the Dashboard link in the drawer.</li>
+              <li>Click it.</li>
+            </ol>
+          </td>
+          <td>
+            Route <span class="mono">/hospital/patientlist-dashboard</span> — the link is
+            reached by href, because it is labelled just "Dashboard"
+          </td>
+          <td>
+            <ul>
+              <li>The admission dashboard loads with rows in the grid.</li>
+              <li>Search is editable; <em>Print List</em> and <em>Print Package List</em> are on screen.</li>
+            </ul>
+          </td>
+          <td>P1</td>
+          <td><span class="badge pass">pass</span><br /><span class="note">5.3 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">TC_ADMD_002<br /><span class="note">admission-dashboard.regression.spec.ts:59</span></td>
+          <td>The grid lists admissions under the expected columns</td>
+          <td>Signed in. At least one patient admitted.</td>
+          <td>
+            <ol>
+              <li>Open the admission dashboard.</li>
+              <li>Read the grid's header row.</li>
+              <li>Read the ADM.NO and CABINNO cell of every row on the page.</li>
+            </ol>
+          </td>
+          <td>
+            Eleven columns: ADM.NO, ADM.DATE, ADM.TIME, NAME, CABINNO, ASSIGNED DOCTOR, PHONE,
+            ADDRESS, CABINTYPE, PACKAGE, ACTION
+          </td>
+          <td>
+            <ul>
+              <li>Exactly those eleven headers, in that order.</li>
+              <li>No row is missing its admission number or its bed — the two every admitted patient has.</li>
+            </ul>
+          </td>
+          <td>P2</td>
+          <td><span class="badge pass">pass</span><br /><span class="note">3.7 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">TC_ADMD_003<br /><span class="note">admission-dashboard.regression.spec.ts:79</span></td>
+          <td>Searching an admission number finds that admission</td>
+          <td>Signed in. At least one patient admitted.</td>
+          <td>
+            <ol>
+              <li>Open the admission dashboard and read the first row.</li>
+              <li>Type its admission number into Search.</li>
+            </ol>
+          </td>
+          <td>Admission number read live from the grid</td>
+          <td>
+            <ul>
+              <li>Exactly one row comes back — an admission number is unique.</li>
+              <li>Its admission number and patient name are the ones read in step 1.</li>
+            </ul>
+          </td>
+          <td>P1</td>
+          <td><span class="badge pass">pass</span><br /><span class="note">3.3 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">TC_ADMD_004<br /><span class="note">admission-dashboard.regression.spec.ts:93</span></td>
+          <td>Searching a patient name finds their admission</td>
+          <td>Signed in. At least one patient admitted.</td>
+          <td>
+            <ol>
+              <li>Open the admission dashboard and read the first row.</li>
+              <li>Drop the title from the name (<span class="mono">Mr Jalal Miah</span> → <span class="mono">Jalal Miah</span>).</li>
+              <li>Type the remainder into Search.</li>
+            </ol>
+          </td>
+          <td>Patient name read live from the grid</td>
+          <td>
+            <ul>
+              <li>The admission read in step 1 is among the rows returned.</li>
+              <li>Its name matches. <em>Not</em> asserted as a single row: a ward holding two patients of one name is ordinary.</li>
+            </ul>
+          </td>
+          <td>P1</td>
+          <td><span class="badge pass">pass</span><br /><span class="note">3.6 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">TC_ADMD_005<br /><span class="note">admission-dashboard.regression.spec.ts:111</span></td>
+          <td>Searching a phone number finds that admission</td>
+          <td>
+            Signed in. Skipped if the admission at the top of the grid carries no phone
+            number.
+          </td>
+          <td>
+            <ol>
+              <li>Open the admission dashboard and read the first row.</li>
+              <li>Type its phone number into Search.</li>
+            </ol>
+          </td>
+          <td>Phone number read live from the grid</td>
+          <td>
+            <ul>
+              <li>The admission read in step 1 is among the rows returned.</li>
+              <li>Its PHONE cell is the number searched. Not a single-row assertion — a family shares a number.</li>
+            </ul>
+          </td>
+          <td>P2</td>
+          <td><span class="badge pass">pass</span><br /><span class="note">3.4 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">TC_ADMD_006<br /><span class="note">admission-dashboard.regression.spec.ts:125</span></td>
+          <td>Searching a cabin number finds the patient in that bed</td>
+          <td>Signed in. At least one patient admitted.</td>
+          <td>
+            <ol>
+              <li>Open the admission dashboard and read the first row.</li>
+              <li>Type its cabin number into Search.</li>
+            </ol>
+          </td>
+          <td>Cabin number read live from the grid, e.g. <span class="mono">HDU-48</span></td>
+          <td>
+            <ul>
+              <li>The admission read in step 1 is among the rows returned.</li>
+              <li>Every row returned is for that bed — a bed holds one patient at a time.</li>
+            </ul>
+          </td>
+          <td>P2</td>
+          <td><span class="badge pass">pass</span><br /><span class="note">3.8 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">TC_ADMD_007<br /><span class="note">admission-dashboard.regression.spec.ts:143</span></td>
+          <td>Every Action print button renders a PDF</td>
+          <td>
+            Signed in. At least one patient admitted. Test timeout raised to 240 s — four
+            documents, the largest over a megabyte.
+          </td>
+          <td>
+            <ol>
+              <li>Open the admission dashboard and search the first row's admission number.</li>
+              <li>Press the first print button in the Action cell; wait for the tab it opens.</li>
+              <li>Read the document back out of the browser and close the tab.</li>
+              <li>Repeat for every remaining print button, one at a time, left to right.</li>
+            </ol>
+          </td>
+          <td>
+            One admission, read live from the grid. Measured on 03 Oct 2026: 1 388 783 /
+            643 337 / 37 660 / 643 270 bytes
+          </td>
+          <td>
+            <ul>
+              <li>At least four print buttons, each opening its own tab.</li>
+              <li>Each tab carries a real PDF — <span class="mono">%PDF-</span> header, over 1 KB.</li>
+              <li>Not all four are the same file: these are different documents, and four identical ones would mean the buttons share a handler.</li>
+            </ul>
+          </td>
+          <td>P1</td>
+          <td><span class="badge pass">pass</span><br /><span class="note">9.4 s</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="note">
+      <strong>How a printed document is checked.</strong> The app does not navigate to a
+      document or download one — it builds the file in the browser and opens a tab on a
+      <span class="mono">blob:</span> URL, which renders in the browser's own PDF viewer and
+      has no readable page behind it. The blob belongs to the dashboard, which created it, so
+      the test fetches that URL from the dashboard and gets the actual bytes. That is what
+      makes "the button printed something" checkable rather than just "a tab opened" — a page
+      that failed to render would open a tab too.
+    </p>
+    <p class="note">
+      <strong>Not clicked:</strong> some rows carry a cloud-arrow-down button among the print
+      buttons. It produced nothing observable on any row tried — no tab, no download, nothing
+      on screen — so the print run matches on the printer icon and steps over it rather than
+      hanging on a document that never comes. Worth a question to the module owners; it is not
+      raised as a defect because what it is meant to do is unknown.
+    </p>
+
+    <h2 class="suite-break">16. Known coverage gaps</h2>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 26%">Gap</th>
+          <th style="width: 44%">Why it is open</th>
+          <th style="width: 30%">Suggested next step</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Grid search and row actions on the patient list (the old TC_REG_005–007)</td>
+          <td>Removed from the spec; the cases keyed off live data that was not stable enough to assert on.</td>
+          <td>Re-add against a patient the test registers itself, the way TC_FLOW_001 does.</td>
+        </tr>
+        <tr>
+          <td>Advance payment reaching the admission</td>
+          <td>Observed failing; see BUG-002. Asserting it today would make TC_FLOW_001 fail for a defect that is already tracked.</td>
+          <td>Add the assertion as soon as BUG-002 is fixed, so it guards the fix.</td>
+        </tr>
+        <tr>
+          <td>What is inside a printed admission document</td>
+          <td>TC_ADMD_007 checks that each Action button produces a real, non-empty PDF, not what the PDF says. Reading the text back would mean parsing it, and nothing in the suite does that today.</td>
+          <td>Add a PDF text extractor and assert the patient's name and admission number appear in each document.</td>
+        </tr>
+        <tr>
+          <td>The dashboard's list-level Print List / Print Package List, and the per-row cloud-arrow-down button</td>
+          <td>The two list buttons print the whole filtered page and are not tied to one admission. The cloud button produced nothing observable, and what it is meant to do is unknown.</td>
+          <td>Ask the module owners what the cloud button does, then cover all three.</td>
+        </tr>
+        <tr>
+          <td>Create-patient field validation (required fields, mobile/NID format, duplicate NID)</td>
+          <td>Every negative case would need the Confirm button, which writes to live data.</td>
+          <td>Needs a test tenant or a reset endpoint before it can be automated safely.</td>
+        </tr>
+        <tr>
+          <td>Firefox, WebKit and mobile viewports</td>
+          <td>Projects are present in the config but commented out — the host drops sessions under concurrent browsers.</td>
+          <td>Enable once the host tolerates more than one worker, or run them in separate scheduled passes.</td>
+        </tr>
+        <tr>
+          <td>Roles other than Administrator</td>
+          <td>Only one account is configured. Doctor, receptionist and accountant are declared as types but never exercised.</td>
+          <td>Add per-role accounts to <span class="mono">.env</span> and a storage state per role.</td>
+        </tr>
+        <tr>
+          <td>OPD, Pharmacy, Diagnostic, HR, Accounts</td>
+          <td>Out of scope for this cycle — only their tiles are checked on the launcher.</td>
+          <td>Plan per-module suites in the next cycle.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <footer class="doc-footer">
+      Test Case Document v1.0 · Popular Medical College &amp; Hospital Ltd — Healthcare ERP
+      Test Automation · 03 October 2026 · generated from
+      <span class="mono">docs/src/test-cases.html</span> by
+      <span class="mono">npm run docs</span>.
+    </footer>
+  </body>
+</html>

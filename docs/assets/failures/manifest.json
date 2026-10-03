@@ -1,0 +1,83 @@
+{
+  "generatedAt": "2026-10-03T08:31:33.597Z",
+  "run": {
+    "startedAt": 1791014652698,
+    "durationMs": 197589.874,
+    "projects": [
+      "setup",
+      "chromium"
+    ],
+    "total": 24,
+    "expected": 23,
+    "unexpected": 1,
+    "flaky": 0,
+    "skipped": 0,
+    "ok": false
+  },
+  "failures": [
+    {
+      "id": "TC_ADM_002",
+      "title": "TC_ADM_002 searching a UHID loads that patient into the wizard",
+      "suite": "Admission @regression",
+      "spec": "regression/admission.regression.spec.ts:52",
+      "project": "chromium",
+      "outcome": "unexpected",
+      "durationMs": 66664,
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "failed",
+          "durationMs": 32760,
+          "startedAt": "2026-10-03T08:04:24.985Z",
+          "error": "TimeoutError: locator.innerText: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('table.mud-table-root').locator('tbody tr').first().locator('td').nth(1)\n\n\n  30 |     await registrationPage.expectLoaded();\n  31 |     // NAME, UHID, REG DATE, PHONE NUMBER, DOB, ACTION - UHID is the second column.\n> 32 |     const uhid = (await registrationPage.rows.first().locator('td').nth(1).innerText()).trim();\n     |                                                                            ^\n  33 |     expect(uhid).toMatch(/^\\d{10,}$/);\n  34 |     return uhid;\n  35 |   }",
+          "attachments": [
+            {
+              "name": "screenshot",
+              "file": "TC_ADM_002/screenshot-1.png",
+              "contentType": "image/png"
+            },
+            {
+              "name": "video",
+              "file": "TC_ADM_002/video-1.webm",
+              "contentType": "video/webm"
+            },
+            {
+              "name": "error-context",
+              "file": "TC_ADM_002/error-context-1.md",
+              "contentType": "text/markdown"
+            }
+          ]
+        },
+        {
+          "attempt": 2,
+          "status": "failed",
+          "durationMs": 33904,
+          "startedAt": "2026-10-03T08:04:58.756Z",
+          "error": "TimeoutError: locator.innerText: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('table.mud-table-root').locator('tbody tr').first().locator('td').nth(1)\n\n\n  30 |     await registrationPage.expectLoaded();\n  31 |     // NAME, UHID, REG DATE, PHONE NUMBER, DOB, ACTION - UHID is the second column.\n> 32 |     const uhid = (await registrationPage.rows.first().locator('td').nth(1).innerText()).trim();\n     |                                                                            ^\n  33 |     expect(uhid).toMatch(/^\\d{10,}$/);\n  34 |     return uhid;\n  35 |   }",
+          "attachments": [
+            {
+              "name": "screenshot",
+              "file": "TC_ADM_002/screenshot-2.png",
+              "contentType": "image/png"
+            },
+            {
+              "name": "video",
+              "file": "TC_ADM_002/video-2.webm",
+              "contentType": "video/webm"
+            },
+            {
+              "name": "error-context",
+              "file": "TC_ADM_002/error-context-2.md",
+              "contentType": "text/markdown"
+            },
+            {
+              "name": "trace",
+              "file": "TC_ADM_002/trace-2.zip",
+              "contentType": "application/zip"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
