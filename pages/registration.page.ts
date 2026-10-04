@@ -83,6 +83,43 @@ export class RegistrationPage extends BasePage {
     await expect(this.table).toBeVisible({ timeout: 30_000 });
   }
 
+  /**
+   * Widens the date filter to start `days` days back and reloads the grid, leaving at
+   * least one patient listed.
+   *
+   * "Show From" and "Show To" both open on today, so the grid arrives holding only the
+   * patients registered today - and before the front desk has registered anybody it is
+   * empty, pagination reading "0-0 of 0". Anything that reads a patient out of the grid
+   * has to widen the window first, or it is working on the luck of what the day brought
+   * in. A year is the default because this is a filter, not a sample: the window only has
+   * to be wide enough that an empty grid means an empty list rather than a quiet morning.
+   *
+   * "Show To" is left on today - the far end of the window is already as late as it goes.
+   */
+  async showLastDays(days = 365): Promise<void> {
+    const from = new Date();
+    from.setDate(from.getDate() - days);
+    await this.pickDate(
+      this.showFrom,
+      from.getFullYear(),
+      from.toLocaleString('en-US', { month: 'short' }),
+      from.getDate()
+    );
+
+    // Show is disabled until the range is changed and goes back to disabled once the grid
+    // has been fetched under it, so a click fired straight after the picker closes lands on
+    // a dead button - Blazor re-enables it a beat after the date is taken.
+    await expect(this.showButton).toBeEnabled({ timeout: 30_000 });
+    await this.showButton.click();
+
+    // The grid refetches on Show; settle before reading rows, as searchFor does.
+    await this.page.waitForTimeout(1_500);
+    await expect(
+      this.rows.first(),
+      `the registration list is empty over the last ${days} days`
+    ).toBeVisible({ timeout: 30_000 });
+  }
+
   /** Types `term` into the search box and waits for the grid to re-render. */
   async searchFor(term: string): Promise<void> {
     await this.search.fill(term);
@@ -330,37 +367,13 @@ export class CreatePatientPage extends BasePage {
   }
 
   /**
-   * Sets DOB through the MudDatePicker, which is the only way in: the input is readonly,
-   * and the Year/Month/Day boxes beside it are a read-out of the chosen date rather than a
-   * second entry point - typing an age into them leaves DOB empty.
-   *
-   * Three views, in the order the picker walks through them: year list, month grid, day
-   * cell. Picking the year advances to the month grid on its own, so there is no month
-   * header to click in between.
+   * Sets DOB through the MudDatePicker - see BasePage.pickDate for why the picker is the
+   * only way in. The Year/Month/Day boxes beside the field are no second entry point
+   * either: they are a read-out of the chosen date, and typing an age into them leaves
+   * DOB empty.
    */
   async setDob(year: number, month: string, day: number): Promise<void> {
-    await this.dob.click();
-    const picker = this.openPopover.last();
-
-    // MudBlazor scrolls the year list to the current year, never to a birth year.
-    await picker.locator('.mud-button-year').click();
-    const yearItem = picker.locator('.mud-picker-year').filter({ hasText: String(year) }).first();
-    await yearItem.scrollIntoViewIfNeeded();
-    await yearItem.click();
-
-    await picker.locator('.mud-picker-month').filter({ hasText: month }).first().click();
-
-    // The leading and trailing cells belong to the neighbouring months and carry mud-hidden.
-    // Anchored hasText rather than :text-is - the digits sit in a <p> inside the day button,
-    // so the text engine would match that <p> and not the button that has to be clicked.
-    await picker
-      .locator('.mud-picker-calendar-day:not(.mud-hidden)')
-      .filter({ hasText: new RegExp(`^${day}$`) })
-      .first()
-      .click();
-
-    await expect(this.openPopover).toHaveCount(0);
-    await expect(this.dob).not.toHaveValue('');
+    await this.pickDate(this.dob, year, month, day);
   }
 
   /**

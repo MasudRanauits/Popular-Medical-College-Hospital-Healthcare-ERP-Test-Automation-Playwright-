@@ -76,6 +76,41 @@ export abstract class BasePage {
     }
   }
 
+  /**
+   * Sets a MudBlazor date field by driving the picker `input` opens, which is the only way
+   * in: these inputs render readonly, so fill() has nothing to type into and times out.
+   *
+   * Three views, in the order the picker walks through them: year list, month grid, day
+   * cell. Picking the year advances to the month grid on its own, so there is no month
+   * header to click in between. `month` is the picker's own abbreviation, e.g. 'Apr'.
+   */
+  protected async pickDate(input: Locator, year: number, month: string, day: number): Promise<void> {
+    await input.click();
+    // Several popovers can be mounted at once - a date field inside a form sits below its
+    // own form's, so the one just opened is the last.
+    const picker = this.page.locator('.mud-popover-open').last();
+
+    // MudBlazor scrolls the year list to the current year, never to the one asked for.
+    await picker.locator('.mud-button-year').click();
+    const yearItem = picker.locator('.mud-picker-year').filter({ hasText: String(year) }).first();
+    await yearItem.scrollIntoViewIfNeeded();
+    await yearItem.click();
+
+    await picker.locator('.mud-picker-month').filter({ hasText: month }).first().click();
+
+    // The leading and trailing cells belong to the neighbouring months and carry mud-hidden.
+    // Anchored hasText rather than :text-is - the digits sit in a <p> inside the day button,
+    // so the text engine would match that <p> and not the button that has to be clicked.
+    await picker
+      .locator('.mud-picker-calendar-day:not(.mud-hidden)')
+      .filter({ hasText: new RegExp(`^${day}$`) })
+      .first()
+      .click();
+
+    await expect(this.page.locator('.mud-popover-open')).toHaveCount(0);
+    await expect(input).not.toHaveValue('');
+  }
+
   /** Resolves to `tag` once `locator` is visible, or to the fallback if it never is. */
   private async visible<T, F>(locator: Locator, tag: T, timeout = 30_000, fallback?: F) {
     return locator

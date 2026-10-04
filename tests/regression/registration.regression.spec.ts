@@ -78,8 +78,10 @@ test.describe('Registration @regression', () => {
     await expect(headers).toHaveCount(RegistrationPage.COLUMNS.length);
     await expect(headers).toHaveText(RegistrationPage.COLUMNS);
 
-    // The ward always has at least one registration; an empty grid means the fetch failed.
-    await expect(registrationPage.rows.first()).toBeVisible();
+    // Over a year the hospital always registers somebody, so an empty grid here means the
+    // fetch failed. Today alone proves nothing: the grid opens filtered to today and the
+    // front desk may not have registered anyone yet - see RegistrationPage.showLastDays.
+    await registrationPage.showLastDays();
   });
 
 

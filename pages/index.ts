@@ -7,3 +7,12 @@ export { AdmissionDashboardPage } from './admission-dashboard.page';
 export type { PrintedDocument } from './admission-dashboard.page';
 export { NurseStationPage } from './nurse-station.page';
 export type { WardPatient, IndentPatient, IndentLine, VerifiedIndent } from './nurse-station.page';
+export { DietIndentPage } from './diet-indent.page';
+export type {
+  DietWardPatient,
+  DietPatient,
+  DietLine,
+  DietIndentRow,
+  DietAttempt,
+  PatternPick,
+} from './diet-indent.page';

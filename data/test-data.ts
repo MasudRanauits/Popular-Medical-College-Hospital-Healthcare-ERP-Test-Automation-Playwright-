@@ -167,3 +167,65 @@ export function medicineIndent(lines = 10): MedicineIndentData {
     quantities: Array.from({ length: lines }, () => randomInt(1, 10)),
   };
 }
+
+/** One diet indent's worth of input. */
+export interface DietIndentData {
+  outlet: string;
+  priority: string;
+  /**
+   * What goes into the Food Pattern Group lookup. One term rather than one per line: the
+   * catalogue is live, and a term that matches a whole page of patterns lets an indent
+   * take a different one per line without several searches that each have to hit
+   * something. A single letter is used because pattern names are phrases - "Normal,
+   * DM", "Renal Semi-solid" - with no shared word to search on.
+   */
+  patternSearch: string;
+  /**
+   * What goes in the line's Remarks box, and the only thing a case can recognise its own
+   * indent by once it reaches Verify Indent.
+   *
+   * That tab has no search box - Medicine Indent's has one, this one does not - so the
+   * grid is read whole and filtered on this. It has to be unique per indent, not per run:
+   * several cases here save, and two of them turn on counting how many indents carry the
+   * mark.
+   */
+  mark: string;
+  /**
+   * How far down the ward list to start looking for a patient.
+   *
+   * The cases are spread across the ward rather than all indenting for whoever is in the
+   * first bed. A patient who already has a food pattern on order cannot be given it again,
+   * so a case that saves leaves that patient one pattern poorer - and a suite that always
+   * took the first bed would, run after run, work its way through that one patient's
+   * choices and then be unable to build an indent at all. Spread this way, each run and
+   * each case within it starts from a different bed.
+   */
+  wardIndex: number;
+  /** One quantity per line, so the indent's length is however long this is. */
+  quantities: number[];
+}
+
+/**
+ * A diet indent of `lines` food patterns.
+ *
+ * The quantities are random inside 1..9 for the same reason the medicine factory's are:
+ * a ward orders what it needs. They are carried here so a case can show what it typed,
+ * not because the form keeps them - Diet Indent records every line as 1 whatever is sent,
+ * which DI-06 covers.
+ *
+ * The mark carries the run number and a tail of the clock. The run number alone would
+ * repeat if playwright/.run-counters.json were deleted, and a mark that repeats would make
+ * one run's indent look like a duplicate of another's to the cases that count them.
+ */
+export function dietIndent(lines = 1): DietIndentData {
+  const n = nextRunNumber('diet-indent');
+  return {
+    outlet: 'Main Outlet',
+    priority: ['Routine', 'Emergency', 'Others'][n % 3],
+    patternSearch: 'a',
+    // Kept well inside the ward list, which runs to a few hundred beds.
+    wardIndex: n % 24,
+    mark: `DT-${n}-${uniqueSuffix().slice(-7)}`,
+    quantities: Array.from({ length: lines }, () => randomInt(1, 9)),
+  };
+}

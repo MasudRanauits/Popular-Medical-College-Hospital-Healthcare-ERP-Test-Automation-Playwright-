@@ -1,4 +1,5 @@
 import { test, expect } from '../../fixtures';
+import type { RegistrationPage } from '../../pages';
 import { primaryUser } from '../../data/users';
 import { admissionData, medicineIndent, registrationPatient } from '../../data/test-data';
 
@@ -20,18 +21,28 @@ import { admissionData, medicineIndent, registrationPatient } from '../../data/t
  * ward that will treat them.
  */
 test.describe('Admission @regression', () => {
-  /** UHID of the most recently registered patient, taken from the registration grid. */
-  async function newestUhid(registrationPage: {
-    goto: () => Promise<void>;
-    expectLoaded: () => Promise<void>;
-    rows: import('@playwright/test').Locator;
-  }): Promise<string> {
+  /**
+   * Name and UHID of the first patient on the registration list.
+   *
+   * The list opens filtered to today and is empty until the front desk registers somebody,
+   * so the window is widened to a year first - see RegistrationPage.showLastDays. Both
+   * cells are read off the same row in one go, so the name and the UHID cannot come from
+   * two different patients if the grid re-renders in between.
+   */
+  async function listedPatient(
+    registrationPage: RegistrationPage
+  ): Promise<{ uhid: string; name: string }> {
     await registrationPage.goto();
     await registrationPage.expectLoaded();
-    // NAME, UHID, REG DATE, PHONE NUMBER, DOB, ACTION - UHID is the second column.
-    const uhid = (await registrationPage.rows.first().locator('td').nth(1).innerText()).trim();
-    expect(uhid).toMatch(/^\d{10,}$/);
-    return uhid;
+    await registrationPage.showLastDays();
+
+    // NAME, UHID, REG DATE, PHONE NUMBER, DOB, ACTION - name first, UHID second.
+    const cells = await registrationPage.rows.first().locator('td').allInnerTexts();
+    // Normalised, because the grid cell wraps the name and the wizard's field does not.
+    const name = cells[0].replace(/\s+/g, ' ').trim();
+    const uhid = cells[1].trim();
+    expect(uhid, `UHID of the patient listed as "${name}"`).toMatch(/^\d{10,}$/);
+    return { uhid, name };
   }
 
   test('TC_ADM_001 New Admission opens from the Hospital module menu', async ({
@@ -53,11 +64,7 @@ test.describe('Admission @regression', () => {
     registrationPage,
     admissionPage,
   }) => {
-    const uhid = await newestUhid(registrationPage);
-    // Normalised, because the grid cell wraps the name and the dashboard row does not.
-    const name = (await registrationPage.rows.first().locator('td').first().innerText())
-      .replace(/\s+/g, ' ')
-      .trim();
+    const { uhid, name } = await listedPatient(registrationPage);
 
     await admissionPage.goto();
     await admissionPage.expectLoaded();
