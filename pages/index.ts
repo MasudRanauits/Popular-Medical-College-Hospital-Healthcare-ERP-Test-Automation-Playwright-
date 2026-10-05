@@ -28,3 +28,13 @@ export type {
   LineAttempt,
   LineInput,
 } from './consultancy-service.page';
+export { IpdServiceEntryPage } from './ipd-service-entry.page';
+export type {
+  IpdWardPatient,
+  IpdPatient,
+  IpdServiceOption,
+  IpdCartLine,
+  IpdBilledLine,
+  IpdLineAttempt,
+  IpdLineInput,
+} from './ipd-service-entry.page';

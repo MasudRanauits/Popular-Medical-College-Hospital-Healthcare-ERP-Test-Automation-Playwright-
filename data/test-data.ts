@@ -323,3 +323,76 @@ export function consultancyService(lines = 2): ConsultancyServiceData {
     discount: 40,
   };
 }
+
+/** One IPD Service Entry line's worth of input for the Nurse Station. */
+export interface IpdServiceEntryData {
+  /**
+   * How far down the ward list to start looking for a patient.
+   *
+   * The cases are spread across the ward rather than all working on whoever is in the first
+   * bed, for the same reason the consultancy factory spreads its own: these are live
+   * admissions. Nothing here saves, so no bill is moved either way - but reading a
+   * different bed per run is what keeps a case from passing on one patient's data forever.
+   */
+  wardIndex: number;
+  /**
+   * What goes into the Service lookup. One term rather than one per line: the catalogue is
+   * live, and a term that matches a page of services lets a case take a different one per
+   * line without several searches that each have to hit something.
+   */
+  serviceSearch: string;
+  /** A second term, for the cases that need a service the first one does not offer. */
+  otherServiceSearch: string;
+  /** A term no service can match, for the empty-result case. */
+  noSuchTerm: string;
+  /**
+   * What goes in the line's Remarks box - the only thing on this tab that a case can
+   * recognise its own line by, the cart carrying no identifier of its own.
+   *
+   * Unique per run rather than fixed, so two runs' lines cannot be mistaken for each other
+   * in a cart that outlives both the patient and the tab.
+   */
+  mark: string;
+  /** A code typed into the Code box, for the case about what that box is for. */
+  code: string;
+  /** One quantity per line, so a case's cart is however long this is. */
+  quantities: number[];
+  /** A back-dated Service Date, as the box takes it: YYYY-MM-DD HH:mm. */
+  backdated: string;
+  /** A sane service window - start before end, both earlier today. */
+  window: { start: string; end: string };
+  /** The same window with its ends swapped, which the tab should refuse. */
+  reversed: { start: string; end: string };
+  /** What the Service Change box is set to, for the case about the discount. */
+  discount: number;
+}
+
+/**
+ * One run's worth of IPD Service Entry input, all relative to the day of the run.
+ *
+ * The quantities stay inside 1..3 the way the consultancy factory's do. Nothing in the
+ * suite saves - see the spec's file header - but a cart left on screen is still something
+ * a nurse could press Save on, and a line reading "50" would be a worse thing to leave
+ * behind than one reading "1".
+ *
+ * Zero is excluded deliberately: the form refuses it, and that refusal is its own case
+ * rather than something the data should stumble into.
+ */
+export function ipdServiceEntry(lines = 2): IpdServiceEntryData {
+  const n = nextRunNumber('ipd-service');
+  const today = daysAgo(0);
+  return {
+    // Kept well inside the ward list, which runs to a few hundred beds.
+    wardIndex: n % 24,
+    serviceSearch: 'Visit',
+    otherServiceSearch: 'Charge',
+    noSuchTerm: `no-such-service-${uniqueSuffix()}`,
+    mark: `IS-${n}-${uniqueSuffix().slice(-7)}`,
+    code: `IS-CODE-${n}`,
+    quantities: Array.from({ length: lines }, () => randomInt(1, 3)),
+    backdated: `${daysAgo(3)} 10:00`,
+    window: { start: `${today} 09:00`, end: `${today} 11:00` },
+    reversed: { start: `${today} 18:00`, end: `${today} 08:00` },
+    discount: 25,
+  };
+}

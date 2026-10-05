@@ -54,7 +54,7 @@ Two deliverables live in [docs/](docs/), each its own file:
 
 | Document | What it is |
 | --- | --- |
-| [docs/TEST_CASES.pdf](docs/TEST_CASES.pdf) | All 35 test cases in one PDF — steps, data, expected result, priority and last-run status per case |
+| [docs/TEST_CASES.pdf](docs/TEST_CASES.pdf) | All 137 test cases in one PDF — steps, data, expected result, priority and last-run status per case |
 | [docs/BUG_REPORT.pdf](docs/BUG_REPORT.pdf) | The defects raised from the last cycle, with screenshots, videos and traces |
 
 ```bash

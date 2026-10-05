@@ -10,6 +10,7 @@ import {
   DietIndentPage,
   DietDashboardPage,
   ConsultancyServicePage,
+  IpdServiceEntryPage,
 } from '../pages';
 
 /**
@@ -28,6 +29,7 @@ type Pages = {
   dietIndentPage: DietIndentPage;
   dietDashboardPage: DietDashboardPage;
   consultancyServicePage: ConsultancyServicePage;
+  ipdServiceEntryPage: IpdServiceEntryPage;
 };
 
 export const test = base.extend<Pages>({
@@ -60,6 +62,9 @@ export const test = base.extend<Pages>({
   },
   consultancyServicePage: async ({ page }, use) => {
     await use(new ConsultancyServicePage(page));
+  },
+  ipdServiceEntryPage: async ({ page }, use) => {
+    await use(new IpdServiceEntryPage(page));
   },
 });
 

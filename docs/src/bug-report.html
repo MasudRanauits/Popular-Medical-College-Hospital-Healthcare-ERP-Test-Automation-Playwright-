@@ -41,11 +41,12 @@
         </tr>
         <tr>
           <th>Version</th>
-          <td>2.0</td>
+          <td>2.1</td>
         </tr>
         <tr>
           <th>Date raised</th>
-          <td>03 October 2026 (BUG-001 … BUG-008), 05 October 2026 (BUG-009 … BUG-023)</td>
+          <td>03 October 2026 (BUG-001 … BUG-008), 05 October 2026 (BUG-009 … BUG-023),
+            06 October 2026 (BUG-024 … BUG-037)</td>
         </tr>
         <tr>
           <th>Raised by</th>
@@ -57,12 +58,16 @@
             Full regression run of <strong>05 Oct 2026, 15:28 UTC</strong> — 99 tests in
             33 m 33 s: 94 expected (78 passed and 16 expected-to-fail), 2 failed, 3 skipped.
             Supersedes the run of 03 Oct 2026, 08:04 UTC, which covered 24 of these cases.
+            <strong>BUG-024 … BUG-037</strong> come from the IPD Service Entry run of
+            <strong>06 Oct 2026</strong> — 27 cases, 13 passed and 14 expected-to-fail, no
+            unexpected failures and no skips. That suite is new and was not part of the 05 Oct
+            cycle; the other suites are unchanged.
           </td>
         </tr>
         <tr>
           <th>Companion document</th>
           <td>
-            <span class="mono">docs/TEST_CASES.pdf</span> — the 110 cases these defects were
+            <span class="mono">docs/TEST_CASES.pdf</span> — the 137 cases these defects were
             found against. Each defect below names the case that holds it.
           </td>
         </tr>
@@ -353,6 +358,118 @@
           <td>P1</td>
           <td><span class="badge warn">held by a case</span> DD-16, DD-17</td>
         </tr>
+        <tr>
+          <td class="mono"><strong>BUG-024</strong></td>
+          <td>Picking another patient does not empty the cart, so one patient's services are billed to the next</td>
+          <td>IPD Service Entry</td>
+          <td>Critical</td>
+          <td>P1</td>
+          <td><span class="badge warn">held by a case</span> IS-13</td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-025</strong></td>
+          <td>Leaving the tab and coming back clears the patient but keeps the cart</td>
+          <td>IPD Service Entry</td>
+          <td>High</td>
+          <td>P1</td>
+          <td><span class="badge warn">held by a case</span> IS-14</td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-026</strong></td>
+          <td>The Rate box is editable, and the rate a nurse types is the rate the line carries</td>
+          <td>IPD Service Entry</td>
+          <td>High</td>
+          <td>P1</td>
+          <td><span class="badge warn">held by a case</span> IS-15</td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-027</strong></td>
+          <td>A service saved against an admission cannot be cancelled, corrected or removed from the tab at all</td>
+          <td>IPD Service Entry</td>
+          <td>High</td>
+          <td>P1</td>
+          <td><span class="badge warn">held by a case</span> IS-24</td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-028</strong></td>
+          <td>The bill grid stops at fifteen rows, with no pager, no total and nothing saying so</td>
+          <td>IPD Service Entry</td>
+          <td>Medium</td>
+          <td>P2</td>
+          <td><span class="badge warn">held by a case</span> IS-23</td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-029</strong></td>
+          <td>Committing a line resets the Service Date, so a service cannot be entered as having happened earlier</td>
+          <td>IPD Service Entry</td>
+          <td>Medium</td>
+          <td>P2</td>
+          <td><span class="badge warn">held by a case</span> IS-17</td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-030</strong></td>
+          <td>Service Change is read by nothing, and the commit wipes the box as well</td>
+          <td>IPD Service Entry</td>
+          <td>Medium</td>
+          <td>P2</td>
+          <td><span class="badge warn">held by a case</span> IS-16</td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-031</strong></td>
+          <td>An End Date Time earlier than the Start Date Time is taken without a word</td>
+          <td>IPD Service Entry</td>
+          <td>Medium</td>
+          <td>P2</td>
+          <td><span class="badge warn">held by a case</span> IS-20</td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-032</strong></td>
+          <td>Start and End Date Time survive the commit, so the next line inherits the last one's window</td>
+          <td>IPD Service Entry</td>
+          <td>Medium</td>
+          <td>P3</td>
+          <td><span class="badge warn">held by a case</span> IS-21</td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-033</strong></td>
+          <td>The Code box is never filled by the Service lookup and takes any free text</td>
+          <td>IPD Service Entry</td>
+          <td>Medium</td>
+          <td>P3</td>
+          <td><span class="badge warn">held by a case</span> IS-19</td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-034</strong></td>
+          <td>The cart grid has a Schedule column and the tab has no Schedule control</td>
+          <td>IPD Service Entry</td>
+          <td>Low</td>
+          <td>P3</td>
+          <td><span class="badge warn">held by a case</span> IS-18</td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-035</strong></td>
+          <td>A line with no service picked is refused in silence</td>
+          <td>IPD Service Entry</td>
+          <td>Medium</td>
+          <td>P2</td>
+          <td><span class="badge warn">held by a case</span> IS-07</td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-036</strong></td>
+          <td>A Service lookup search that matches nothing shows a blank row rather than saying so</td>
+          <td>IPD Service Entry</td>
+          <td>Low</td>
+          <td>P3</td>
+          <td><span class="badge warn">held by a case</span> IS-22</td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-037</strong></td>
+          <td>The bill grid heads its end-of-window column "End End"</td>
+          <td>IPD Service Entry</td>
+          <td>Low</td>
+          <td>P3</td>
+          <td><span class="badge warn">held by a case</span> IS-26</td>
+        </tr>
       </tbody>
     </table>
     <p class="note">
@@ -367,6 +484,15 @@
       two cycles and had not been covered before. Fifteen of the sixteen cases marked
       <span class="mono">test.fail()</span> were written against behaviour found while building
       those suites; BUG-018 is the one genuinely new failure the 05 Oct run turned up.
+      BUG-024 … BUG-037 are the same story one tab further along: IPD Service Entry was
+      automated on 06 Oct and all fourteen were found while building that suite.
+    </p>
+    <p class="note">
+      <strong>Four pairs, not fourteen new defects.</strong> BUG-024 / BUG-009,
+      BUG-026 / BUG-011, BUG-030 / BUG-013 and BUG-036 / BUG-015 are the same behaviour on two
+      tabs that share a route, a ward list and a cart-then-bill shape. They are filed separately
+      because they are separate screens needing separate fixes, but a single shared component is
+      the likeliest cause and one change may close both halves of each pair.
     </p>
 
     <h2 class="defects-break">5a. Defect detail — Registration, Admission, Platform</h2>
@@ -2117,6 +2243,883 @@ Timeout:  15000ms
       </ol>
     </section>
 
+    <h2 class="defects-break">5d. Defect detail — Nurse Station &gt; IPD Service Entry</h2>
+    <p class="note">
+      All fourteen were found while automating the tab for the 06 Oct cycle. Each is held by a
+      regression case marked <span class="mono">test.fail()</span>: the case asserts the
+      behaviour the tab is supposed to have, fails on every run, and will report as
+      <em>unexpectedly passing</em> the day the module is corrected. The route is
+      <span class="mono">/hospital/nurse-station</span> &gt; <strong>IPD Service Entry</strong>
+      throughout, and the spec is
+      <span class="mono">tests/regression/ipd-service-entry.regression.spec.ts</span>.
+    </p>
+    <p class="note">
+      <strong>No evidence folder, and the reason is BUG-027.</strong> Several of these would be
+      best shown with a saved bill to point at. The tab offers no way to take a saved service
+      off again, so no case in the suite presses Save against a cart with anything in it — see
+      BUG-027 — and the evidence here is therefore the cart, the form and the grid headers
+      rather than a charge made and undone. Every figure quoted below was read off the live
+      ward on 06 Oct 2026.
+    </p>
+    <p class="note">
+      <strong>Four of these are the Consultancy Service defects again.</strong> BUG-024 is
+      BUG-009, BUG-026 is BUG-011, BUG-030 is BUG-013 and BUG-036 is BUG-015 — the same
+      behaviour on a second tab that shares the route, the ward list and the cart-then-bill
+      shape. They are filed separately because they are separate screens and will need separate
+      fixes, but whoever picks one up should look at both: a single shared component is the
+      likeliest cause, and fixing it once may close two.
+    </p>
+
+    <!-- ------------------------------------------------------------ BUG-024 -->
+    <section class="bug">
+      <h3><span class="mono">BUG-024</span> — Picking another patient does not empty the cart, so one patient's services are billed to the next</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Nurse Station &gt; IPD Service Entry</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>Critical / P1</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge fail">open</span> — the worst of the fourteen on this tab</td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td><span class="mono">IS-13</span> — <span class="mono">ipd-service-entry.regression.spec.ts:551</span></td>
+          </tr>
+          <tr>
+            <th>Reproducibility</th>
+            <td>Deterministic — every run, every pair of beds.</td>
+          </tr>
+          <tr>
+            <th>Related</th>
+            <td>BUG-009, the same defect on Consultancy Service; BUG-025, the same cart on a different trigger</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Open Nurse Station &gt; IPD Service Entry.</li>
+        <li>Click the patient in bed <strong>A</strong> in the ward list.</li>
+        <li>Enter one service — pick a service, type a quantity, press <strong>Enter</strong> on Qty. The line lands in the cart and Total Amount shows its value.</li>
+        <li>Without pressing Save, click the patient in bed <strong>B</strong>.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>
+        Picking a patient starts that patient's bill. The cart is emptied and Total Amount
+        returns to zero, because nothing in it belongs to the patient now on screen.
+      </p>
+
+      <h4>Actual result</h4>
+      <p>
+        The patient panel moves to B — Inv.No, Name, Gender, Age, Assigned Doctor and CabinNo
+        all change — and the cart does not. A's services are still listed, and A's money is
+        still in Total Amount, under B's name.
+        <strong>Press Save from here and B is billed for A's services.</strong> Nothing on
+        screen marks the lines as belonging to someone else, and the only cue that anything is
+        wrong is that the nurse remembers entering them for the previous bed.
+      </p>
+
+      <h4>Impact</h4>
+      <p>
+        One mis-click in a ward list produces a wrong charge against a real patient, silently.
+        It is also the easiest mistake on the tab to make: the ward list and the entry row are
+        on the same screen, and moving down the beds is the normal way to work. And on this tab
+        the mistake is not recoverable from the screen that made it — see BUG-027.
+      </p>
+
+      <h4>Suggested fix</h4>
+      <p>
+        Clear the cart, Total Amount and the Service Change box whenever the selected admission
+        changes — the same reset the save already performs. If carrying lines over is ever
+        wanted, it must be an explicit choice with the patient named in the prompt, not the
+        default.
+      </p>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-025 -->
+    <section class="bug">
+      <h3><span class="mono">BUG-025</span> — Leaving the tab and coming back clears the patient but keeps the cart</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Nurse Station &gt; IPD Service Entry</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>High / P1</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge fail">open</span></td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td><span class="mono">IS-14</span> — <span class="mono">ipd-service-entry.regression.spec.ts:614</span></td>
+          </tr>
+          <tr>
+            <th>Related</th>
+            <td>BUG-024 — the same cart, not cleared on a different trigger; BUG-010 on Consultancy Service</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Pick a patient and enter one service into the cart.</li>
+        <li>Click away to <strong>Medicine Indent</strong>.</li>
+        <li>Click back to <strong>IPD Service Entry</strong> and wait for the pane to settle.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>A cart with no patient against it should not exist. Either both survive the round trip, or neither does.</p>
+
+      <h4>Actual result</h4>
+      <p>
+        The round trip <em>does</em> reset the patient panel — Inv.No goes back to
+        <span class="mono">0</span>, which is the half the tab gets right — and leaves the cart
+        holding its lines, with a figure under them in Total Amount, against nobody at all. The
+        next nurse to pick a patient inherits them, which is BUG-024 by another route.
+      </p>
+
+      <h4>Note for whoever fixes it</h4>
+      <p>
+        Returning to the tab repaints the grid empty for about a second before refilling it, so
+        a quick look can suggest the cart was cleared when it was not. The regression case waits
+        for the pane to settle before reading it, for exactly that reason.
+      </p>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-026 -->
+    <section class="bug">
+      <h3><span class="mono">BUG-026</span> — The Rate box is editable, and the rate a nurse types is the rate the line carries</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Nurse Station &gt; IPD Service Entry</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>High / P1</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge fail">open</span></td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td><span class="mono">IS-15</span> — <span class="mono">ipd-service-entry.regression.spec.ts:661</span></td>
+          </tr>
+          <tr>
+            <th>Related</th>
+            <td>BUG-011 / BUG-014, the same defect on Consultancy Service</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Pick a patient, then pick a service the catalogue prices above zero — <span class="mono">ICU Visit</span> at 1000 on 06 Oct.</li>
+        <li>The Rate box fills with 1000, as it should.</li>
+        <li>Type <span class="mono">1</span> over it, set Qty to 2, press <strong>Enter</strong>.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>
+        The rate belongs to the catalogue. A ward nurse entering a service is not the person who
+        prices it, so the box should be read-only here and the line should carry 1000.
+      </p>
+
+      <h4>Actual result</h4>
+      <p>
+        The line goes into the cart at a rate of 1, and the amount follows it: 1 × 2 = 2 against
+        a catalogue price of 1000 × 2 = 2000. Total Amount agrees with the typed figure. Nothing
+        on screen shows what the catalogue said.
+      </p>
+
+      <h4>Impact</h4>
+      <p>
+        Under-charging and over-charging are equally available, from a keyboard, with no second
+        pair of eyes and no record of the original price. Combined with BUG-027 — a saved
+        service cannot be corrected from this tab — a typo here is a billing error that has to
+        be unpicked in Accounts.
+      </p>
+
+      <h4>Suggested fix</h4>
+      <p>
+        Make Rate read-only on this tab. If a price override is a real requirement, it belongs
+        behind a permission, with the catalogue rate still shown beside it and the override
+        recorded in the change log.
+      </p>
+
+      <h4>Note</h4>
+      <p>
+        The regression case types the rate <em>down</em> to 1 rather than up, and never saves,
+        so running the suite cannot leave a larger charge on screen than the ward meant to make.
+      </p>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-027 -->
+    <section class="bug">
+      <h3><span class="mono">BUG-027</span> — A service saved against an admission cannot be cancelled, corrected or removed from the tab at all</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Nurse Station &gt; IPD Service Entry</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>High / P1</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge fail">open</span> — also the reason this tab has no automated coverage of its own Save</td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td><span class="mono">IS-24</span> — <span class="mono">ipd-service-entry.regression.spec.ts:1060</span></td>
+          </tr>
+          <tr>
+            <th>Related</th>
+            <td>BUG-024, BUG-026, BUG-029 — every mistake this tab makes easy is a mistake this defect makes permanent</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Pick any patient who has been charged something.</li>
+        <li>Look at the lower grid — the services already saved against the admission.</li>
+        <li>Look for a bin, an edit, a cancel or a checkbox on any row.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>
+        A service charged to the wrong patient, at the wrong rate or in the wrong quantity can
+        be taken off — the way Consultancy Service allows, through a bin on each bill row that
+        opens a cancel-with-reason dialog and writes the cancellation to IPD Bill Change
+        History.
+      </p>
+
+      <h4>Actual result</h4>
+      <p>
+        The bill grid renders nine cells per row and no control of any kind: no button, no link,
+        no checkbox. The cart grid immediately above it <em>does</em> put a bin on every row, so
+        this is not a grid library that cannot render one — the tab simply does not. A service
+        saved here is permanent as far as this screen is concerned, and the same admission's
+        consultancies, one tab along, can be cancelled in two clicks.
+      </p>
+
+      <h4>Impact</h4>
+      <p>
+        Every other defect on this tab gets worse because of this one. BUG-024 bills the wrong
+        patient, BUG-026 bills the wrong amount and BUG-029 bills it on the wrong day — and
+        none of the three can be put right from the screen that made them. It is also why the
+        regression suite stops at the cart: a case that pressed Save would make a permanent
+        change to a real patient's bill with no way to undo it, which no amount of care in the
+        test makes acceptable. The tab's Save, its OTName picker and its Print All button are
+        therefore uncovered, and listed as such under Known coverage gaps.
+      </p>
+
+      <h4>Suggested fix</h4>
+      <p>
+        Put the Consultancy Service cancel flow on this grid — the same bin, the same
+        reason-with-chips dialog, the same write to IPD Bill Change History. It exists, it is
+        one tab away, and it is the thing that would let this tab be regression-tested at all.
+      </p>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-028 -->
+    <section class="bug">
+      <h3><span class="mono">BUG-028</span> — The bill grid stops at fifteen rows, with no pager, no total and nothing saying so</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Nurse Station &gt; IPD Service Entry</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>Medium / P2</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge fail">open</span></td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td><span class="mono">IS-23</span> — <span class="mono">ipd-service-entry.regression.spec.ts:1008</span></td>
+          </tr>
+          <tr>
+            <th>Related</th>
+            <td>BUG-016, the same cap on Consultancy Service — which is the same admission's bill read through a different tab</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Walk down the ward list, picking each patient in turn.</li>
+        <li>Count the rows in the lower grid for each.</li>
+        <li>Look anywhere on the tab for a pager, a page-size box, a row total or a "show more".</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>The bill lists every service charged, or says plainly that it is showing only part of it.</p>
+
+      <h4>Actual result</h4>
+      <p>
+        The list stops at exactly fifteen and says nothing. Long-stay beds sit on that number
+        and nothing goes above it — on 06 Oct, S.Care-06 and S.Care-63 were both on exactly 15,
+        and an eighteen-bed walk never found a sixteenth row anywhere. There is no pager, no
+        page-size box and no total on the tab.
+      </p>
+
+      <h4>Impact</h4>
+      <p>
+        A sixteenth service is charged and then cannot be seen on this tab — and because the
+        row carries no control either (BUG-027), it cannot be reached from here by any route at
+        all. The ward has no way to check what a long-stay patient has actually been billed.
+      </p>
+
+      <h4>Suggested fix</h4>
+      <p>
+        Page the grid, or at the very least print the full count above it so the nurse knows
+        the list is partial.
+      </p>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-029 -->
+    <section class="bug">
+      <h3><span class="mono">BUG-029</span> — Committing a line resets the Service Date, so a service cannot be entered as having happened earlier</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Nurse Station &gt; IPD Service Entry</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>Medium / P2</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge fail">open</span></td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td><span class="mono">IS-17</span> — <span class="mono">ipd-service-entry.regression.spec.ts:747</span></td>
+          </tr>
+          <tr>
+            <th>Related</th>
+            <td>BUG-012, the same defect on Consultancy Service — where the box holds a date alone rather than a date and a time</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Pick a patient and a service.</li>
+        <li>Set <strong>Service Date</strong> three days back — the box takes a date and a time, e.g. <span class="mono">2026-10-03 10:00</span>.</li>
+        <li>Check it is still there: it is, right up to the keystroke.</li>
+        <li>Press <strong>Enter</strong> on Qty and watch the box for a second or two.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>A service performed three days ago can be entered as three days ago. The date survives the commit.</p>
+
+      <h4>Actual result</h4>
+      <p>
+        The box silently resets to the moment of the commit. The reset arrives a render after
+        the row lands, so it is easy to miss: the date that was typed is still on screen when
+        the line appears, and is gone a second later. A late entry is therefore recorded as
+        having happened now.
+      </p>
+
+      <h4>Impact</h4>
+      <p>
+        Ward entry is routinely done after the fact — a night-shift service entered in the
+        morning is normal. Every such entry carries the wrong date, and the bill's
+        <span class="mono">S.Date</span> column is the only record of when the service happened.
+      </p>
+
+      <h4>Note for whoever fixes it</h4>
+      <p>
+        The hidden input behind this box posts two different formats depending on who last set
+        it — <span class="mono">2026-10-06 16:23</span> when the app fills it, and
+        <span class="mono">2026-10-03T10:00:00</span> once a nurse has typed into it. That is
+        worth tidying with the same change; it is also what made the regression case fail on the
+        format before it failed on the defect.
+      </p>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-030 -->
+    <section class="bug">
+      <h3><span class="mono">BUG-030</span> — Service Change is read by nothing, and the commit wipes the box as well</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Nurse Station &gt; IPD Service Entry</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>Medium / P2</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge fail">open</span></td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td><span class="mono">IS-16</span> — <span class="mono">ipd-service-entry.regression.spec.ts:700</span></td>
+          </tr>
+          <tr>
+            <th>Related</th>
+            <td>BUG-013, the same box ignored on Consultancy Service — where it at least keeps what was typed</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Pick a service costing more than the discount — e.g. one at 1000.</li>
+        <li>Type <span class="mono">25</span> into <strong>Service Change</strong>, the box under Total Amount.</li>
+        <li>Press <strong>Enter</strong> on Qty, then look at the cart row, at Total Amount and at the box itself.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>
+        The discount reaches the line's Service Change cell and comes off the amount, and the
+        box keeps what was typed.
+      </p>
+
+      <h4>Actual result</h4>
+      <p>
+        Nothing reads it. The cart's Service Change cell stays <span class="mono">0</span>, the
+        amount is undiscounted, Total Amount agrees with the undiscounted amount — and the
+        commit <em>also resets the box to 0</em>. So a nurse who looks back at it sees a zero
+        and may reasonably conclude the discount did not take and type it again.
+      </p>
+
+      <h4>Impact</h4>
+      <p>
+        The form offers a discount the system does not apply. The cart has a Service Change
+        column for it and the bill a Discount column, and both stay at zero. This is the same
+        defect as BUG-013 one tab along, made slightly worse by the box being wiped.
+      </p>
+
+      <h4>Suggested fix</h4>
+      <p>
+        Either wire the discount through to the amount, or take the box and both grid columns
+        off the tab. A control that silently does nothing is worse than no control.
+      </p>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-031 -->
+    <section class="bug">
+      <h3><span class="mono">BUG-031</span> — An End Date Time earlier than the Start Date Time is taken without a word</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Nurse Station &gt; IPD Service Entry</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>Medium / P2</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge fail">open</span></td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td><span class="mono">IS-20</span> — <span class="mono">ipd-service-entry.regression.spec.ts:897</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Pick a patient and a service.</li>
+        <li>Set <strong>Start Date Time</strong> to today 18:00 and <strong>End Date Time</strong> to today 08:00.</li>
+        <li>Press <strong>Enter</strong> on Qty.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>
+        A window whose end precedes its start is not a service window. The line is refused and
+        the nurse is told which box is wrong.
+      </p>
+
+      <h4>Actual result</h4>
+      <p>
+        Taken in silence. The row lands in the cart reading
+        <span class="mono">10/6/2026 6:00:00 PM</span> →
+        <span class="mono">10/6/2026 8:00:00 AM</span>, and any duration computed from it is
+        negative. Neither box objects, and the commit says nothing.
+      </p>
+
+      <h4>Impact</h4>
+      <p>
+        Hourly and per-session services are priced off a duration. A reversed window is either a
+        typo that nobody is told about or, if anything downstream multiplies by it, a charge of
+        the wrong sign.
+      </p>
+
+      <h4>Suggested fix</h4>
+      <p>
+        Refuse the commit with a worded message, the way the quantity guard already does
+        (<span class="mono">Please input correct Qty.</span>), and mark the offending box.
+      </p>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-032 -->
+    <section class="bug">
+      <h3><span class="mono">BUG-032</span> — Start and End Date Time survive the commit, so the next line inherits the last one's window</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Nurse Station &gt; IPD Service Entry</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>Medium / P3</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge fail">open</span></td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td><span class="mono">IS-21</span> — <span class="mono">ipd-service-entry.regression.spec.ts:939</span></td>
+          </tr>
+          <tr>
+            <th>Related</th>
+            <td>BUG-029 — the third date box on the same row is reset when these two are not</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Enter a line with a Start Date Time and an End Date Time.</li>
+        <li>Press <strong>Enter</strong> on Qty.</li>
+        <li>Look at the entry row.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>
+        The commit clears the whole entry row, the two date boxes included — as it already does
+        for the service, the remarks, the rate and the quantity.
+      </p>
+
+      <h4>Actual result</h4>
+      <p>
+        Everything else is cleared and these two are not. The next service entered for this
+        patient silently carries the window of the one before it unless the nurse notices and
+        empties both boxes by hand.
+      </p>
+
+      <h4>Impact</h4>
+      <p>
+        A ward entering several services in a row will attach the first one's window to all of
+        them. Taken together with BUG-029 — the Service Date reset that the nurse did not ask
+        for — the tab clears the one date that should persist and keeps the two that should not.
+      </p>
+
+      <h4>Suggested fix</h4>
+      <p>Clear both boxes with the rest of the line, and settle BUG-029 the same way round.</p>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-033 -->
+    <section class="bug">
+      <h3><span class="mono">BUG-033</span> — The Code box is never filled by the Service lookup and takes any free text</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Nurse Station &gt; IPD Service Entry</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>Medium / P3</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge fail">open</span></td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td><span class="mono">IS-19</span> — <span class="mono">ipd-service-entry.regression.spec.ts:859</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Pick a patient. The <strong>Code</strong> box beside the Service lookup is empty.</li>
+        <li>Pick any service out of the lookup and look at the box again.</li>
+        <li>Type <span class="mono">ZZZ-999</span> into it and commit a line.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>
+        Code sits beside the Service lookup and is plainly meant to hold the catalogue code of
+        whatever was picked — it is the one field on the row that could tie a line to a
+        catalogue entry.
+      </p>
+
+      <h4>Actual result</h4>
+      <p>
+        Picking a service leaves it empty, every time. It stays editable, and a made-up code
+        commits a line without a word — so it is free text that nobody sets and nothing
+        validates. Whether anything reads it on save could not be established, for the reason
+        given at the top of this section.
+      </p>
+
+      <h4>Suggested fix</h4>
+      <p>
+        Fill it from the catalogue when a service is picked and make it read-only; or, if it is
+        meant to be a way of entering a service <em>by</em> code, make typing one select the
+        matching service and reject a code that matches none.
+      </p>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-034 -->
+    <section class="bug">
+      <h3><span class="mono">BUG-034</span> — The cart grid has a Schedule column and the tab has no Schedule control</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Nurse Station &gt; IPD Service Entry</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>Low / P3</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge fail">open</span></td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td><span class="mono">IS-18</span> — <span class="mono">ipd-service-entry.regression.spec.ts:812</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Open the tab and read the entry row: Service, Code, Remarks, Service Date, Start Date Time, End Date Time, Rate, Qty.</li>
+        <li>Read the cart grid's columns: Service Name, <strong>Schedule</strong>, Rate, Qty, Service Change, Remarks, Start Date, End Date, Amount.</li>
+        <li>Commit a line and look at its Schedule cell.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>A column on the grid can be filled by something on the form.</p>
+
+      <h4>Actual result</h4>
+      <p>
+        There is no Schedule control on this tab at all — not a lookup, not a select, not a box
+        — so the column is empty on every line ever entered. Consultancy Service has the
+        control, offering <span class="mono">On Time</span> and <span class="mono">Off Time</span>;
+        this tab appears to have inherited the column without it.
+      </p>
+
+      <h4>Suggested fix</h4>
+      <p>
+        Add the Schedule picker if the distinction applies to IPD services, or drop the column.
+        Either is a small change; leaving an always-blank column between the service and its
+        rate is the one option that helps nobody.
+      </p>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-035 -->
+    <section class="bug">
+      <h3><span class="mono">BUG-035</span> — A line with no service picked is refused in silence</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Nurse Station &gt; IPD Service Entry</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>Medium / P2</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge fail">open</span></td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td><span class="mono">IS-07</span> — <span class="mono">ipd-service-entry.regression.spec.ts:342</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Pick a patient. Leave the Service lookup untouched.</li>
+        <li>Type <span class="mono">1</span> into Qty and press <strong>Enter</strong>.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>
+        The line is refused <em>and</em> the nurse is told why — the way a bad quantity is
+        answered on this very tab with <span class="mono">Please input correct Qty.</span>, and
+        the way Consultancy Service answers the same mistake with
+        <span class="mono">Please select fields.</span>
+      </p>
+
+      <h4>Actual result</h4>
+      <p>
+        The line is correctly not taken, and nothing is said at all. The keystroke that commits
+        a line every other time does nothing, with no message, no highlight and no indication
+        which field is missing.
+      </p>
+
+      <h4>Impact</h4>
+      <p>
+        The nurse has no way to tell a refusal from a slow page. The usual next move is to press
+        Enter again, and then to assume the line went in.
+      </p>
+
+      <h4>Suggested fix</h4>
+      <p>
+        Raise the same kind of snackbar the quantity guard already raises, naming the Service
+        field. The mechanism is there; only this path is silent.
+      </p>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-036 -->
+    <section class="bug">
+      <h3><span class="mono">BUG-036</span> — A Service lookup search that matches nothing shows a blank row rather than saying so</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Nurse Station &gt; IPD Service Entry</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>Low / P3</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge fail">open</span></td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td><span class="mono">IS-22</span> — <span class="mono">ipd-service-entry.regression.spec.ts:980</span></td>
+          </tr>
+          <tr>
+            <th>Related</th>
+            <td>BUG-015, the same empty state on the Consultancy Service lookups</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Open the Service lookup and search for a term no service matches.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>The lookup says there is no such service.</p>
+
+      <h4>Actual result</h4>
+      <p>
+        Nothing selectable comes back, which is right, but what is shown is an empty bordered row
+        with no text in it — the same picture as a lookup that has not finished loading.
+      </p>
+
+      <h4>Suggested fix</h4>
+      <p>One sentence of text in the empty row. The row is already rendered; it is simply blank.</p>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-037 -->
+    <section class="bug">
+      <h3><span class="mono">BUG-037</span> — The bill grid heads its end-of-window column "End End"</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Nurse Station &gt; IPD Service Entry</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>Low / P3</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge fail">open</span></td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td><span class="mono">IS-26</span> — <span class="mono">ipd-service-entry.regression.spec.ts:1134</span></td>
+          </tr>
+          <tr>
+            <th>Related</th>
+            <td>BUG-008 — two misspelled labels on the create-patient wizard, the same class of defect</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Pick any patient and read the lower grid's column headers.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>
+        The eighth column reads <span class="mono">End Date</span> — the name the cart grid one
+        row up uses for the same value.
+      </p>
+
+      <h4>Actual result</h4>
+      <p>
+        It reads <span class="mono">End End</span>. The grid's other labels are inconsistent in
+        the same spirit — <span class="mono">S.Date</span> and
+        <span class="mono">Served_By</span> against the cart's
+        <span class="mono">Service Name</span> and <span class="mono">Start Date</span> — so the
+        header row is worth a pass as a whole.
+      </p>
+
+      <h4>Note for whoever fixes it</h4>
+      <p>
+        The automation matches these headers exactly, including the misspelling, so that IS-01
+        guards the grid's shape. Flag the change and the constant comes off in the same release.
+      </p>
+    </section>
+
     <h2 class="defects-break">6. Automation defect (not an application defect)</h2>
     <section class="bug sev-medium">
       <h3><span class="mono">AUT-001</span> — TC_ADM_002 assumes the registration grid is never empty</h3>
@@ -2332,13 +3335,27 @@ Timeout:  15000ms
       <tbody>
         <tr>
           <td>1</td>
-          <td class="mono">BUG-009, BUG-011</td>
+          <td class="mono">BUG-009, BUG-011, BUG-024, BUG-026</td>
           <td>
-            Both put a wrong charge on a real patient's bill with no warning and no audit
+            All four put a wrong charge on a real patient's bill with no warning and no audit
             trail — one patient's services billed to the next, and a rate any ward account can
             type over. Nothing else in this document is as cheap to trigger or as hard to
-            detect after the fact. BUG-010 is the same cart, not cleared on a different
-            trigger, so fix it in the same change.
+            detect after the fact. They are <em>two</em> defects on two tabs: BUG-024 is BUG-009
+            on IPD Service Entry and BUG-026 is BUG-011 there, so look for a shared component
+            before fixing either twice. BUG-010 and BUG-025 are the same carts not cleared on a
+            different trigger, so take them in the same change.
+          </td>
+        </tr>
+        <tr>
+          <td>1a</td>
+          <td class="mono">BUG-027</td>
+          <td>
+            Taken with the group above rather than after it, because it is what makes those
+            defects permanent: a service saved on IPD Service Entry cannot be cancelled,
+            corrected or removed from the tab at all. The Consultancy Service cancel-with-reason
+            dialog already exists one tab along. Until this lands, every wrong charge that tab
+            produces has to be unpicked in Accounts — and the regression suite cannot cover the
+            tab's Save at all, because there would be no way to undo what it wrote.
           </td>
         </tr>
         <tr>
@@ -2427,7 +3444,7 @@ Timeout:  15000ms
       </tbody>
     </table>
     <p class="note">
-      <strong>How to tell a fix landed.</strong> Sixteen of these defects are held by a
+      <strong>How to tell a fix landed.</strong> Thirty of these defects are held by a
       regression case marked <span class="mono">test.fail()</span>. When the module is
       corrected, that case does not quietly start passing — the run reports it as
       <strong>unexpectedly passing</strong>, which fails the build until the marker is removed.
@@ -2436,8 +3453,8 @@ Timeout:  15000ms
     </p>
 
     <footer class="doc-footer">
-      Bug Report v2.0 · Popular Medical College &amp; Hospital Ltd — Healthcare ERP Test
-      Automation · 05 October 2026 · generated from
+      Bug Report v2.1 · Popular Medical College &amp; Hospital Ltd — Healthcare ERP Test
+      Automation · 06 October 2026 · generated from
       <span class="mono">docs/src/bug-report.html</span> by <span class="mono">npm run docs</span>.
     </footer>
   </body>

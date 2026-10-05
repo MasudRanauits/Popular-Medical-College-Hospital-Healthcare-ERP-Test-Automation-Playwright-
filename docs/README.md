@@ -4,17 +4,24 @@ Two deliverables, each a separate document, both built from the sources in `src/
 
 | Document | PDF | Source | Pages |
 | --- | --- | --- | --- |
-| **Test Case Document** — all 110 cases in one file | [`TEST_CASES.pdf`](TEST_CASES.pdf) | [`src/test-cases.html`](src/test-cases.html) | 56, A4 landscape |
-| **Bug Report** — 23 defects + 1 closed automation defect, with screenshots and video | [`BUG_REPORT.pdf`](BUG_REPORT.pdf) | [`src/bug-report.html`](src/bug-report.html) | 32, A4 portrait |
+| **Test Case Document** — all 137 cases in one file | [`TEST_CASES.pdf`](TEST_CASES.pdf) | [`src/test-cases.html`](src/test-cases.html) | 56, A4 landscape |
+| **Bug Report** — 37 defects + 1 closed automation defect, with screenshots and video | [`BUG_REPORT.pdf`](BUG_REPORT.pdf) | [`src/bug-report.html`](src/bug-report.html) | 32, A4 portrait |
 
 Both reflect the full regression run of **05 Oct 2026, 15:28 UTC** — 99 tests in 33 m 33 s:
-94 expected (78 passed, 16 expected-to-fail), 2 failed, 3 skipped.
+94 expected (78 passed, 16 expected-to-fail), 2 failed, 3 skipped — plus the **IPD Service
+Entry run of 06 Oct 2026**: 27 cases, 13 passed and 14 expected-to-fail, nothing unexpected
+and nothing skipped. That suite is new; every other suite is unchanged.
 
-**Expected-to-fail is not a broken test.** Sixteen cases are marked `test.fail()`: each asserts
+**Expected-to-fail is not a broken test.** Thirty cases are marked `test.fail()`: each asserts
 the behaviour the module is supposed to have, fails on every run, and is reported as
 *unexpectedly passing* — which fails the build — the day the module is corrected. Each is a
-defect in the bug report (BUG-009 … BUG-023, bar BUG-018). The two real failures are DD-02 and
+defect in the bug report (BUG-009 … BUG-037, bar BUG-018). The two real failures are DD-02 and
 DD-13, both BUG-018; the three skips are downstream of it.
+
+**IPD Service Entry has no evidence folder, on purpose.** That tab offers no way to take a
+saved service off a bill again (BUG-027), so no case in its suite presses Save against a cart
+with anything in it — the evidence for its fourteen defects is the cart, the form and the grid
+headers rather than a charge made and undone.
 
 ## Video
 

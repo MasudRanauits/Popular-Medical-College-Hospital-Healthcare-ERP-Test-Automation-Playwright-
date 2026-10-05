@@ -84,9 +84,9 @@
       <h1>Test Case Document</h1>
       <p class="subtitle">
         Playwright automation suite — Login, Home launcher, Patient Registration, Patient
-        Admission, the admission dashboard, the end-to-end patient journey, and the four
-        Nurse Station tabs: Medicine Indent, Consultancy Service, Diet Indent and Diet
-        Dashboard. 110 cases, all automated.
+        Admission, the admission dashboard, the end-to-end patient journey, and the five
+        Nurse Station tabs: Medicine Indent, Consultancy Service, IPD Service Entry, Diet
+        Indent and Diet Dashboard. 137 cases, all automated.
       </p>
     </header>
 
@@ -99,11 +99,11 @@
         </tr>
         <tr>
           <th>Version</th>
-          <td>2.0</td>
+          <td>2.1</td>
         </tr>
         <tr>
           <th>Date</th>
-          <td>05 October 2026</td>
+          <td>06 October 2026</td>
         </tr>
         <tr>
           <th>Prepared by</th>
@@ -136,12 +136,17 @@
             companion bug report), <strong>2 failed</strong> and <strong>3 skipped</strong>.
             The smoke and API suites were not part of that cycle and are marked
             <span class="badge idle">not run</span>.
+            <br /><br />
+            <strong>§20, IPD Service Entry, is from a separate run of 06 Oct 2026</strong> —
+            27 cases, <strong>13 passed</strong> and <strong>14 known fail</strong>, no
+            unexpected failures and no skips. That suite is new; every other suite is unchanged
+            from the 05 Oct cycle.
           </td>
         </tr>
         <tr>
           <th>Companion document</th>
           <td>
-            <span class="mono">docs/BUG_REPORT.pdf</span> — the 23 defects raised against
+            <span class="mono">docs/BUG_REPORT.pdf</span> — the 37 defects raised against
             these cases, with screenshots and video.
           </td>
         </tr>
@@ -158,10 +163,11 @@
             wizard, New Admission wizard (Patient / Contact Person / Advance Payment /
             Admission Detail), the admission dashboard — looking an admission up and printing
             its paperwork — host availability, one end-to-end register-then-admit-then-indent
-            flow, and the four <strong>Nurse Station</strong> tabs the ward works from:
+            flow, and the five <strong>Nurse Station</strong> tabs the ward works from:
             Medicine Indent and its Verify Indent pane, Consultancy Service (the cart, the
-            bill and the cancel-with-reason dialog), Diet Indent, and Diet Dashboard
-            (the date range, the search, both grids, and Stop / Continue).
+            bill and the cancel-with-reason dialog), IPD Service Entry (the cart, the bill
+            and the entry row, up to but not including the Save — see §20), Diet Indent, and
+            Diet Dashboard (the date range, the search, both grids, and Stop / Continue).
           </td>
         </tr>
         <tr>
@@ -437,11 +443,22 @@
           <td>Signed in</td>
         </tr>
         <tr>
+          <td>Regression — IPD Service Entry</td>
+          <td class="mono">tests/regression/ipd-service-entry.regression.spec.ts</td>
+          <td>27</td>
+          <td>13</td>
+          <td>14</td>
+          <td>—</td>
+          <td>—</td>
+          <td>—</td>
+          <td>Signed in</td>
+        </tr>
+        <tr>
           <td><strong>Total</strong></td>
           <td></td>
-          <td><strong>110</strong></td>
-          <td><strong>78</strong></td>
-          <td><strong>16</strong></td>
+          <td><strong>137</strong></td>
+          <td><strong>91</strong></td>
+          <td><strong>30</strong></td>
           <td><strong>2</strong></td>
           <td><strong>3</strong></td>
           <td><strong>11</strong></td>
@@ -450,11 +467,24 @@
       </tbody>
     </table>
     <p class="note">
-      The 99 cases that ran are the setup plus every regression suite.
-      <strong>Known fail</strong> is not a red build: all 16 are cases marked
-      <span class="mono">test.fail()</span>, which Playwright counts as expected — the run's
-      own figures are 94 expected, 2 unexpected, 3 skipped. The two real failures are DD-02
-      and DD-13, both BUG-018, and the three skips are downstream of it.
+      The 126 cases that ran are the setup plus every regression suite.
+      <strong>Known fail</strong> is not a red build: all 30 are cases marked
+      <span class="mono">test.fail()</span>, which Playwright counts as expected. The two real
+      failures are DD-02 and DD-13, both BUG-018, and the three skips are downstream of it.
+    </p>
+    <p class="note">
+      <strong>IPD Service Entry (§20) was run on 06 Oct 2026</strong>, after the figures above
+      were taken; the other suites are from the 05 Oct cycle and are unchanged. Its 27 cases
+      ran in two passes — the first was cut short by the test host running out of memory, not
+      by the application, and the remaining cases were run again to completion. Two defects in
+      the automation itself were found and fixed in that first pass and are worth recording,
+      because both were the suite's fault and neither is an application defect: the hidden
+      Service Date input posts <span class="mono">2026-10-06 16:23</span> for a value the app
+      set and <span class="mono">2026-10-03T10:00:00</span> for one a nurse typed, so IS-17 was
+      comparing formats rather than moments; and a Service lookup search can be swallowed
+      before Blazor wires the button, leaving the unfiltered catalogue on screen, which failed
+      IS-04 once. The page object now reduces both date shapes to a moment before comparing,
+      and re-sends a search whose grid did not move.
     </p>
 
     <h2>5. Data safety</h2>
@@ -519,6 +549,17 @@
       before any Confirm button, the negative cases on the indent forms are negative precisely
       because the app refuses them, and the dashboard cases only search, sort and print — a
       printed document changes nothing in the record it is printed from.
+    </p>
+    <p class="note">
+      <strong>IPD Service Entry (§20) writes nothing at all, and that is a finding rather than
+      caution.</strong> Its bill grid carries no bin, no edit and no cancel (IS-24 / BUG-027),
+      so a service saved there cannot be taken off again from the tab — there is no equivalent
+      of the cancel dialog that makes CS-19 … CS-22 safe. All 27 of its cases therefore stop at
+      the cart, which is client-side state and reaches no bill. The single exception is IS-25,
+      which presses Save against a cart it has first <em>asserted</em> to be empty, so the only
+      outcome available to it is the refusal it is testing for. The tab's Save, its OTName
+      picker and its Print All button are consequently uncovered, and listed under Known
+      coverage gaps (§21).
     </p>
     <p class="note">
       Both writing suites are in a <span class="mono">describe</span> of their own, so a run
@@ -3863,7 +3904,573 @@
       </tbody>
     </table>
 
-    <h2 class="suite-break">20. Known coverage gaps</h2>
+    <h2 class="suite-break">20. Regression — IPD Service Entry</h2>
+    <p class="note">
+      Spec: <span class="mono">tests/regression/ipd-service-entry.regression.spec.ts</span> ·
+      signed in. Route <span class="mono">/hospital/nurse-station</span>, the
+      <strong>IPD Service Entry</strong> tab — where the ward puts a chargeable service, a
+      procedure or an OT item onto an admitted patient's bill.
+    </p>
+    <p class="note">
+      <strong>How the tab works, since nothing on it says.</strong> The ward list fills a
+      patient panel of six read-only boxes — Inv.No, Name, Gender, Age, Assigned Doctor,
+      CabinNo. Under that is one line entry row — Service, Code, Remarks, Service Date, Start
+      Date Time, End Date Time, Rate, Qty — and <em>Enter on Qty</em> is what commits a line:
+      there is no Add button, the only buttons under the cart being Save and Print All. The
+      upper grid is the <strong>cart</strong>, lines costed but not yet billed, with Total
+      Amount and a discount box under it. The lower grid is the <strong>bill</strong>, every
+      service already saved against the admission, with who saved it and when.
+    </p>
+    <p class="note">
+      <strong>Nothing in this suite saves, and that is itself a finding.</strong> Consultancy
+      Service puts a bin on every row of its bill, which opens a cancel-with-reason dialog —
+      which is how the cases over there can charge a live admission and take the charge back
+      off again. This tab's bill grid has nine columns and no control of any kind on the row:
+      a service saved here cannot be cancelled, corrected or removed from this tab at all.
+      That is <span class="mono">IS-24</span> / <strong>BUG-027</strong>, and it is also why
+      every case below stops at the cart. A case that pressed Save would be making a permanent
+      change to a real patient's bill with no way to undo it. The one Save the suite does press
+      is <span class="mono">IS-25</span>, against an empty cart, which writes nothing and is
+      asserted to be empty first.
+    </p>
+    <p class="note">
+      <strong>Fourteen cases carry <span class="badge warn">known fail</span>.</strong> Each
+      asserts the behaviour the tab is supposed to have and is marked
+      <span class="mono">test.fail()</span>, so a run reports it as expected-to-fail — and
+      reports it as <em>unexpectedly passing</em> on the day the module is corrected, which is
+      the signal to drop the marker and keep the assertion. Nothing is rewritten to match the
+      defect, which would turn it into a documented feature and leave nothing watching for the
+      fix. The fourteen are raised as <strong>BUG-024</strong> … <strong>BUG-037</strong> in the
+      companion bug report.
+    </p>
+    <table class="cases">
+      <colgroup>
+        <col class="c-id" /><col class="c-title" /><col class="c-pre" /><col class="c-steps" />
+        <col class="c-data" /><col class="c-exp" /><col class="c-act" /><col class="c-pri" /><col class="c-status" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Case ID</th>
+          <th>Title</th>
+          <th>Pre-conditions</th>
+          <th>Test steps</th>
+          <th>Test data</th>
+          <th>Expected result</th>
+          <th>Actual result</th>
+          <th>Pri</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="id">IS-01<br /><span class="note">line 113</span></td>
+          <td>IPD Service Entry opens from the Nurse Station tab strip, with both grids</td>
+          <td>Signed in; on the launcher.</td>
+          <td>
+            <ol>
+              <li>Open the Hospital module and click Nurse Station.</li>
+              <li>Assert the page lands on Medicine Indent — IPD Service Entry is five tabs along.</li>
+              <li>Open IPD Service Entry and read the entry row and both grid headers.</li>
+            </ol>
+          </td>
+          <td>Columns from <span class="mono">CART_COLUMNS</span> and <span class="mono">BILL_COLUMNS</span></td>
+          <td>
+            <ul>
+              <li>Service lookup, Code, Remarks, the three date boxes, Rate and Qty are on screen; Save is enabled and Print All is present.</li>
+              <li>Cart and bill each carry their own named columns, in order; the cart has a tenth for the bin and the bill does not.</li>
+            </ul>
+          </td>
+          <td><span class="badge pass">as expected</span></td>
+          <td><span class="badge pass">pass</span><br /><span class="note">9.0 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">IS-02<br /><span class="note">line 153</span></td>
+          <td>The ward list narrows to a bed or an admission number</td>
+          <td>Signed in; patients on the ward.</td>
+          <td>
+            <ol>
+              <li>Count the whole ward list.</li>
+              <li>Search a live admission number; assert one card comes back and it is that admission.</li>
+              <li>Search the ward prefix off that bed; assert every card returned matches it.</li>
+              <li>Search a term the ward does not hold.</li>
+            </ol>
+          </td>
+          <td>Admission number and bed read live off the list; <span class="mono">noSuchTerm</span> from <span class="mono">ipdServiceEntry()</span></td>
+          <td>
+            <ul>
+              <li>An admission number brings back exactly one card.</li>
+              <li>A ward prefix brings back only beds whose name contains it.</li>
+              <li>A term no bed matches empties the list rather than falling back to all of it.</li>
+            </ul>
+          </td>
+          <td><span class="badge pass">as expected</span></td>
+          <td><span class="badge pass">pass</span><br /><span class="note">19.8 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">IS-03<br /><span class="note">line 198</span></td>
+          <td>Picking a ward patient fills the patient panel, and none of it can be typed into</td>
+          <td>Signed in; IPD Service Entry open.</td>
+          <td>
+            <ol>
+              <li>Assert Inv.No reads 0 before any card is clicked.</li>
+              <li>Click a ward card and read all six panel boxes back.</li>
+              <li>Assert each of the six is disabled in the markup.</li>
+            </ol>
+          </td>
+          <td>A bed read live off the list, rotated per run by <span class="mono">wardIndex</span></td>
+          <td>
+            <ul>
+              <li>Inv.No is the admission number of the card clicked; Name, Gender and Age are filled; CabinNo holds the bed.</li>
+              <li>All six boxes are disabled — the ward list is the only way to set a patient.</li>
+            </ul>
+          </td>
+          <td><span class="badge pass">as expected</span></td>
+          <td><span class="badge pass">pass</span><br /><span class="note">16.6 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">IS-04<br /><span class="note">line 247</span></td>
+          <td>The Service lookup answers a search with the services it matches, and their rates</td>
+          <td>Signed in; a patient picked.</td>
+          <td>
+            <ol>
+              <li>Open the Service lookup and search a term the catalogue holds.</li>
+              <li>Read every row back as a name and a rate.</li>
+              <li>Assert each name contains the term and each rate is a readable number ≥ 0.</li>
+            </ol>
+          </td>
+          <td><span class="mono">serviceSearch</span> = "Visit"</td>
+          <td>
+            <ul>
+              <li>Every row returned matches the term.</li>
+              <li>Every row carries a rate, which is what tells two entries of the same name apart.</li>
+            </ul>
+          </td>
+          <td>
+            <span class="badge pass">as expected</span><br /><span class="note">
+              Flaked once on the first full run — a search click swallowed before Blazor wired
+              it left the unfiltered catalogue on screen. The page object now re-sends a search
+              whose grid did not move; it has not recurred.</span>
+          </td>
+          <td><span class="badge pass">pass</span><br /><span class="note">16.0 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">IS-05<br /><span class="note">line 282</span></td>
+          <td>Picking a service puts its catalogue rate on the form</td>
+          <td>Signed in; a patient picked. Skips if nothing matching the term carries a rate today.</td>
+          <td>
+            <ol>
+              <li>Assert nothing is picked and Rate and Qty both read 0 on arrival.</li>
+              <li>Search the catalogue and take the first priced entry.</li>
+              <li>Read the Rate box and the Service Date box back.</li>
+            </ol>
+          </td>
+          <td><span class="mono">serviceSearch</span> = "Visit"</td>
+          <td>
+            <ul>
+              <li>The lookup puts the service that was clicked on the form, and its catalogue rate in the Rate box.</li>
+              <li>Service Date opens on a date <em>and a time</em> — the shape IS-17 goes on to test.</li>
+            </ul>
+          </td>
+          <td><span class="badge pass">as expected</span></td>
+          <td><span class="badge pass">pass</span><br /><span class="note">19.9 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">IS-06<br /><span class="note">line 315</span></td>
+          <td>Qty refuses zero and negatives, and says why</td>
+          <td>Signed in; a free service picked.</td>
+          <td>
+            <ol>
+              <li>Pick a service the catalogue prices at zero.</li>
+              <li>Press Enter on Qty with 0, then with −1.</li>
+              <li>Assert neither reached the cart, and read the message each raised.</li>
+            </ol>
+          </td>
+          <td>Qty 0 and −1</td>
+          <td>
+            <ul>
+              <li>Both are refused with <span class="mono">Please input correct Qty.</span></li>
+              <li>The cart is still empty, and the service is left on the form so the nurse can correct the number.</li>
+            </ul>
+          </td>
+          <td><span class="badge pass">as expected</span><br /><span class="note">The one refusal on this tab that is actually worded — compare IS-07.</span></td>
+          <td><span class="badge pass">pass</span><br /><span class="note">42.0 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">IS-07<br /><span class="note">line 342</span></td>
+          <td>A line with no service is refused, and the tab says so</td>
+          <td>Signed in; a patient picked; nothing picked in the Service lookup.</td>
+          <td>
+            <ol>
+              <li>Leave the Service lookup untouched.</li>
+              <li>Press Enter on Qty with a perfectly good quantity of 1.</li>
+              <li>Read whether the cart grew and what the tab said.</li>
+            </ol>
+          </td>
+          <td>Qty 1, no service</td>
+          <td>The line is refused <em>and</em> the nurse is told why — the way IS-06 is told about a bad quantity, and the way Consultancy Service answers the same mistake with <span class="mono">Please select fields.</span></td>
+          <td>The line is correctly not taken, and nothing is said at all. The same keystroke that works every other time does nothing, with no explanation on screen. <strong>BUG-035</strong></td>
+          <td>P2</td>
+          <td><span class="badge warn">known fail</span><br /><span class="note">45.8 s · BUG-035</span></td>
+        </tr>
+        <tr>
+          <td class="id">IS-08<br /><span class="note">line 376</span></td>
+          <td>Enter on Qty commits the line, and the cart carries what was entered</td>
+          <td>Signed in; a priced service picked; cart empty.</td>
+          <td>
+            <ol>
+              <li>Pick a priced service, type remarks and a quantity.</li>
+              <li>Press Enter on Qty.</li>
+              <li>Read the cart row and then the entry row back.</li>
+            </ol>
+          </td>
+          <td><span class="mono">quantities[0]</span>, 1–3; <span class="mono">mark</span> as remarks</td>
+          <td>
+            <ul>
+              <li>The cart row names the service and carries the catalogue rate, the quantity, and rate × quantity as the amount.</li>
+              <li>The commit clears the service, the remarks, the rate and the quantity for the next line.</li>
+            </ul>
+          </td>
+          <td><span class="badge pass">as expected</span><br /><span class="note">The two date boxes are <em>not</em> cleared — IS-21.</span></td>
+          <td><span class="badge pass">pass</span><br /><span class="note">36.0 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">IS-09<br /><span class="note">line 415</span></td>
+          <td>The cart bin takes a line off, and Total Amount drops with it</td>
+          <td>Signed in; two lines in the cart.</td>
+          <td>
+            <ol>
+              <li>Commit two lines of the same priced service in different quantities.</li>
+              <li>Assert Total Amount is the sum of the two.</li>
+              <li>Click the bin on the first row.</li>
+            </ol>
+          </td>
+          <td>Quantities <span class="mono">n</span> and <span class="mono">n+1</span>, so the survivor can be told from the one removed</td>
+          <td>
+            <ul>
+              <li>Exactly one row goes, and it is the one whose bin was clicked.</li>
+              <li>Total Amount drops to the remaining line's amount.</li>
+            </ul>
+          </td>
+          <td><span class="badge pass">as expected</span></td>
+          <td><span class="badge pass">pass</span><br /><span class="note">1.1 m</span></td>
+        </tr>
+        <tr>
+          <td class="id">IS-10<br /><span class="note">line 453</span></td>
+          <td>Total Amount is the sum of the cart</td>
+          <td>Signed in; a priced service available.</td>
+          <td>
+            <ol>
+              <li>Commit one line per quantity in the run's data.</li>
+              <li>Assert Total Amount after <em>each</em> line, not only at the end.</li>
+              <li>Add the cart's own amounts up and compare.</li>
+            </ol>
+          </td>
+          <td><span class="mono">quantities</span>, two lines of 1–3</td>
+          <td>Total Amount equals the running sum at every step, and the cart's rows add up to it.</td>
+          <td><span class="badge pass">as expected</span><br /><span class="note">Checked per line so a total that drifts is caught on the line that broke it.</span></td>
+          <td><span class="badge pass">pass</span><br /><span class="note">1.1 m</span></td>
+        </tr>
+        <tr>
+          <td class="id">IS-11<br /><span class="note">line 491</span></td>
+          <td>The Remarks typed on a line reach the cart row</td>
+          <td>Signed in; a free service picked.</td>
+          <td>
+            <ol>
+              <li>Type a unique mark into Remarks.</li>
+              <li>Commit the line.</li>
+              <li>Read the cart row's Remarks cell.</li>
+            </ol>
+          </td>
+          <td><span class="mono">mark</span> — unique per run</td>
+          <td>The cart row carries exactly what was typed.</td>
+          <td><span class="badge pass">as expected</span><br /><span class="note">Remarks is the only free-text field on the tab that reaches the grid, so it is the only thing a nurse — or a case — can mark a line with.</span></td>
+          <td><span class="badge pass">pass</span><br /><span class="note">34.7 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">IS-12<br /><span class="note">line 514</span></td>
+          <td>The service window typed on a line reaches the cart row</td>
+          <td>Signed in; a free service picked.</td>
+          <td>
+            <ol>
+              <li>Set Start Date Time and End Date Time to a sane window earlier today.</li>
+              <li>Assert both reached the hidden inputs the form posts.</li>
+              <li>Commit the line and read the row's Start Date and End Date cells.</li>
+            </ol>
+          </td>
+          <td><span class="mono">window</span> = today 09:00 → 11:00</td>
+          <td>Both ends reach the cart row and name the same moments that were typed.</td>
+          <td><span class="badge pass">as expected</span><br /><span class="note">Compared as moments, not strings: the grid reprints both as <span class="mono">M/d/yyyy h:mm:ss AM/PM</span>.</span></td>
+          <td><span class="badge pass">pass</span><br /><span class="note">36.2 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">IS-13<br /><span class="note">line 551</span></td>
+          <td>The cart is emptied when another patient is picked</td>
+          <td>Signed in; one line entered for the patient in bed A.</td>
+          <td>
+            <ol>
+              <li>Pick the patient in bed A and commit one line.</li>
+              <li>Without pressing Save, click the patient in bed B.</li>
+              <li>Wait for the pane to settle, then read the cart and Total Amount.</li>
+            </ol>
+          </td>
+          <td>Two beds read live off the ward list</td>
+          <td>Picking a patient starts that patient's bill — the cart is emptied and Total Amount returns to zero, because nothing in it belongs to the patient now on screen.</td>
+          <td>The panel moves to B and the cart does not. A's services are still listed, and A's money is still in Total Amount, under B's name. <strong>Press Save from here and B is billed for A's services.</strong> <strong>BUG-024</strong></td>
+          <td>P1</td>
+          <td><span class="badge warn">known fail</span><br /><span class="note">47.2 s · BUG-024</span></td>
+        </tr>
+        <tr>
+          <td class="id">IS-14<br /><span class="note">line 614</span></td>
+          <td>The cart does not outlive leaving the tab</td>
+          <td>Signed in; one line in the cart.</td>
+          <td>
+            <ol>
+              <li>Pick a patient and commit one line.</li>
+              <li>Click away to Medicine Indent, then back to IPD Service Entry.</li>
+              <li>Read the settled cart and the patient panel.</li>
+            </ol>
+          </td>
+          <td><span class="mono">mark</span> as remarks, quantity 1–3</td>
+          <td>A cart with no patient against it should not exist — either both survive the round trip or neither does.</td>
+          <td>The round trip <em>does</em> reset the patient panel — Inv.No goes back to 0, which is the half the tab gets right — and leaves the cart holding its lines, with a figure in Total Amount, against nobody at all. The next nurse to pick a patient inherits them, which is BUG-024 by another route. <strong>BUG-025</strong></td>
+          <td>P1</td>
+          <td><span class="badge warn">known fail</span><br /><span class="note">41.2 s · BUG-025</span></td>
+        </tr>
+        <tr>
+          <td class="id">IS-15<br /><span class="note">line 661</span></td>
+          <td>The catalogue rate cannot be typed over on the form</td>
+          <td>Signed in; a priced service picked.</td>
+          <td>
+            <ol>
+              <li>Pick a service the catalogue prices above zero.</li>
+              <li>Type 1 into the Rate box.</li>
+              <li>Commit a line of quantity 2 and read the row back.</li>
+            </ol>
+          </td>
+          <td>Rate typed <em>down</em> to 1, never up — see §5 Data safety</td>
+          <td>The rate belongs to the catalogue. The box is read-only at the nurse station, and the line carries the catalogue rate whatever was typed.</td>
+          <td>The box is editable and the line carries the typed rate: a service the catalogue prices at 1000 goes into the cart at 1, and the amount follows. <strong>BUG-026</strong></td>
+          <td>P1</td>
+          <td><span class="badge warn">known fail</span><br /><span class="note">48.4 s · BUG-026</span></td>
+        </tr>
+        <tr>
+          <td class="id">IS-16<br /><span class="note">line 700</span></td>
+          <td>Service Change comes off the amount</td>
+          <td>Signed in; a service priced above the discount.</td>
+          <td>
+            <ol>
+              <li>Pick a service costing more than the discount.</li>
+              <li>Type the discount into the Service Change box.</li>
+              <li>Commit the line; read the row, the box and Total Amount.</li>
+            </ol>
+          </td>
+          <td><span class="mono">discount</span> = 25</td>
+          <td>The discount reaches the line's Service Change cell and comes off the amount, and the box keeps what was typed.</td>
+          <td>Nothing reads it. The cart's Service Change cell stays 0, the amount is undiscounted, and the commit <em>also wipes the box</em> — so a nurse looking back at it sees a zero and may well type it again. <strong>BUG-030</strong></td>
+          <td>P2</td>
+          <td><span class="badge warn">known fail</span><br /><span class="note">41.0 s · BUG-030</span></td>
+        </tr>
+        <tr>
+          <td class="id">IS-17<br /><span class="note">line 747</span></td>
+          <td>The Service Date chosen survives committing the line</td>
+          <td>Signed in; a free service picked.</td>
+          <td>
+            <ol>
+              <li>Read what the Service Date box opened on.</li>
+              <li>Set it three days back and assert it holds through the whole of the entry.</li>
+              <li>Press Enter on Qty, then read the box once it has stopped moving.</li>
+            </ol>
+          </td>
+          <td><span class="mono">backdated</span> = three days ago, 10:00</td>
+          <td>A service performed three days ago can be entered as three days ago — the date survives the commit.</td>
+          <td>The box takes the back-date and keeps it right up to the Enter, then silently resets to the moment of the commit. A late entry is recorded as having happened now. <strong>BUG-029</strong></td>
+          <td>P2</td>
+          <td><span class="badge warn">known fail</span><br /><span class="note">21.4 s · BUG-029</span></td>
+        </tr>
+        <tr>
+          <td class="id">IS-18<br /><span class="note">line 812</span></td>
+          <td>A committed line carries the schedule its column is for</td>
+          <td>Signed in; a free service picked.</td>
+          <td>
+            <ol>
+              <li>Count the fields labelled "Schedule" on the entry form.</li>
+              <li>Commit a line.</li>
+              <li>Assert the cart's Schedule column exists, and read the row's Schedule cell.</li>
+            </ol>
+          </td>
+          <td>None — the case is about what the form does not offer</td>
+          <td>A column on the cart grid can be filled by something on the form.</td>
+          <td>There is no Schedule control on this tab at all — not a lookup, not a select, not a box — so the column is empty on every line ever entered. Consultancy Service has the control and offers On Time / Off Time; this tab inherited the column without it. <strong>BUG-034</strong></td>
+          <td>P3</td>
+          <td><span class="badge warn">known fail</span><br /><span class="note">39.7 s · BUG-034</span></td>
+        </tr>
+        <tr>
+          <td class="id">IS-19<br /><span class="note">line 859</span></td>
+          <td>Picking a service fills the Code box</td>
+          <td>Signed in; a patient picked.</td>
+          <td>
+            <ol>
+              <li>Assert the Code box is empty on arrival.</li>
+              <li>Pick a service out of the lookup and read the Code box.</li>
+              <li>Type a made-up code into it and commit a line anyway.</li>
+            </ol>
+          </td>
+          <td><span class="mono">code</span> = "IS-CODE-<em>n</em>"</td>
+          <td>Code sits beside the Service lookup and holds the catalogue code of whatever was picked — the one field that could tie a line to a catalogue entry.</td>
+          <td>Nothing fills it. It stays empty, stays editable, and a made-up code commits a line without a word — free text nobody sets and nothing reads. <strong>BUG-033</strong></td>
+          <td>P3</td>
+          <td><span class="badge warn">known fail</span><br /><span class="note">36.7 s · BUG-033</span></td>
+        </tr>
+        <tr>
+          <td class="id">IS-20<br /><span class="note">line 897</span></td>
+          <td>An End Date Time before the Start Date Time is refused</td>
+          <td>Signed in; a free service picked.</td>
+          <td>
+            <ol>
+              <li>Set Start Date Time to 18:00 and End Date Time to 08:00 the same day.</li>
+              <li>Press Enter on Qty.</li>
+              <li>Read whether the cart took it and what was said.</li>
+            </ol>
+          </td>
+          <td><span class="mono">reversed</span> = today 18:00 → today 08:00</td>
+          <td>A window whose end precedes its start is not a service window; the line is refused and the nurse is told.</td>
+          <td>Taken without a word. The row goes into the cart reading 6:00 PM → 8:00 AM, and any duration read off it is negative. <strong>BUG-031</strong></td>
+          <td>P2</td>
+          <td><span class="badge warn">known fail</span><br /><span class="note">38.3 s · BUG-031</span></td>
+        </tr>
+        <tr>
+          <td class="id">IS-21<br /><span class="note">line 939</span></td>
+          <td>The service window is cleared with the rest of the line</td>
+          <td>Signed in; one line committed with a window.</td>
+          <td>
+            <ol>
+              <li>Set both date boxes and commit a line.</li>
+              <li>Assert the service was cleared, so the case is reading a committed row.</li>
+              <li>Read both date boxes.</li>
+            </ol>
+          </td>
+          <td><span class="mono">window</span> = today 09:00 → 11:00</td>
+          <td>The commit clears the whole entry row, the two date boxes included — as it already does for the service, the remarks, the rate and the quantity.</td>
+          <td>Both boxes keep their values, so the next service entered for this patient silently inherits the window of the last one unless the nurse notices and clears them by hand. <strong>BUG-032</strong></td>
+          <td>P3</td>
+          <td><span class="badge warn">known fail</span><br /><span class="note">41.3 s · BUG-032</span></td>
+        </tr>
+        <tr>
+          <td class="id">IS-22<br /><span class="note">line 980</span></td>
+          <td>A lookup search that matches nothing says so</td>
+          <td>Signed in; a patient picked.</td>
+          <td>
+            <ol>
+              <li>Search the Service lookup for a term no service can match.</li>
+              <li>Assert no selectable row comes back.</li>
+              <li>Read the empty-state row's text.</li>
+            </ol>
+          </td>
+          <td><span class="mono">noSuchTerm</span> — unique per run</td>
+          <td>The lookup says there is no such service.</td>
+          <td>Nothing selectable comes back, which is right, but what the nurse is shown is an empty bordered row with no text in it — the same picture as a lookup that has not finished loading. <strong>BUG-036</strong></td>
+          <td>P3</td>
+          <td><span class="badge warn">known fail</span><br /><span class="note">34.8 s · BUG-036</span></td>
+        </tr>
+        <tr>
+          <td class="id">IS-23<br /><span class="note">line 1008</span></td>
+          <td>The bill lists every service charged, however many there are</td>
+          <td>Signed in. Skips if no patient in the first eighteen beds has fifteen services on the bill.</td>
+          <td>
+            <ol>
+              <li>Walk the ward, reading each patient's bill-row count.</li>
+              <li>Stop at the first patient whose bill is at the cap.</li>
+              <li>Assert there is no pager, page-size box or total anywhere on the tab.</li>
+            </ol>
+          </td>
+          <td>Up to 18 beds read live; <span class="mono">BILL_ROW_CAP</span> = 15</td>
+          <td>The bill lists every service charged, or says that it does not.</td>
+          <td>The list stops at fifteen and says nothing about it. A sixteenth service is charged and then cannot be seen on this tab at all — and since the row carries no control either (IS-24), it cannot be reached from here by any route. <strong>BUG-028</strong></td>
+          <td>P2</td>
+          <td><span class="badge warn">known fail</span><br /><span class="note">16.4 s · BUG-028</span></td>
+        </tr>
+        <tr>
+          <td class="id">IS-24<br /><span class="note">line 1060</span></td>
+          <td>A service saved by mistake can be taken off the bill</td>
+          <td>Signed in. Skips if no patient in reach has a service on the bill.</td>
+          <td>
+            <ol>
+              <li>Find a patient who has been charged something.</li>
+              <li>Count the controls on the first bill row — buttons, links, checkboxes.</li>
+              <li>Compare against the cart grid, whose rows do carry a bin.</li>
+            </ol>
+          </td>
+          <td>Any bed with a non-empty bill</td>
+          <td>A service charged to the wrong patient, at the wrong rate or in the wrong quantity can be cancelled, corrected or removed — as Consultancy Service allows, through a cancel-with-reason dialog recorded in IPD Bill Change History.</td>
+          <td>A bill row carries nine cells and no control of any kind. The same admission's services entered here are permanent as far as this screen is concerned. This is also why no case in this suite saves. <strong>BUG-027</strong></td>
+          <td>P1</td>
+          <td><span class="badge warn">known fail</span><br /><span class="note">27.0 s · BUG-027</span></td>
+        </tr>
+        <tr>
+          <td class="id">IS-25<br /><span class="note">line 1106</span></td>
+          <td>Save refuses an empty cart</td>
+          <td>Signed in; a patient picked; cart asserted empty.</td>
+          <td>
+            <ol>
+              <li>Count the bill rows.</li>
+              <li>Assert the cart is empty — if it were not, this click would charge a real patient.</li>
+              <li>Click Save and read the message; re-count the bill.</li>
+            </ol>
+          </td>
+          <td>None</td>
+          <td>Save refuses with <span class="mono">Please input items</span> and writes nothing.</td>
+          <td><span class="badge pass">as expected</span><br /><span class="note">The only Save this suite presses, and the emptiness of the cart is asserted rather than assumed.</span></td>
+          <td><span class="badge pass">pass</span><br /><span class="note">11.8 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">IS-26<br /><span class="note">line 1134</span></td>
+          <td>The bill grid names its columns</td>
+          <td>Signed in; a patient picked.</td>
+          <td>
+            <ol>
+              <li>Read the bill grid's column headers.</li>
+              <li>Assert the end-of-window column is named.</li>
+            </ol>
+          </td>
+          <td>None</td>
+          <td>The eighth column reads <span class="mono">End Date</span> — the name the cart grid uses for the same value one grid up.</td>
+          <td>It reads <span class="mono">End End</span>. Cosmetic, and on a screen a ward nurse reads all day. <strong>BUG-037</strong></td>
+          <td>P3</td>
+          <td><span class="badge warn">known fail</span><br /><span class="note">11.2 s · BUG-037</span></td>
+        </tr>
+        <tr>
+          <td class="id">IS-27<br /><span class="note">line 1161</span></td>
+          <td>Saved services carry the window they were entered with</td>
+          <td>Signed in. Skips if no patient in reach has a service on the bill.</td>
+          <td>
+            <ol>
+              <li>Walk up to eight beds, reading each bill in full.</li>
+              <li>Count the saved rows carrying either end of a service window.</li>
+              <li>Record the figure as an annotation.</li>
+            </ol>
+          </td>
+          <td>Up to 8 beds read live</td>
+          <td>A figure, not a verdict — see the Actual column.</td>
+          <td>
+            <span class="badge pass">observational</span> — the 06 Oct run read
+            <strong>0 of 46</strong> saved services carrying either end of a window, across
+            four beds (S.Care-06 0/15, Free Bed Male-515 0/5, Free Bed-609 0/11, S.Care-63
+            0/15).<br /><span class="note">
+              Deliberately not marked <span class="mono">test.fail()</span>. Both window boxes
+              are optional on the entry form, so a bill of services entered without one is
+              telling the truth, and proving a <em>saved</em> window is dropped would mean
+              saving — which this tab offers no way to undo (IS-24). Nought out of forty-six,
+              against a cart grid that shows both ends (IS-12), is a figure for the module
+              owners to explain, not a defect this suite is in a position to raise. Listed
+              under Known coverage gaps.</span>
+          </td>
+          <td>P3</td>
+          <td><span class="badge pass">pass</span><br /><span class="note">1.0 m</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 class="suite-break">21. Known coverage gaps</h2>
     <table>
       <thead>
         <tr>
@@ -3926,6 +4533,54 @@
           <td>Cover it from the Accounts side, where the bill is presumably complete.</td>
         </tr>
         <tr>
+          <td>The IPD Service Entry <em>Save</em> itself — and everything downstream of it</td>
+          <td>
+            No case on that tab saves, on purpose. Its bill grid carries no bin, no edit and no
+            cancel (IS-24 / BUG-027), so a service saved there cannot be taken off again from
+            the tab — a case that pressed Save would make a permanent change to a live
+            patient's bill with no way to undo it. IS-25 presses Save only against a cart it
+            has asserted is empty.
+          </td>
+          <td>
+            Cover the save once BUG-027 gives the tab a cancel path, or from a tenant that is
+            not the hospital's own. Until then the save is exercised by hand, not by the suite.
+          </td>
+        </tr>
+        <tr>
+          <td>Whether a saved IPD service keeps its Start / End window</td>
+          <td>
+            IS-27 reads every bill in reach and has yet to find one saved service carrying
+            either end of a window, against a cart grid that shows both (IS-12). But the two
+            boxes are optional, so a bill of services entered without one is telling the truth,
+            and proving the save drops them would mean saving — see the row above. The case
+            records the figure and asserts nothing.
+          </td>
+          <td>
+            Ask the module owners whether the window is meant to persist. If it is, this
+            becomes a defect; if it is not, the two columns on the bill grid should go.
+          </td>
+        </tr>
+        <tr>
+          <td>IPD services charged past the fifteen-row cap</td>
+          <td>
+            IS-23 establishes the cap exists on this tab too; nothing tests what a sixteenth
+            charge does, because it can be read back from neither grid nor cancelled from the
+            tab (BUG-028 with BUG-027).
+          </td>
+          <td>Cover it from the Accounts side, where the bill is presumably complete.</td>
+        </tr>
+        <tr>
+          <td>The IPD Service Entry <em>OTName</em> picker and <em>Print All</em></td>
+          <td>
+            OTName lists several hundred OT procedures and nothing in the suite establishes
+            what picking one changes about a saved entry — which cannot be checked without
+            saving. Print All prints the whole cart and is not tied to one line.
+          </td>
+          <td>
+            Cover both with the save, once there is a cancel path or a non-production tenant.
+          </td>
+        </tr>
+        <tr>
           <td>Diet Dashboard rows past 120, and the dashboard's own date boxes</td>
           <td>
             DD-07 shows the grid cuts at 120 with no pager. The date boxes are read through the
@@ -3943,8 +4598,8 @@
     </table>
 
     <footer class="doc-footer">
-      Test Case Document v2.0 · Popular Medical College &amp; Hospital Ltd — Healthcare ERP
-      Test Automation · 05 October 2026 · generated from
+      Test Case Document v2.1 · Popular Medical College &amp; Hospital Ltd — Healthcare ERP
+      Test Automation · 06 October 2026 · generated from
       <span class="mono">docs/src/test-cases.html</span> by
       <span class="mono">npm run docs</span>.
     </footer>
