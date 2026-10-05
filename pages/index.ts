@@ -16,3 +16,15 @@ export type {
   DietAttempt,
   PatternPick,
 } from './diet-indent.page';
+export { DietDashboardPage } from './diet-dashboard.page';
+export type { DietDashboardRow, DietGrid, DietActionOutcome } from './diet-dashboard.page';
+export { ConsultancyServicePage } from './consultancy-service.page';
+export type {
+  ConsultancyWardPatient,
+  ConsultancyPatient,
+  ServiceOption,
+  CartLine,
+  ServedLine,
+  LineAttempt,
+  LineInput,
+} from './consultancy-service.page';

@@ -8,6 +8,8 @@ import {
   AdmissionDashboardPage,
   NurseStationPage,
   DietIndentPage,
+  DietDashboardPage,
+  ConsultancyServicePage,
 } from '../pages';
 
 /**
@@ -24,6 +26,8 @@ type Pages = {
   admissionDashboardPage: AdmissionDashboardPage;
   nurseStationPage: NurseStationPage;
   dietIndentPage: DietIndentPage;
+  dietDashboardPage: DietDashboardPage;
+  consultancyServicePage: ConsultancyServicePage;
 };
 
 export const test = base.extend<Pages>({
@@ -50,6 +54,12 @@ export const test = base.extend<Pages>({
   },
   dietIndentPage: async ({ page }, use) => {
     await use(new DietIndentPage(page));
+  },
+  dietDashboardPage: async ({ page }, use) => {
+    await use(new DietDashboardPage(page));
+  },
+  consultancyServicePage: async ({ page }, use) => {
+    await use(new ConsultancyServicePage(page));
   },
 });
 

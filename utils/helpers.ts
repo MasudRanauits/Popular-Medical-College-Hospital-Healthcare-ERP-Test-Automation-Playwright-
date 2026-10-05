@@ -118,3 +118,27 @@ export function nextRunNumber(counter: string): number {
   fs.writeFileSync(COUNTER_FILE, JSON.stringify(counters, null, 2));
   return next;
 }
+
+/**
+ * A date as the ERP's flatpickr boxes take it: YYYY-MM-DD.
+ *
+ * Built out of the local calendar fields rather than through toISOString, which formats in
+ * UTC - six hours behind this host - and so names yesterday for any run started before
+ * 6am local time.
+ */
+export function isoDate(date: Date = new Date()): string {
+  const pad = (part: number) => String(part).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+/** `days` before today, as YYYY-MM-DD. daysAgo(0) is today. */
+export function daysAgo(days: number): string {
+  const date = new Date();
+  date.setDate(date.getDate() - days);
+  return isoDate(date);
+}
+
+/** `days` after today, as YYYY-MM-DD. */
+export function daysAhead(days: number): string {
+  return daysAgo(-days);
+}

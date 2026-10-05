@@ -84,40 +84,76 @@ export class RegistrationPage extends BasePage {
   }
 
   /**
-   * Widens the date filter to start `days` days back and reloads the grid, leaving at
-   * least one patient listed.
+   * Widens the date filter until at least one patient is listed, and leaves the grid on
+   * the window that found them.
    *
    * "Show From" and "Show To" both open on today, so the grid arrives holding only the
    * patients registered today - and before the front desk has registered anybody it is
    * empty, pagination reading "0-0 of 0". Anything that reads a patient out of the grid
    * has to widen the window first, or it is working on the luck of what the day brought
-   * in. A year is the default because this is a filter, not a sample: the window only has
-   * to be wide enough that an empty grid means an empty list rather than a quiet morning.
+   * in. `days` is the widest it is worth widening to: this is a filter, not a sample, and
+   * it only has to be wide enough that an empty grid means an empty list rather than a
+   * quiet morning.
+   *
+   * It is not set there in one go, though. The grid is fetched server-side out of live
+   * hospital data and the fetch costs what the window holds: a year of registrations does
+   * not come back inside any wait worth putting on it - the loading bar was still running
+   * well past 30s, which is what used to fail this as "empty" - while a week comes back at
+   * once and nearly always holds somebody. So the windows are tried narrowest first, and
+   * each is widened past only because it came back empty.
    *
    * "Show To" is left on today - the far end of the window is already as late as it goes.
    */
   async showLastDays(days = 365): Promise<void> {
-    const from = new Date();
-    from.setDate(from.getDate() - days);
-    await this.pickDate(
-      this.showFrom,
-      from.getFullYear(),
-      from.toLocaleString('en-US', { month: 'short' }),
-      from.getDate()
-    );
+    const windows = [7, 30, days].filter((w, i, all) => w <= days && all.indexOf(w) === i);
 
-    // Show is disabled until the range is changed and goes back to disabled once the grid
-    // has been fetched under it, so a click fired straight after the picker closes lands on
-    // a dead button - Blazor re-enables it a beat after the date is taken.
-    await expect(this.showButton).toBeEnabled({ timeout: 30_000 });
-    await this.showButton.click();
+    for (const window of windows) {
+      const from = new Date();
+      from.setDate(from.getDate() - window);
+      await this.pickDate(
+        this.showFrom,
+        from.getFullYear(),
+        from.toLocaleString('en-US', { month: 'short' }),
+        from.getDate()
+      );
 
-    // The grid refetches on Show; settle before reading rows, as searchFor does.
-    await this.page.waitForTimeout(1_500);
+      // Show is disabled until the range is changed and goes back to disabled once the grid
+      // has been fetched under it, so a click fired straight after the picker closes lands on
+      // a dead button - Blazor re-enables it a beat after the date is taken.
+      await expect(this.showButton).toBeEnabled({ timeout: 30_000 });
+      await this.showButton.click();
+      await this.waitForGrid();
+
+      const listed = await this.rows
+        .first()
+        .waitFor({ state: 'visible', timeout: 5_000 })
+        .then(() => true)
+        .catch(() => false);
+      if (listed) return;
+    }
+
+    // Every window came back empty, out to the widest the caller allowed - report it
+    // against that one rather than the last one tried.
     await expect(
       this.rows.first(),
       `the registration list is empty over the last ${days} days`
     ).toBeVisible({ timeout: 30_000 });
+  }
+
+  /**
+   * Waits out the fetch behind the grid.
+   *
+   * MudTable hangs an indeterminate bar in the header row while its server call is in
+   * flight and takes it down when the rows arrive, and that bar is the only honest signal
+   * that what is on screen is the answer: mid-fetch and "nobody matched" are the same
+   * empty grid, down to the "0-0 of 0" in the pager.
+   */
+  async waitForGrid(timeout = 60_000): Promise<void> {
+    const loading = this.table.locator('.mud-table-loading-progress').first();
+    // Blazor needs a beat to put the bar up, so a check fired straight after the click
+    // would pass over the very fetch it is there to wait for.
+    await loading.waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {});
+    await expect(loading, 'the registration list never finished loading').toBeHidden({ timeout });
   }
 
   /** Types `term` into the search box and waits for the grid to re-render. */

@@ -1,4 +1,4 @@
-import { nextRunNumber, randomInt, uniqueSuffix } from '../utils/helpers';
+import { daysAgo, daysAhead, nextRunNumber, randomInt, uniqueSuffix } from '../utils/helpers';
 
 /** Builders keep specs readable and guarantee unique records per run. */
 export const patientFactory = (overrides: Partial<Patient> = {}): Patient => ({
@@ -227,5 +227,99 @@ export function dietIndent(lines = 1): DietIndentData {
     wardIndex: n % 24,
     mark: `DT-${n}-${uniqueSuffix().slice(-7)}`,
     quantities: Array.from({ length: lines }, () => randomInt(1, 9)),
+  };
+}
+
+/** The date windows a Diet Dashboard case filters on. */
+export interface DietDashboardData {
+  /** Today, as the filter boxes take it. The dashboard opens on this range. */
+  today: string;
+  /** A window wide enough to hold more than one day of indents. */
+  window: { start: string; end: string };
+  /** The same window with its ends swapped - a range the app should refuse. */
+  reversed: { start: string; end: string };
+  /** A window no indent can fall in, so an empty dashboard is the right answer. */
+  future: { start: string; end: string };
+  /**
+   * A window wide enough that the ward raised more indents in it than either grid will
+   * show. A fortnight of a live hospital is well past the 120 rows a grid stops at - five
+   * days already fills both - and the dashboard answers it in seconds, where a range of
+   * months leaves the host timing out mid-query and taking the session with it.
+   */
+  wide: { start: string; end: string };
+  /** Twice `wide`, for the case that asks whether a wider window brings back more. */
+  wider: { start: string; end: string };
+}
+
+/**
+ * The ranges the Diet Dashboard cases filter on, all relative to the day of the run.
+ *
+ * Nothing is hard-coded to a date: the dashboard is read-only about history, so a case
+ * that named 1 October would pass this month and find an empty ward next month.
+ */
+export function dietDashboard(): DietDashboardData {
+  return {
+    today: daysAgo(0),
+    window: { start: daysAgo(6), end: daysAgo(0) },
+    reversed: { start: daysAgo(0), end: daysAgo(6) },
+    future: { start: daysAhead(30), end: daysAhead(37) },
+    wide: { start: daysAgo(14), end: daysAgo(0) },
+    wider: { start: daysAgo(28), end: daysAgo(0) },
+  };
+}
+
+/** One consultancy line's worth of input for the Nurse Station. */
+export interface ConsultancyServiceData {
+  /**
+   * How far down the ward list to start looking for a patient.
+   *
+   * The cases are spread across the ward rather than all billing whoever is in the first
+   * bed, for the same reason the diet factory spreads its own: these are live admissions
+   * and a suite that always took the first one would put every run's services on one
+   * patient's bill. Rotated off the run counter, so each run starts from a different bed.
+   */
+  wardIndex: number;
+  /**
+   * What goes into the Service lookup. One term rather than one per line: the catalogue is
+   * live, and a term that matches a page of services lets a case take a different one per
+   * line without several searches that each have to hit something.
+   */
+  serviceSearch: string;
+  /**
+   * A second term, for the cases that need a service the first one does not offer.
+   */
+  otherServiceSearch: string;
+  /** Enough of a doctor name to bring back exactly one row in the Doctor Name lookup. */
+  doctorSearch: string;
+  /** A term no service or doctor can match, for the empty-result cases. */
+  noSuchTerm: string;
+  /** One quantity per line, so a case's cart is however long this is. */
+  quantities: number[];
+  /** A back-dated service date, for the case about the Service Date box. */
+  backdated: string;
+  /** What the discount box is set to, for the case about Service Change. */
+  discount: number;
+}
+
+/**
+ * One run's worth of consultancy input, all relative to the day of the run.
+ *
+ * The quantities stay inside 1..3 because these are billed to a live admission: a case
+ * that ordered fifty of a consultant's visits would leave a bill somebody has to unpick.
+ * Zero is excluded deliberately - the form refuses it, and that refusal is its own case
+ * rather than something the data should stumble into.
+ */
+export function consultancyService(lines = 2): ConsultancyServiceData {
+  const n = nextRunNumber('consultancy');
+  return {
+    // Kept well inside the ward list, which runs to a few hundred beds.
+    wardIndex: n % 24,
+    serviceSearch: 'Visit',
+    otherServiceSearch: 'Charge',
+    doctorSearch: 'Rowshon',
+    noSuchTerm: `no-such-service-${uniqueSuffix()}`,
+    quantities: Array.from({ length: lines }, () => randomInt(1, 3)),
+    backdated: daysAgo(3),
+    discount: 40,
   };
 }

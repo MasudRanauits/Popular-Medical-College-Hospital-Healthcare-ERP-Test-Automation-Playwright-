@@ -1,11 +1,12 @@
 import { Page, Locator, expect } from '@playwright/test';
 import { BasePage } from './base.page';
+import { readFile } from 'fs/promises';
 
 /** One PDF a print button produced, read back out of the blob the app handed the browser. */
 export interface PrintedDocument {
   /** Position in the Action cell, left to right - which document it is, in the app's order. */
   index: number;
-  /** The blob: URL the popup opened on. */
+  /** The blob: URL the document came back on - the download's, or the popup's. */
   url: string;
   /** Bytes of the PDF. */
   size: number;
@@ -31,6 +32,10 @@ export class AdmissionDashboardPage extends BasePage {
   static readonly PATH = '/hospital/patientlist-dashboard';
 
   protected readonly path = AdmissionDashboardPage.PATH;
+
+  /** How long one print is given to produce its document. The first of the four is over a
+   *  megabyte and is built on the server before a byte of it reaches the browser. */
+  private static readonly PRINT_TIMEOUT = 90_000;
 
   /** The grid's columns, in order. */
   static readonly COLUMNS = [
@@ -149,14 +154,20 @@ export class AdmissionDashboardPage extends BasePage {
    * produced.
    *
    * One at a time on purpose: each click opens its own tab, and the app reuses nothing
-   * between them, so firing them together would leave the popups unmatched to the buttons
-   * that opened them.
+   * between them, so firing them together would leave the documents unmatched to the
+   * buttons that opened them.
    *
-   * How the PDF is read back. The app does not navigate to a document or download one - it
-   * builds the file in the browser and opens a tab on a blob: URL, which is Chrome's PDF
-   * viewer and has no readable DOM. But the blob belongs to this page, which created it,
-   * so fetching that URL from here hands back the actual bytes. That is what makes
-   * "the button printed something" checkable rather than just "a tab opened".
+   * How the PDF is read back. The app builds the file in the browser and hands it to
+   * Chrome as a blob, which lands one of two ways. On this host it lands as a *download*:
+   * the blob carries a filename, so Chrome saves it and leaves the tab the app opened
+   * alongside it permanently blank - which is what the old wait for a blob: URL on that
+   * tab sat through until it timed out. Where it does not download, the tab is left
+   * sitting on the blob: URL in Chrome's PDF viewer instead.
+   *
+   * So both are armed before the click and whichever answers first is the document: a
+   * saved download is read off disk, a document tab is fetched from the page that created
+   * the blob - a blob: URL belongs to its creator and nothing else can read it. Either way
+   * what is checked is the bytes, not that a tab opened.
    */
   async printAll(row: Locator): Promise<PrintedDocument[]> {
     const context = this.page.context();
@@ -167,21 +178,50 @@ export class AdmissionDashboardPage extends BasePage {
     const printed: PrintedDocument[] = [];
 
     for (let index = 0; index < count; index++) {
-      const opening = context.waitForEvent('page', { timeout: 90_000 });
+      // The first of these is the document on this host; the second is the fallback. Both
+      // resolve to null on their own timeout rather than rejecting, so the race below is
+      // settled by whichever actually happened.
+      const downloading = this.page
+        .waitForEvent('download', { timeout: AdmissionDashboardPage.PRINT_TIMEOUT })
+        .catch(() => null);
+      // The tab is opened by the click handler itself, so it is there within a moment or
+      // it is not coming - only the document inside it is worth a long wait.
+      const opening = context.waitForEvent('page', { timeout: 15_000 }).catch(() => null);
+      const documentTab = opening.then((popup) =>
+        popup
+          ?.waitForURL(/^blob:/, { timeout: AdmissionDashboardPage.PRINT_TIMEOUT })
+          .then(() => popup)
+          .catch(() => null) ?? null
+      );
+
       await buttons.nth(index).click();
-      const popup = await opening;
 
-      // The tab opens on about:blank for a moment before the blob is swapped in.
-      await expect
-        .poll(() => popup.url(), {
-          timeout: 60_000,
-          message: `print button ${index + 1} opened a tab that never became a document`,
-        })
-        .toMatch(/^blob:/);
+      const document = await Promise.race([
+        downloading.then((download) => (download ? { download } : null)),
+        documentTab.then((popup) => (popup ? { popup } : null)),
+      ]);
 
-      const url = popup.url();
-      printed.push({ index, url, ...(await this.readPdf(url)) });
-      await popup.close();
+      if (document && 'download' in document) {
+        const bytes = await readFile(await document.download.path());
+        printed.push({
+          index,
+          url: document.download.url(),
+          size: bytes.length,
+          header: bytes.subarray(0, 8).toString('latin1'),
+        });
+      } else if (document) {
+        const url = document.popup.url();
+        printed.push({ index, url, ...(await this.readPdf(url)) });
+      } else {
+        throw new Error(
+          `print button ${index + 1} produced no document - nothing was saved, and the tab ` +
+            `it opened never became one`
+        );
+      }
+
+      // The app opens a tab for every print whether the document ends up in it or not;
+      // left behind they pile up over the four buttons.
+      await (await opening)?.close().catch(() => {});
     }
 
     return printed;
