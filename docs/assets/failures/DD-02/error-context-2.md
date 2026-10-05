@@ -1,0 +1,266 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: regression\diet-dashboard.regression.spec.ts >> Diet Dashboard @regression >> DD-02 the dashboard opens filtered to today, and says so in the date boxes
+- Location: tests\regression\diet-dashboard.regression.spec.ts:153:7
+
+# Error details
+
+```
+Error: expect(locator).toHaveValue(expected) failed
+
+Locator:  locator('input[name="StartDate"]')
+Expected: "2026-10-05"
+Received: "2026-10-06"
+Timeout:  15000ms
+
+Call log:
+  - Expect "toHaveValue" locator('input[name="StartDate"]') with timeout 15000ms
+  - waiting for locator('input[name="StartDate"]')
+    32 × locator resolved to <input type="hidden" name="StartDate" value="2026-10-06" placeholder="Start Date" id="flatpickr_hidden_0HNP2JLQ7CA3J" class="form-control flatpickr-input" _bl_6190cfad-9469-4d01-b95f-bd0d9cf81e5f=""/>
+       - unexpected value "2026-10-06"
+
+```
+
+```yaml
+- banner:
+  - toolbar:
+    - button
+    - heading "Popular Medical College and Hospital Limited" [level=2]
+    - button
+    - 'button "Language: English"'
+    - img: NA
+    - text: NA Administrator
+    - button "Open user menu"
+- complementary:
+  - navigation:
+    - img
+    - text: HIS ERP Healthcare Information System
+    - navigation:
+      - button "Toggle zho9wdrtp" [expanded]:
+        - img
+        - text: Hospital
+      - navigation:
+        - link "Dashboard":
+          - /url: /hospital/patientlist-dashboard
+        - link "New Admission":
+          - /url: /hospital/patientadmission
+        - link "Cabin dashboard":
+          - /url: /hospital/cabin-dashboard
+        - link "Billing Dashboard":
+          - /url: /hospital/hospital-billing-dashboard
+        - link "Billing Dashboard(Counter)":
+          - /url: /hospital/billing-dashboard-counter
+        - link "Nurse Station":
+          - /url: /hospital/nurse-station
+        - link "IPD Bill Change History":
+          - /url: /hospital/ipd-bill-change-history
+        - link "DRAFT BILL":
+          - /url: /hospital/hospital-billing
+        - link "FINAL BILL":
+          - /url: /hospital/pre-final-billing
+        - link "Advance Dashboard":
+          - /url: /hospital/advance-payment-dashboard
+        - link "Bed/Cabin Transfer":
+          - /url: /hospital/Cabin-Transfer
+        - link "Advance Collection":
+          - /url: /hospital/advance-payment
+        - link "Advance Return":
+          - /url: /hospital/advance-return
+        - link "IPD DUE COLLECTION":
+          - /url: /hospital/ipd-due-collection
+        - link "Billing Dashboard(Office)":
+          - /url: /hospital/billing-dashboard-office
+        - link "Doctor Transfer History":
+          - /url: /hospital/doctor-transfer-history
+        - link "IPD Service Entry (Billing Dept)":
+          - /url: /hospital/ipd-service-record-extra
+        - link "Consultant Service Entry (Billing Dept)":
+          - /url: /hospital/ipd-consultancy-service-extra
+        - link "Cabin Release":
+          - /url: /hospital/cabin-release
+        - link "OT Service Entry (Billing Dept)":
+          - /url: /hospital/addedit-otservice-extra
+        - link "Nurses Duty":
+          - /url: /hospital/Nurses-Duty
+        - link "IPD Service Entry":
+          - /url: /hospital/ipd-service-record
+        - link "CONSULTANCY SERVICE":
+          - /url: /hospital/ipd-consultancy-service
+        - link "Investigation Indent":
+          - /url: /hospital/ipdinvestigation-indent
+        - link "Visitor Pass":
+          - /url: /hospital/visiting-card
+        - link "Patient Dashboard For Billing Dept":
+          - /url: /hospital/patient-dashboard-for-billing-dept
+        - link "Medicine Indent":
+          - /url: /pharmacy/medicine-indent
+        - link "IPD MEDICINE RETURN":
+          - /url: /hospital/medicine-return-indent
+        - link "OT Service Entry":
+          - /url: /hospital/addedit-otservice
+        - link "DIET INDENT":
+          - /url: /canteen/canteen-indent
+        - link "Service Group":
+          - /url: /hospital/service-group
+        - link "SERVICE HEADS":
+          - /url: /hospital/service-executing
+        - link "Cabin Categories":
+          - /url: /hospital/cabin-categories
+        - link "Cabin":
+          - /url: /hospital/cabin
+        - link "Department":
+          - /url: /hospital/department
+        - link "Floor Setup":
+          - /url: /hospital/floor
+        - link "Edit Patient Basic Info":
+          - /url: /hospital/patientinfoedit-dashboard
+        - link "Edit/Delete Services":
+          - /url: /hospital/edit-hospital-bill-details
+        - link "OT Type":
+          - /url: /hospital/OTType
+        - link "PATIENT TRANSFER( INTER-DEPT )":
+          - /url: /hospital/inter-dept-transfer
+        - link "Anaesthesia Type":
+          - /url: /hospital/AnaesthesiaType
+        - link "PROCEDURE WEIGHT":
+          - /url: /hospital/Procedure-Weight
+        - link "Package Sub-Items":
+          - /url: /hospital/service-package-subitems
+        - link "Service Packagees":
+          - /url: /hospital/service-package
+        - link "Cabin Charge Rule":
+          - /url: /hospital/Cabin-ChargeRule
+        - link "Areas":
+          - /url: /hospital/areas
+        - link "District":
+          - /url: /hospital/district
+        - link "EDIT DISCHARGED IPD SERVICES":
+          - /url: /hospital/ipd-discharged-service-dashboard
+        - link "EDIT DISCHARGED CONSULTANT SERVICES":
+          - /url: /hospital/discharged-consultation-dashboard
+        - link "EDIT DISCHARGED OT SERVICES":
+          - /url: /hospital/discharged-otservice-dashboard
+        - link "Investigation Indent Dashboard":
+          - /url: /hospital/ipdinvestigation-indent-dashboard
+        - link "EDIT DISCHARGED BILL SUMMARY":
+          - /url: /hospital/edit-discharged-patient-bill-item
+        - link "Package Transfer":
+          - /url: /hospital/package-transfer
+        - link "House Keeping Dashboard":
+          - /url: /hospital/house-keeping-dashboard
+        - link "Edit Bed and Cabins ( Discharged )":
+          - /url: /hospital/discharged-cabin-bed-dashboard
+        - link "Dynamic Form Category":
+          - /url: /hospital/dynamic-form-category
+        - link "Edit Food and Beverage ( Discharged)":
+          - /url: /hospital/discharged-food-beverage
+        - link "Master Service Group":
+          - /url: /hospital/master-service-group
+        - link "Patient Package History":
+          - /url: hospital/patient-package-history
+        - link "Mpo Change History":
+          - /url: /hospital/mpo-change-history
+        - link "IPD Package Service Mapping":
+          - /url: /hospital/ipd-package-service
+        - link "OT Room Request":
+          - /url: /hospital/otroom-booking-request
+        - link "OT Room Booking Request Dashboard":
+          - /url: /hospital/otroom-booking-request-dashboard
+        - link "OT Calander":
+          - /url: /hospital/otroom-book
+        - link "IPD Due Collection Dashboard":
+          - /url: /hospital/ipd-due-collection-dashboard
+        - link "IPD Service Dashboard":
+          - /url: /hospital/ipd-service-details-dashboard
+        - link "Advance Return Dashboard":
+          - /url: /hospital/advance-return-dashboard
+        - link "Admission Cancel":
+          - /url: /hospital/admission-cancel
+        - link "Extra Cabin Allot/Cancel":
+          - /url: /hospital/extra-cabin
+        - link "Re-Admit":
+          - /url: /hospital/bring-discharged-patient-live
+        - link "OT Rooms":
+          - /url: /hospital/OTRoom
+        - link "Discharged Patients All Service":
+          - /url: /hospital/discharged-hospital-billing-dashboard
+        - link "OT Assistant Payment":
+          - /url: /ipd/ot-assistant-payment
+        - link "OT Info (NS)":
+          - /url: /hospital/addedit-otinfo-nursestation
+        - link "Print Discharged Patient admission form":
+          - /url: /hospital/print-discharged-patient-admission
+        - link "Hospital Patients Package Management":
+          - /url: /hospital/patient-package-management
+        - link "Acknowledge Hand Over Patients":
+          - /url: /emr/hand-over-list-dashboard
+        - link "Manual Cabin Charge":
+          - /url: /hospital/manual-cabin-day
+        - link "Cabin Groups":
+          - /url: /hospital/cabin-groups
+- navigation "breadcrumb":
+  - list:
+    - listitem:
+      - link " HealthCareERP":
+        - /url: "#"
+    - listitem:
+      - text: /
+      - link "Hospital":
+        - /url: "#"
+    - listitem: / Nurse Station
+- heading "Nurse Station" [level=4]:
+  - button:
+    - img
+  - text: Nurse Station
+- list:
+  - listitem: Medicine Indent
+  - listitem: Diet Indent
+  - listitem: Diet Dashboard
+  - listitem: Discharged Diet History
+  - listitem: Consultancy Service
+  - listitem: IPD Service Entry
+  - listitem: Clear From Nurse Station
+- text: Start Date
+- textbox "Start Date"
+- text: End Date
+- textbox "End Date"
+- text: Search
+- textbox
+- toolbar:
+  - group:
+    - button "Show"
+- table:
+  - rowgroup:
+    - row "Indent No ⇅ Admission No ⇅ Patient Name ⇅ CabinNo ⇅ Diet Name ⇅ Indent Date ⇅ Indent Time ⇅ Status ⇅ Remarks ⇅":
+      - columnheader "Indent No ⇅"
+      - columnheader "Admission No ⇅"
+      - columnheader "Patient Name ⇅"
+      - columnheader "CabinNo ⇅"
+      - columnheader "Diet Name ⇅"
+      - columnheader "Indent Date ⇅"
+      - columnheader "Indent Time ⇅"
+      - columnheader "Status ⇅"
+      - columnheader "Remarks ⇅"
+      - columnheader
+  - rowgroup
+- table:
+  - rowgroup:
+    - row "Indent No ⇅ Admission No ⇅ Patient Name ⇅ CabinNo ⇅ Diet Name ⇅ Indent Date ⇅ Indent Time ⇅ Status ⇅ Remarks ⇅":
+      - columnheader "Indent No ⇅"
+      - columnheader "Admission No ⇅"
+      - columnheader "Patient Name ⇅"
+      - columnheader "CabinNo ⇅"
+      - columnheader "Diet Name ⇅"
+      - columnheader "Indent Date ⇅"
+      - columnheader "Indent Time ⇅"
+      - columnheader "Status ⇅"
+      - columnheader "Remarks ⇅"
+      - columnheader
+  - rowgroup
+```

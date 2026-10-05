@@ -1,49 +1,49 @@
 {
-  "generatedAt": "2026-10-03T08:31:33.597Z",
+  "generatedAt": "2026-10-05T16:20:30.431Z",
   "run": {
-    "startedAt": 1791014652698,
-    "durationMs": 197589.874,
+    "startedAt": 1791214102595,
+    "durationMs": 2012698.34,
     "projects": [
       "setup",
       "chromium"
     ],
-    "total": 24,
-    "expected": 23,
-    "unexpected": 1,
+    "total": 99,
+    "expected": 94,
+    "unexpected": 2,
     "flaky": 0,
-    "skipped": 0,
+    "skipped": 3,
     "ok": false
   },
   "failures": [
     {
-      "id": "TC_ADM_002",
-      "title": "TC_ADM_002 searching a UHID loads that patient into the wizard",
-      "suite": "Admission @regression",
-      "spec": "regression/admission.regression.spec.ts:52",
+      "id": "DD-02",
+      "title": "DD-02 the dashboard opens filtered to today, and says so in the date boxes",
+      "suite": "Diet Dashboard @regression",
+      "spec": "regression/diet-dashboard.regression.spec.ts:153",
       "project": "chromium",
       "outcome": "unexpected",
-      "durationMs": 66664,
+      "durationMs": 46537,
       "attempts": [
         {
           "attempt": 1,
           "status": "failed",
-          "durationMs": 32760,
-          "startedAt": "2026-10-03T08:04:24.985Z",
-          "error": "TimeoutError: locator.innerText: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('table.mud-table-root').locator('tbody tr').first().locator('td').nth(1)\n\n\n  30 |     await registrationPage.expectLoaded();\n  31 |     // NAME, UHID, REG DATE, PHONE NUMBER, DOB, ACTION - UHID is the second column.\n> 32 |     const uhid = (await registrationPage.rows.first().locator('td').nth(1).innerText()).trim();\n     |                                                                            ^\n  33 |     expect(uhid).toMatch(/^\\d{10,}$/);\n  34 |     return uhid;\n  35 |   }",
+          "durationMs": 23277,
+          "startedAt": "2026-10-05T15:45:35.445Z",
+          "error": "Error: expect(locator).toHaveValue(expected) failed\n\nLocator:  locator('input[name=\"StartDate\"]')\nExpected: \"2026-10-05\"\nReceived: \"2026-10-06\"\nTimeout:  15000ms\n\nCall log:\n  - Expect \"toHaveValue\" locator('input[name=\"StartDate\"]') with timeout 15000ms\n  - waiting for locator('input[name=\"StartDate\"]')\n    32 × locator resolved to <input type=\"hidden\" name=\"StartDate\" value=\"2026-10-06\" placeholder=\"Start Date\" id=\"flatpickr_hidden_0HNP2JLQ7CA21\" class=\"form-control flatpickr-input\" _bl_cc8ab874-cb58-4011-aad7-692faf47db6f=\"\"/>\n       - unexpected value \"2026-10-06\"",
           "attachments": [
             {
               "name": "screenshot",
-              "file": "TC_ADM_002/screenshot-1.png",
+              "file": "DD-02/screenshot-1.png",
               "contentType": "image/png"
             },
             {
               "name": "video",
-              "file": "TC_ADM_002/video-1.webm",
+              "file": "DD-02/video-1.webm",
               "contentType": "video/webm"
             },
             {
               "name": "error-context",
-              "file": "TC_ADM_002/error-context-1.md",
+              "file": "DD-02/error-context-1.md",
               "contentType": "text/markdown"
             }
           ]
@@ -51,28 +51,92 @@
         {
           "attempt": 2,
           "status": "failed",
-          "durationMs": 33904,
-          "startedAt": "2026-10-03T08:04:58.756Z",
-          "error": "TimeoutError: locator.innerText: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('table.mud-table-root').locator('tbody tr').first().locator('td').nth(1)\n\n\n  30 |     await registrationPage.expectLoaded();\n  31 |     // NAME, UHID, REG DATE, PHONE NUMBER, DOB, ACTION - UHID is the second column.\n> 32 |     const uhid = (await registrationPage.rows.first().locator('td').nth(1).innerText()).trim();\n     |                                                                            ^\n  33 |     expect(uhid).toMatch(/^\\d{10,}$/);\n  34 |     return uhid;\n  35 |   }",
+          "durationMs": 23260,
+          "startedAt": "2026-10-05T15:46:00.490Z",
+          "error": "Error: expect(locator).toHaveValue(expected) failed\n\nLocator:  locator('input[name=\"StartDate\"]')\nExpected: \"2026-10-05\"\nReceived: \"2026-10-06\"\nTimeout:  15000ms\n\nCall log:\n  - Expect \"toHaveValue\" locator('input[name=\"StartDate\"]') with timeout 15000ms\n  - waiting for locator('input[name=\"StartDate\"]')\n    32 × locator resolved to <input type=\"hidden\" name=\"StartDate\" value=\"2026-10-06\" placeholder=\"Start Date\" id=\"flatpickr_hidden_0HNP2JLQ7CA3J\" class=\"form-control flatpickr-input\" _bl_6190cfad-9469-4d01-b95f-bd0d9cf81e5f=\"\"/>\n       - unexpected value \"2026-10-06\"",
           "attachments": [
             {
               "name": "screenshot",
-              "file": "TC_ADM_002/screenshot-2.png",
+              "file": "DD-02/screenshot-2.png",
               "contentType": "image/png"
             },
             {
               "name": "video",
-              "file": "TC_ADM_002/video-2.webm",
+              "file": "DD-02/video-2.webm",
               "contentType": "video/webm"
             },
             {
               "name": "error-context",
-              "file": "TC_ADM_002/error-context-2.md",
+              "file": "DD-02/error-context-2.md",
               "contentType": "text/markdown"
             },
             {
               "name": "trace",
-              "file": "TC_ADM_002/trace-2.zip",
+              "file": "DD-02/trace-2.zip",
+              "contentType": "application/zip"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "DD-13",
+      "title": "DD-13 leaving the tab and coming back puts the dashboard back on today",
+      "suite": "Diet Dashboard @regression",
+      "spec": "regression/diet-dashboard.regression.spec.ts:609",
+      "project": "chromium",
+      "outcome": "unexpected",
+      "durationMs": 74231,
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "failed",
+          "durationMs": 33684,
+          "startedAt": "2026-10-05T15:49:24.165Z",
+          "error": "Error: expect(locator).toHaveValue(expected) failed\n\nLocator:  locator('input[name=\"StartDate\"]')\nExpected: \"2026-10-05\"\nReceived: \"2026-10-06\"\nTimeout:  15000ms\n\nCall log:\n  - Expect \"toHaveValue\" locator('input[name=\"StartDate\"]') with timeout 15000ms\n  - waiting for locator('input[name=\"StartDate\"]')\n    32 × locator resolved to <input type=\"hidden\" name=\"StartDate\" value=\"2026-10-06\" placeholder=\"Start Date\" id=\"flatpickr_hidden_0HNP2JLQ7CMPK\" class=\"form-control flatpickr-input\" _bl_de79ac65-ffae-4d11-8383-58274a6ac349=\"\"/>\n       - unexpected value \"2026-10-06\"",
+          "attachments": [
+            {
+              "name": "screenshot",
+              "file": "DD-13/screenshot-1.png",
+              "contentType": "image/png"
+            },
+            {
+              "name": "video",
+              "file": "DD-13/video-1.webm",
+              "contentType": "video/webm"
+            },
+            {
+              "name": "error-context",
+              "file": "DD-13/error-context-1.md",
+              "contentType": "text/markdown"
+            }
+          ]
+        },
+        {
+          "attempt": 2,
+          "status": "failed",
+          "durationMs": 40547,
+          "startedAt": "2026-10-05T15:50:00.104Z",
+          "error": "Error: expect(locator).toHaveValue(expected) failed\n\nLocator:  locator('input[name=\"StartDate\"]')\nExpected: \"2026-10-05\"\nReceived: \"2026-10-06\"\nTimeout:  15000ms\n\nCall log:\n  - Expect \"toHaveValue\" locator('input[name=\"StartDate\"]') with timeout 15000ms\n  - waiting for locator('input[name=\"StartDate\"]')\n    32 × locator resolved to <input type=\"hidden\" name=\"StartDate\" value=\"2026-10-06\" placeholder=\"Start Date\" id=\"flatpickr_hidden_0HNP2JLQ7COE1\" class=\"form-control flatpickr-input\" _bl_b7a156ac-21a2-49e5-91de-13e741f127f0=\"\"/>\n       - unexpected value \"2026-10-06\"",
+          "attachments": [
+            {
+              "name": "screenshot",
+              "file": "DD-13/screenshot-2.png",
+              "contentType": "image/png"
+            },
+            {
+              "name": "video",
+              "file": "DD-13/video-2.webm",
+              "contentType": "video/webm"
+            },
+            {
+              "name": "error-context",
+              "file": "DD-13/error-context-2.md",
+              "contentType": "text/markdown"
+            },
+            {
+              "name": "trace",
+              "file": "DD-13/trace-2.zip",
               "contentType": "application/zip"
             }
           ]

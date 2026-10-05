@@ -4,10 +4,17 @@ Two deliverables, each a separate document, both built from the sources in `src/
 
 | Document | PDF | Source | Pages |
 | --- | --- | --- | --- |
-| **Test Case Document** — all 35 cases in one file | [`TEST_CASES.pdf`](TEST_CASES.pdf) | [`src/test-cases.html`](src/test-cases.html) | 15, A4 landscape |
-| **Bug Report** — 8 defects + 1 automation defect, with screenshots and video | [`BUG_REPORT.pdf`](BUG_REPORT.pdf) | [`src/bug-report.html`](src/bug-report.html) | 13, A4 portrait |
+| **Test Case Document** — all 110 cases in one file | [`TEST_CASES.pdf`](TEST_CASES.pdf) | [`src/test-cases.html`](src/test-cases.html) | 56, A4 landscape |
+| **Bug Report** — 23 defects + 1 closed automation defect, with screenshots and video | [`BUG_REPORT.pdf`](BUG_REPORT.pdf) | [`src/bug-report.html`](src/bug-report.html) | 32, A4 portrait |
 
-Both reflect the regression run of **03 Oct 2026, 08:04 UTC** — 24 tests, 23 passed, 1 failed.
+Both reflect the full regression run of **05 Oct 2026, 15:28 UTC** — 99 tests in 33 m 33 s:
+94 expected (78 passed, 16 expected-to-fail), 2 failed, 3 skipped.
+
+**Expected-to-fail is not a broken test.** Sixteen cases are marked `test.fail()`: each asserts
+the behaviour the module is supposed to have, fails on every run, and is reported as
+*unexpectedly passing* — which fails the build — the day the module is corrected. Each is a
+defect in the bug report (BUG-009 … BUG-023, bar BUG-018). The two real failures are DD-02 and
+DD-13, both BUG-018; the three skips are downstream of it.
 
 ## Video
 
@@ -16,31 +23,45 @@ players. For the recordings, either open `src/bug-report.html` in a browser — 
 are inline — or open the files directly:
 
 ```
-docs/assets/failures/TC_ADM_002/video-1.webm   attempt 1
-docs/assets/failures/TC_ADM_002/video-2.webm   attempt 2 (retry)
+docs/assets/failures/DD-02/video-1.webm   BUG-018, attempt 1
+docs/assets/failures/DD-02/video-2.webm   BUG-018, attempt 2 (retry)
+docs/assets/failures/DD-13/video-1.webm   the same default after a tab round trip
+docs/assets/failures/DD-13/video-2.webm   attempt 2 (retry)
 ```
 
 The Playwright trace is richer than either, with DOM snapshots, network and console per
 step:
 
 ```
-npx playwright show-trace docs/assets/failures/TC_ADM_002/trace-2.zip
+npx playwright show-trace docs/assets/failures/DD-02/trace-2.zip
 ```
+
+`TC_ADM_002/` is kept from the 03 Oct run because BUG-001 is still open — it is the only
+folder here that is not from the latest run. Clearing it means dropping that defect's evidence.
 
 ## Evidence
 
 `assets/failures/` holds one folder per failed test, named by its case ID, plus
 `manifest.json` describing the run. It is written by the collector, not by hand.
 
+Case IDs in both schemes are recognised — `TC_ADM_002` and the shorter `CS-12` / `DD-02` /
+`DI-06` the Nurse Station suites use.
+
 ```
 assets/failures/
   manifest.json                 run stats, per-attempt status, timings, error text
-  TC_ADM_002/
+  DD-02/                        05 Oct run — BUG-018, BUG-019
     screenshot-1.png  screenshot-2.png
     video-1.webm      video-2.webm
     error-context-1.md  error-context-2.md    page snapshot at the failure
     trace-2.zip
+  DD-13/                        05 Oct run — BUG-018 after a tab round trip
+  TC_ADM_002/                   03 Oct run — kept for BUG-001, see above
 ```
+
+Cases marked `test.fail()` produce no artifacts: Playwright records nothing for a test that
+failed as expected. Their evidence is the run annotation each one writes — visible per test in
+`npm run report`.
 
 ## Rebuilding
 
@@ -67,3 +88,10 @@ correctly in a browser and in print.
 After a new run, the order is: run the suite → `npm run docs:evidence` → update the status
 columns in `src/test-cases.html` and raise or close defects in `src/bug-report.html` →
 `npm run docs:pdf`.
+
+Use `docs:evidence --keep` while any defect in the report still points at an older run's
+artifacts, as BUG-001 does; a plain run clears the folder.
+
+**Watch for unexpectedly passing.** A case marked `test.fail()` that starts passing means the
+module was corrected: close the defect it holds, drop the `test.fail()` line, keep the
+assertion, and move its row in `src/test-cases.html` from `known fail` to `pass`.

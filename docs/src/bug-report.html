@@ -25,9 +25,10 @@
       <p class="eyebrow">Popular Medical College &amp; Hospital Ltd · Healthcare ERP (HIS)</p>
       <h1>Bug Report</h1>
       <p class="subtitle">
-        Defects raised from the Playwright regression cycle of 03 October 2026. Eight entries:
-        one reproduced with screenshot, video and trace; seven raised from observed behaviour
-        during the automation build.
+        Defects raised from the Playwright regression cycles of 03 and 05 October 2026.
+        Twenty-three entries: three reproduced with screenshot, video and trace; sixteen held
+        under a failing regression case that watches for the fix; the rest raised from
+        behaviour observed repeatedly during the automation build.
       </p>
     </header>
 
@@ -40,11 +41,11 @@
         </tr>
         <tr>
           <th>Version</th>
-          <td>1.0</td>
+          <td>2.0</td>
         </tr>
         <tr>
           <th>Date raised</th>
-          <td>03 October 2026</td>
+          <td>03 October 2026 (BUG-001 … BUG-008), 05 October 2026 (BUG-009 … BUG-023)</td>
         </tr>
         <tr>
           <th>Raised by</th>
@@ -53,15 +54,16 @@
         <tr>
           <th>Test cycle</th>
           <td>
-            Regression run of 03 Oct 2026, 08:04 UTC — 24 tests in 3 m 18 s, 23 passed,
-            1 failed.
+            Full regression run of <strong>05 Oct 2026, 15:28 UTC</strong> — 99 tests in
+            33 m 33 s: 94 expected (78 passed and 16 expected-to-fail), 2 failed, 3 skipped.
+            Supersedes the run of 03 Oct 2026, 08:04 UTC, which covered 24 of these cases.
           </td>
         </tr>
         <tr>
           <th>Companion document</th>
           <td>
-            <span class="mono">docs/TEST_CASES.pdf</span> — the 35 cases these defects were
-            found against.
+            <span class="mono">docs/TEST_CASES.pdf</span> — the 110 cases these defects were
+            found against. Each defect below names the case that holds it.
           </td>
         </tr>
         <tr>
@@ -79,7 +81,7 @@
             This PDF cannot play video. Open
             <span class="mono">docs/src/bug-report.html</span> in a browser for the inline
             players, or open the <span class="mono">.webm</span> files directly — paths are
-            given with each defect and in section 5.
+            given with each defect and in the evidence index, section 7.
           </td>
         </tr>
       </tbody>
@@ -140,10 +142,15 @@
         <tr>
           <th>Evidence strength</th>
           <td>
-            <span class="badge fail">reproduced</span> captured in the 03 Oct run with
-            artifacts attached ·
+            <span class="badge fail">reproduced</span> captured in a run with artifacts
+            attached — screenshot, video, trace ·
+            <span class="badge warn">held by a case</span> a regression case marked
+            <span class="mono">test.fail()</span> asserts the correct behaviour and fails on
+            every run; the run reports it as expected-to-fail, and will report it as
+            <em>unexpectedly passing</em> the day the module is corrected, which is the signal
+            to close the defect and drop the marker ·
             <span class="badge warn">observed</span> seen repeatedly while building the suite
-            and recorded in the test code, but not captured as an artifact in this run.
+            and recorded in the test code, but not captured as an artifact.
           </td>
         </tr>
       </tbody>
@@ -188,11 +195,11 @@
         </tr>
         <tr>
           <td class="mono"><strong>BUG-004</strong></td>
-          <td>Patient Registration grid can take over 30 seconds to render its first row</td>
+          <td>Patient Registration grid is slow to render its first row — 10 s typical, 34 s at worst</td>
           <td>Registration</td>
           <td>Medium</td>
           <td>P2</td>
-          <td><span class="badge fail">reproduced</span> run timings</td>
+          <td><span class="badge fail">reproduced</span> run timings, both cycles</td>
         </tr>
         <tr>
           <td class="mono"><strong>BUG-005</strong></td>
@@ -226,15 +233,148 @@
           <td>P3</td>
           <td><span class="badge warn">observed</span></td>
         </tr>
+        <tr>
+          <td class="mono"><strong>BUG-009</strong></td>
+          <td>Picking another patient does not empty the cart — one patient's services are billed to the next</td>
+          <td>Consultancy Service</td>
+          <td>Critical</td>
+          <td>P1</td>
+          <td><span class="badge warn">held by a case</span> CS-12</td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-010</strong></td>
+          <td>Leaving the tab and returning clears the patient but keeps the cart — services against nobody</td>
+          <td>Consultancy Service</td>
+          <td>High</td>
+          <td>P1</td>
+          <td><span class="badge warn">held by a case</span> CS-13</td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-011</strong></td>
+          <td>The Rate box is editable, and the rate a nurse types is the rate the patient is billed</td>
+          <td>Consultancy Service</td>
+          <td>Critical</td>
+          <td>P1</td>
+          <td><span class="badge warn">held by a case</span> CS-14, CS-22</td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-012</strong></td>
+          <td>Committing a line resets Service Date, so a service performed earlier cannot be entered as such</td>
+          <td>Consultancy Service</td>
+          <td>Medium</td>
+          <td>P2</td>
+          <td><span class="badge warn">held by a case</span> CS-15</td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-013</strong></td>
+          <td>Service Change — the discount box — is read by nothing; the cart and the bill ignore it</td>
+          <td>Consultancy Service</td>
+          <td>Medium</td>
+          <td>P2</td>
+          <td><span class="badge warn">held by a case</span> CS-16</td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-014</strong></td>
+          <td>The blank first row of the Doctor Name lookup satisfies the required-field guard</td>
+          <td>Consultancy Service</td>
+          <td>High</td>
+          <td>P1</td>
+          <td><span class="badge warn">held by a case</span> CS-17</td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-015</strong></td>
+          <td>A lookup search that matches nothing shows a blank bordered row, not an empty state</td>
+          <td>Consultancy Service</td>
+          <td>Low</td>
+          <td>P3</td>
+          <td><span class="badge warn">held by a case</span> CS-18</td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-016</strong></td>
+          <td>The bill grid stops at 15 rows with no pager — a 16th charge cannot be seen or cancelled</td>
+          <td>Consultancy Service</td>
+          <td>High</td>
+          <td>P1</td>
+          <td><span class="badge warn">held by a case</span> CS-23</td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-017</strong></td>
+          <td>Diet indent quantity is not recorded — every line is filed as 1, zero included</td>
+          <td>Diet Indent</td>
+          <td>High</td>
+          <td>P1</td>
+          <td><span class="badge warn">held by a case</span> DI-06, DI-10</td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-018</strong></td>
+          <td>Diet Dashboard opens filtered to <em>tomorrow</em>, so the ward's own meals are not on it</td>
+          <td>Diet Dashboard</td>
+          <td>High</td>
+          <td>P1</td>
+          <td><span class="badge fail">reproduced</span> 2 screenshots, 4 videos, 2 traces</td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-019</strong></td>
+          <td>The date boxes are blank while a range is in force — the filter is invisible</td>
+          <td>Diet Dashboard</td>
+          <td>Medium</td>
+          <td>P2</td>
+          <td><span class="badge fail">reproduced</span> screenshot</td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-020</strong></td>
+          <td>A refused range and a search that matched nothing both answer with a silent empty dashboard</td>
+          <td>Diet Dashboard</td>
+          <td>Medium</td>
+          <td>P2</td>
+          <td><span class="badge warn">held by a case</span> DD-06, DD-09</td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-021</strong></td>
+          <td>Each grid stops at 120 rows with no pager and no total; older indents are invisible</td>
+          <td>Diet Dashboard</td>
+          <td>High</td>
+          <td>P1</td>
+          <td><span class="badge warn">held by a case</span> DD-07</td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-022</strong></td>
+          <td>Neither grid is labelled, so whether a patient is on a diet is readable only from the button</td>
+          <td>Diet Dashboard</td>
+          <td>Medium</td>
+          <td>P2</td>
+          <td><span class="badge warn">held by a case</span> DD-12</td>
+        </tr>
+        <tr>
+          <td class="mono"><strong>BUG-023</strong></td>
+          <td>Stop takes a patient off their diet on one click, and Continue cancels the running one, both unannounced</td>
+          <td>Diet Dashboard</td>
+          <td>High</td>
+          <td>P1</td>
+          <td><span class="badge warn">held by a case</span> DD-16, DD-17</td>
+        </tr>
       </tbody>
     </table>
     <p class="note">
-      One further item is an <strong>automation defect</strong>, not an application defect, and
-      is tracked separately in section 6: TC_ADM_002 assumes the registration grid is never
-      empty, which is why BUG-001 took the run down with it.
+      <strong>One item has been closed.</strong> AUT-001, the automation defect that took the
+      03 Oct run down with BUG-001, is fixed and verified — see section 6. BUG-001 itself
+      stands: the test working around the default filter does not make the default filter
+      right.
+    </p>
+    <p class="note">
+      <strong>Why so many at once.</strong> BUG-009 … BUG-023 are the Nurse Station tabs —
+      Consultancy Service, Diet Indent and Diet Dashboard — which were automated between the
+      two cycles and had not been covered before. Fifteen of the sixteen cases marked
+      <span class="mono">test.fail()</span> were written against behaviour found while building
+      those suites; BUG-018 is the one genuinely new failure the 05 Oct run turned up.
     </p>
 
-    <h2 class="defects-break">5. Defect detail</h2>
+    <h2 class="defects-break">5a. Defect detail — Registration, Admission, Platform</h2>
+    <p class="note">
+      Raised in the 03 Oct cycle. All eight were re-checked against the 05 Oct run and all
+      eight still stand; what changed is that BUG-001 no longer takes the suite down with it,
+      because the automation defect behind that is fixed (section 6).
+    </p>
 
     <!-- ------------------------------------------------------------ BUG-001 -->
     <section class="bug">
@@ -252,20 +392,24 @@
           </tr>
           <tr>
             <th>Status</th>
-            <td><span class="badge fail">open</span> — reproduced on both attempts of the 03 Oct run</td>
+            <td>
+              <span class="badge fail">open</span> — reproduced on both attempts of the 03 Oct
+              run. Still present on 05 Oct; TC_ADM_002 passed that day only because it now
+              widens the range itself (AUT-001, section 6).
+            </td>
           </tr>
           <tr>
             <th>Found by</th>
             <td>
               <span class="mono">TC_ADM_002</span> —
-              <span class="mono">tests/regression/admission.regression.spec.ts:52</span>
+              <span class="mono">tests/regression/admission.regression.spec.ts:63</span>
             </td>
           </tr>
           <tr>
             <th>Reproducibility</th>
             <td>
               Deterministic. Any day before the first patient of the day is registered — in
-              this run, both attempts, 08:04 and 08:04 UTC.
+              the 03 Oct run, both attempts, 08:04 UTC.
             </td>
           </tr>
         </tbody>
@@ -593,7 +737,11 @@ Call log:
           </tr>
           <tr>
             <th>Status</th>
-            <td><span class="badge fail">open</span> — measured in the 03 Oct run</td>
+            <td>
+              <span class="badge warn">open — intermittent</span> — 33.8 s on 03 Oct,
+              <strong>10.3 s</strong> on 05 Oct. Slow either way, but not reproducibly over
+              30 s; see <em>Actual result</em>.
+            </td>
           </tr>
           <tr>
             <th>Found by</th>
@@ -623,14 +771,26 @@ Call log:
         why the project raises Playwright's default timeouts across the board: 90 s per test,
         30 s per action, 45 s per navigation.
       </p>
+      <p>
+        <strong>Re-measured on 05 Oct: 10.3 seconds.</strong> Three times faster, and still
+        four to five times every other case on the same page in the same session. So the page
+        is reliably slow and <em>sometimes</em> very slow, which points at load on the host or
+        on the query rather than at a fixed cost. The defect stands, with the headline figure
+        read as a worst case rather than as typical.
+      </p>
 
       <h4>Evidence</h4>
       <ul class="evidence-list">
         <li>
           Run timings in <span class="mono">docs/assets/failures/manifest.json</span>, and in
-          the HTML report under <span class="mono">playwright-report/</span>. Comparison, same
+          the HTML report under <span class="mono">playwright-report/</span>. Comparison, 03 Oct
           run, same session: TC_REG_003 (same page, no row wait) 2.4 s; TC_REG_002 4.4 s;
           TC_REG_008 3.8 s.
+        </li>
+        <li>
+          05 Oct run, same session: TC_REG_004 10.3 s against TC_REG_003 2.7 s, TC_REG_002
+          4.3 s, TC_REG_008 4.3 s. The three comparison cases barely moved between the two
+          runs; TC_REG_004 moved by 23 seconds.
         </li>
       </ul>
 
@@ -905,6 +1065,1058 @@ Call log:
       </p>
     </section>
 
+    <h2 class="defects-break">5b. Defect detail — Nurse Station &gt; Consultancy Service</h2>
+    <p class="note">
+      All eight were found while automating the tab for the 05 Oct cycle. Each is held by a
+      regression case marked <span class="mono">test.fail()</span>: the case asserts the
+      behaviour the tab is supposed to have, fails on every run, and will report as
+      <em>unexpectedly passing</em> the day the module is corrected. The route is
+      <span class="mono">/hospital/nurse-station</span> &gt; <strong>Consultancy Service</strong>
+      throughout, and the spec is
+      <span class="mono">tests/regression/consultancy-service.regression.spec.ts</span>.
+    </p>
+
+    <!-- ------------------------------------------------------------ BUG-009 -->
+    <section class="bug">
+      <h3><span class="mono">BUG-009</span> — Picking another patient does not empty the cart, so one patient's services are billed to the next</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Nurse Station &gt; Consultancy Service</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>Critical / P1</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge fail">open</span> — the worst of the eight on this tab</td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td><span class="mono">CS-12</span> — <span class="mono">consultancy-service.regression.spec.ts:515</span></td>
+          </tr>
+          <tr>
+            <th>Reproducibility</th>
+            <td>Deterministic — every run, every pair of beds.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Open Nurse Station &gt; Consultancy Service.</li>
+        <li>Click the patient in bed <strong>A</strong> in the ward list.</li>
+        <li>Enter one service — pick a service, a doctor, a schedule, press <strong>Enter</strong> on Qty. The line lands in the cart and Total Amount shows its value.</li>
+        <li>Without pressing Save, click the patient in bed <strong>B</strong>.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>
+        Picking a patient starts that patient's bill. The cart is emptied and Total Amount
+        returns to zero, because nothing in it belongs to the patient now on screen.
+      </p>
+
+      <h4>Actual result</h4>
+      <p>
+        The patient panel moves to B — name, bed and Inv.No all change — and the cart does not.
+        A's services are still listed, and A's money is still in Total Amount, under B's name.
+        <strong>Press Save from here and B is billed for A's consultants.</strong> Nothing on
+        screen marks the lines as belonging to someone else, and the only cue that anything is
+        wrong is that the nurse remembers entering them for the previous bed.
+      </p>
+
+      <h4>Impact</h4>
+      <p>
+        One mis-click in a ward list produces a wrong bill against a real patient, silently. It
+        is also the easiest mistake on the tab to make: the ward list and the entry row are on
+        the same screen, and moving down the beds is the normal way to work.
+      </p>
+
+      <h4>Suggested fix</h4>
+      <p>
+        Clear the cart, Total Amount and the Service Change box whenever the selected admission
+        changes — the same reset the save already performs. If carrying lines over is ever
+        wanted, it must be an explicit choice with the patient named in the prompt, not the
+        default.
+      </p>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-010 -->
+    <section class="bug">
+      <h3><span class="mono">BUG-010</span> — Leaving the tab and coming back clears the patient but keeps the cart</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Nurse Station &gt; Consultancy Service</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>High / P1</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge fail">open</span></td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td><span class="mono">CS-13</span> — <span class="mono">consultancy-service.regression.spec.ts:568</span></td>
+          </tr>
+          <tr>
+            <th>Related</th>
+            <td>BUG-009 — the same cart, not cleared on a different trigger</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Pick a patient and enter one service into the cart.</li>
+        <li>Click away to <strong>Medicine Indent</strong>.</li>
+        <li>Click back to <strong>Consultancy Service</strong> and wait for the pane to settle.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>A cart with no patient against it should not exist. Either both survive the round trip, or neither does.</p>
+
+      <h4>Actual result</h4>
+      <p>
+        The round trip <em>does</em> clear the patient panel — which is the half the tab gets
+        right — and leaves the cart holding the lines, with a figure under them in Total
+        Amount, against nobody at all. The next nurse to pick a patient inherits them, which is
+        BUG-009 by another route.
+      </p>
+
+      <h4>Note for whoever fixes it</h4>
+      <p>
+        Returning to the tab repaints the grid empty for about a second before refilling it, so
+        a quick look can suggest the cart was cleared when it was not. The regression case
+        waits for the pane to settle before reading it, for exactly that reason.
+      </p>
+
+      <h4>Suggested fix</h4>
+      <p>Clear the cart with the patient panel. One reset, run on both triggers.</p>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-011 -->
+    <section class="bug">
+      <h3><span class="mono">BUG-011</span> — The Rate box is editable, and the rate a nurse types is the rate the patient is billed</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Nurse Station &gt; Consultancy Service</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>Critical / P1</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge fail">open</span> — confirmed through the save</td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td>
+              <span class="mono">CS-14</span> (at the form) —
+              <span class="mono">consultancy-service.regression.spec.ts:620</span><br />
+              <span class="mono">CS-22</span> (on the bill) —
+              <span class="mono">consultancy-service.regression.spec.ts:1108</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Pick a patient, then pick a service the catalogue prices at, say, 1000. The Rate box fills with 1000.</li>
+        <li>Type over it — set it to <strong>1</strong>.</li>
+        <li>Add a doctor and a schedule and press Enter on Qty.</li>
+        <li>Press <strong>Save</strong> and read the row that lands on the bill.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>
+        The rate belongs to the service catalogue. The box is read-only at the nurse station, and
+        whatever is on screen, the line is costed at the catalogue rate. A ward nurse adding a
+        consultant's visit is not the person who prices it.
+      </p>
+
+      <h4>Actual result</h4>
+      <p>
+        The box takes the new number, the cart line carries it, and <strong>the saved bill row
+        carries it too</strong> — 1 instead of 1000, at amount 1. Nothing anywhere records that
+        the catalogue said otherwise. Typed the other way, the same path overcharges.
+      </p>
+
+      <h4>Impact</h4>
+      <p>
+        Pricing is editable by every ward account, without an approval step or an audit trail,
+        on a live bill. Both directions matter: revenue lost on an undercharge, and a patient
+        overcharged with nothing on the record to explain it.
+      </p>
+
+      <h4>Note on how this was tested</h4>
+      <p>
+        Both cases type the rate <em>down</em> to 1, never up. This is the hospital's live
+        database: a rate typed up would be a charge the ward never meant to make. CS-22 cancels
+        its own row off the bill afterwards, with a reason, like every other writing case.
+      </p>
+
+      <h4>Suggested fix</h4>
+      <p>
+        Disable the Rate box and cost the line server-side from the catalogue. If a negotiated
+        rate is a real requirement, put it behind a permission and record who changed it, what
+        from and what to.
+      </p>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-012 -->
+    <section class="bug sev-medium">
+      <h3><span class="mono">BUG-012</span> — Committing a line puts Service Date back, so a service performed earlier cannot be entered as such</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Nurse Station &gt; Consultancy Service</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>Medium / P2</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge warn">open</span></td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td><span class="mono">CS-15</span> — <span class="mono">consultancy-service.regression.spec.ts:663</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Pick a patient and set <strong>Service Date</strong> to a date a few days back.</li>
+        <li>Pick a service, a doctor and a schedule. The back-date is still in the box.</li>
+        <li>Press Enter on Qty and watch the box.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>The date chosen is the date the service is recorded against, and it survives the commit.</p>
+
+      <h4>Actual result</h4>
+      <p>
+        The box takes the date and keeps it through the whole of the entry — right up to the
+        Enter — then drops it, a render after the row lands, back to the day the tab opened on.
+        The saved row carries the moment of the save rather than either. A consultancy performed
+        on the ward three days ago cannot be entered as having been performed three days ago.
+      </p>
+
+      <h4>Suggested fix</h4>
+      <p>
+        Carry the entry row's Service Date into the committed line and into the saved row, and
+        stop resetting the box on commit. If the reset is deliberate, it should at least happen
+        before the line is read, not after.
+      </p>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-013 -->
+    <section class="bug sev-medium">
+      <h3><span class="mono">BUG-013</span> — Service Change, the discount box, is read by nothing</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Nurse Station &gt; Consultancy Service</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>Medium / P2</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge warn">open</span></td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td><span class="mono">CS-16</span> — <span class="mono">consultancy-service.regression.spec.ts:720</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Pick a patient and fill a line for a service that costs more than the discount.</li>
+        <li>Type a discount into <strong>Service Change</strong>, under Total Amount.</li>
+        <li>Press Enter on Qty and read the cart line.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>The discount comes off the amount, and the cart line's Service Change column carries it.</p>
+
+      <h4>Actual result</h4>
+      <p>
+        The box keeps what was typed into it, so nothing on screen suggests it was ignored — but
+        the cart line carries no Service Change and the amount is the full rate. The saved row
+        does not carry it either. The form has the box, the cart has a column for it and the
+        bill has a <em>Discount</em> column, and nothing reads any of the three.
+      </p>
+
+      <h4>Suggested fix</h4>
+      <p>
+        Either wire the box through to the line and the saved row, or remove it and the two
+        columns. A control that silently does nothing is worse than no control: a nurse who
+        types a discount has every reason to believe it was applied.
+      </p>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-014 -->
+    <section class="bug">
+      <h3><span class="mono">BUG-014</span> — The blank first row of the Doctor Name lookup satisfies the required-field guard</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Nurse Station &gt; Consultancy Service</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>High / P1</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge fail">open</span> — services with no doctor are already on live bills</td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td><span class="mono">CS-17</span> — <span class="mono">consultancy-service.regression.spec.ts:769</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Pick a patient and pick a service.</li>
+        <li>Open the <strong>Doctor Name</strong> lookup without searching. The first row is a blank record — no code, no name.</li>
+        <li>Click that row. The form shows no doctor.</li>
+        <li>Press Enter on Qty.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>
+        Doctor Name is required, and a blank record is not a doctor. The commit is refused with
+        <em>Please select fields.</em> — which is exactly what happens if the lookup is never
+        opened at all (CS-06).
+      </p>
+
+      <h4>Actual result</h4>
+      <p>
+        Having opened the lookup and clicked its blank row is enough to satisfy the guard. The
+        line is committed, and saves, with no doctor against it. CS-11 lists the services already
+        on live bills in that state.
+      </p>
+
+      <h4>Impact</h4>
+      <p>
+        A consultancy charge with no consultant named cannot be audited, queried or attributed.
+        The required-field check is in place and gives a false sense that it is holding.
+      </p>
+
+      <h4>Suggested fix</h4>
+      <p>
+        Do not render an empty record in the lookup. Validate on the selected doctor's ID rather
+        than on whether a selection event occurred.
+      </p>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-015 -->
+    <section class="bug sev-low">
+      <h3><span class="mono">BUG-015</span> — A lookup search that matches nothing shows a blank bordered row, not an empty state</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Nurse Station &gt; Consultancy Service — Service and Doctor Name lookups</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>Low / P3</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge warn">open</span></td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td><span class="mono">CS-18</span> — <span class="mono">consultancy-service.regression.spec.ts:813</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Pick a patient and search the Service lookup for a term no service matches.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>The panel says there is no such service.</p>
+
+      <h4>Actual result</h4>
+      <p>
+        An empty bordered row with no text in it — the same picture as a lookup that has not
+        finished loading. Nothing selectable comes back, which is correct; what is missing is
+        the sentence saying so.
+      </p>
+
+      <h4>Suggested fix</h4>
+      <p>
+        Render the grid's empty-message row with text. The component already has the row — it is
+        the content that is blank.
+      </p>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-016 -->
+    <section class="bug">
+      <h3><span class="mono">BUG-016</span> — The bill grid stops at fifteen rows, so a sixteenth charge cannot be seen or cancelled</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Nurse Station &gt; Consultancy Service — the lower grid</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>High / P1</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge fail">open</span> — six of the first eighteen beds are already at the cap</td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td><span class="mono">CS-23</span> — <span class="mono">consultancy-service.regression.spec.ts:844</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Open Consultancy Service and step through the ward until a patient's bill grid shows fifteen rows.</li>
+        <li>Look for a pager, a page-size box, a total, or a "show more".</li>
+        <li>Save a further service against that patient and look for it on the bill.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>The bill lists every consultancy charged against the admission, or says that it does not.</p>
+
+      <h4>Actual result</h4>
+      <p>
+        The grid stops at <strong>fifteen</strong>. There is no pager, no page-size box and no
+        total anywhere on the tab. A sixteenth consultancy is charged and then cannot be seen
+        here at all — and because the bin that opens the cancel dialog lives on the row,
+        <strong>it cannot be cancelled from this tab either</strong>. On a long-stay patient the
+        ward is working from a list that quietly stopped being complete.
+      </p>
+
+      <h4>Impact</h4>
+      <p>
+        Charges exist that the ward cannot see or reverse. It also bit the automation before it
+        was understood: a writing case saved against a patient already at the cap and could not
+        find its own row, which is why every writing case now checks the patient has room first.
+      </p>
+
+      <h4>Suggested fix</h4>
+      <p>
+        Page the grid, or at minimum show the total count and a warning when the list is
+        truncated. The cancel action should be reachable for any charge on the admission, not
+        only for the fifteen most recent.
+      </p>
+    </section>
+
+    <h2 class="defects-break">5c. Defect detail — Nurse Station &gt; Diet Indent and Diet Dashboard</h2>
+    <p class="note">
+      Route <span class="mono">/hospital/nurse-station</span> &gt; <strong>Diet Indent</strong>
+      and <strong>Diet Dashboard</strong>. Specs:
+      <span class="mono">tests/regression/diet-indent.regression.spec.ts</span> and
+      <span class="mono">tests/regression/diet-dashboard.regression.spec.ts</span>.
+      <strong>BUG-018</strong> is the one defect in this document that the 05 Oct run turned up
+      as a genuine failure, with artifacts; the rest are held by cases marked
+      <span class="mono">test.fail()</span>.
+    </p>
+
+    <!-- ------------------------------------------------------------ BUG-017 -->
+    <section class="bug">
+      <h3><span class="mono">BUG-017</span> — The diet indent quantity is not recorded: every line is filed as 1, zero included</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Nurse Station &gt; Diet Indent &gt; Add Indent</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>High / P1</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge fail">open</span></td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td>
+              <span class="mono">DI-06</span> — <span class="mono">diet-indent.regression.spec.ts:135</span><br />
+              <span class="mono">DI-10</span> records the same thing as a run annotation
+            </td>
+          </tr>
+          <tr>
+            <th>Reproducibility</th>
+            <td>Deterministic — every line, every run.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Open Diet Indent &gt; Add Indent and select a ward patient.</li>
+        <li>Pick a food pattern, type a quantity of <strong>5</strong>, press Enter.</li>
+        <li>Read the quantity in the indent table.</li>
+        <li>Repeat with <strong>9</strong>, and with <strong>0</strong>.</li>
+        <li>Save, then open Verify Indent and read the quantity there.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>
+        The line carries the quantity typed, and a quantity of <strong>0</strong> is refused with
+        a message naming the quantity — the way Medicine Indent refuses it (TC_NS_009).
+      </p>
+
+      <h4>Actual result</h4>
+      <p>
+        Every line lands in the indent table reading <strong>1</strong>, whatever was typed, and
+        reaches Verify Indent as 1 as well. A quantity of 0 is taken like any other and the line
+        is added — reading 1. The number the nurse typed is accepted, displayed in the box, and
+        then discarded.
+      </p>
+
+      <h4>Impact</h4>
+      <p>
+        The canteen is told to serve one of everything. A ward ordering five of a pattern gets
+        one, and nothing on either screen says the figure was changed. The zero case is the same
+        defect seen from the other side: an order the nurse meant to cancel out becomes an order
+        for one meal.
+      </p>
+
+      <h4>Note for whoever fixes it</h4>
+      <p>
+        This is why every other case in the diet suite reads quantities back rather than assuming
+        them, and why DI-09 checks the Verify Indent quantity against the indent table rather than
+        against what was typed. When the fix lands, DI-06 will report as unexpectedly passing and
+        those cases can tighten.
+      </p>
+
+      <h4>Suggested fix</h4>
+      <p>
+        Bind the quantity box to the line that is committed, and validate it above zero at the
+        Enter, with the same message style the form uses for its other refusals.
+      </p>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-018 -->
+    <section class="bug">
+      <h3><span class="mono">BUG-018</span> — Diet Dashboard opens filtered to <em>tomorrow</em>, so the ward's own meals are not on it</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Nurse Station &gt; Diet Dashboard</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>High / P1</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td>
+              <span class="badge fail">open</span> — <strong>new in the 05 Oct run</strong>,
+              reproduced on both attempts of both cases
+            </td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td>
+              <span class="mono">DD-02</span> — <span class="mono">diet-dashboard.regression.spec.ts:153</span><br />
+              <span class="mono">DD-13</span> — <span class="mono">diet-dashboard.regression.spec.ts:609</span>
+            </td>
+          </tr>
+          <tr>
+            <th>Reproducibility</th>
+            <td>
+              Deterministic within the run: four attempts across the two cases, 15:45 – 15:50
+              UTC on 05 Oct 2026 (21:45 – 21:50 local), all four identical.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Open Nurse Station &gt; <strong>Diet Dashboard</strong>.</li>
+        <li>Read the <span class="mono">StartDate</span> and <span class="mono">EndDate</span> values the page posts (they are in hidden inputs — see BUG-019).</li>
+        <li>Compare them against the client's date.</li>
+        <li>For DD-13: widen the range, go to another tab, come back, and read them again.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>
+        The dashboard opens filtered to <strong>today</strong> at both ends, and returning to the
+        tab puts it back on today. Today is the day the ward is serving meals on.
+      </p>
+
+      <h4>Actual result</h4>
+      <p>
+        Both ends come back as <span class="mono">2026-10-06</span> against a client date of
+        <span class="mono">2026-10-05</span> — one day ahead. Nothing has been ordered for
+        tomorrow, so both grids are empty and the ward's own running diets are not on screen.
+        The same day-ahead value comes back after a tab round trip.
+      </p>
+
+      <h4>Error as the run reported it</h4>
+      <pre>Error: expect(locator).toHaveValue(expected) failed
+
+Locator:  locator('input[name="StartDate"]')
+Expected: "2026-10-05"
+Received: "2026-10-06"
+Timeout:  15000ms
+
+  - locator resolved to &lt;input type="hidden" name="StartDate" value="2026-10-06"
+    placeholder="Start Date" class="form-control flatpickr-input" /&gt;
+     - unexpected value "2026-10-06"
+
+  at tests/regression/diet-dashboard.regression.spec.ts:162:52</pre>
+
+      <h4>Evidence</h4>
+      <figure>
+        <!-- 34% of the image width is the top ~650px of a 1904x985 capture: the tab strip,
+             the filter bar and both grid headers. The rest is empty grid body. -->
+        <div class="crop" style="padding-top: 34%">
+          <img
+            src="../assets/failures/DD-02/screenshot-1.png"
+            alt="Diet Dashboard with both date boxes showing only placeholder text and both grids rendered to bare headers with no rows"
+          />
+        </div>
+        <figcaption>
+          <strong>Screenshot</strong> —
+          <span class="mono">assets/failures/DD-02/screenshot-1.png</span>, cropped to the filter
+          bar and the two grid headers; the file itself is the full page. Both date boxes show
+          nothing but <em>Start Date</em> and <em>End Date</em> while the hidden inputs carry
+          <span class="mono">2026-10-06</span>, and both grids are rendered to bare headers.
+          BUG-018 and BUG-019 in one picture.
+        </figcaption>
+      </figure>
+
+      <figure>
+        <video controls preload="metadata" src="../assets/failures/DD-02/video-1.webm"></video>
+        <figcaption>
+          <strong>Video, DD-02 attempt 1</strong> —
+          <span class="mono">assets/failures/DD-02/video-1.webm</span> (493 KB). The tab opens,
+          both grids paint their headers, and the date value never becomes today.
+          <span class="note">Not playable in the PDF — open the HTML or the file itself.</span>
+        </figcaption>
+      </figure>
+
+      <figure>
+        <video controls preload="metadata" src="../assets/failures/DD-13/video-2.webm"></video>
+        <figcaption>
+          <strong>Video, DD-13 attempt 2 (retry)</strong> —
+          <span class="mono">assets/failures/DD-13/video-2.webm</span> (1.0 MB). The range is
+          widened to a week, the tab is left for Diet Indent and returned to, and the filter
+          comes back to the same day-ahead default.
+        </figcaption>
+      </figure>
+
+      <ul class="evidence-list">
+        <li>
+          <strong>Playwright traces</strong> —
+          <span class="mono">assets/failures/DD-02/trace-2.zip</span> (5.0 MB) and
+          <span class="mono">assets/failures/DD-13/trace-2.zip</span> (12.8 MB). Open with
+          <span class="mono">npx playwright show-trace &lt;file&gt;</span> for DOM snapshots,
+          network and console per step.
+        </li>
+        <li>
+          <strong>Page snapshots</strong> —
+          <span class="mono">DD-02/error-context-1.md</span> and
+          <span class="mono">-2.md</span>, and the same pair under
+          <span class="mono">DD-13/</span>. Each carries the accessibility tree at the moment of
+          failure, with the hidden input and its value in it.
+        </li>
+        <li>
+          Four attempts across the two cases, all four identical — which is what rules out a
+          transient clock skew during the run.
+        </li>
+      </ul>
+
+      <h4>Analysis</h4>
+      <p>
+        The client machine, the browser and the test host all agreed on 05 Oct; the value is the
+        server's. Either the application server's clock or time zone is a day ahead of the ward,
+        or the default range is computed as <em>today + 1</em>. The first is the more likely and
+        the more serious, because it would affect everything else the server date-stamps — saved
+        indents, bill rows, the Service Date on a consultancy. Worth checking before treating
+        this as a dashboard bug.
+      </p>
+
+      <h4>Impact</h4>
+      <p>
+        A nurse opening the dashboard sees an empty ward and has no way to tell that from a ward
+        with nothing ordered — the tab says nothing either way (BUG-020), and the range in force
+        is not on screen (BUG-019). Three regression cases — DD-03, DD-04 and DD-08 — skipped in
+        this run for want of rows, which is this defect downstream.
+      </p>
+
+      <h4>Suggested fix</h4>
+      <ol>
+        <li>Check the application server's clock and time zone against the hospital's first. If it is ahead, that is the fix, and it is wider than this tab.</li>
+        <li>If the clock is right, correct the default range to today at both ends.</li>
+        <li>Either way, fix BUG-019 alongside it — the day a filter is wrong is the day it most needs to be visible.</li>
+      </ol>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-019 -->
+    <section class="bug sev-medium">
+      <h3><span class="mono">BUG-019</span> — The date boxes are blank while a range is in force, so the filter is invisible</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Nurse Station &gt; Diet Dashboard — the Start Date and End Date boxes</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>Medium / P2</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge warn">open</span></td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td><span class="mono">DD-02</span> — <span class="mono">diet-dashboard.regression.spec.ts:153</span></td>
+          </tr>
+          <tr>
+            <th>Related</th>
+            <td>BUG-018 — this is what makes it invisible to the ward</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Open Diet Dashboard and look at the two date boxes without touching them.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>The boxes show the range the grids below them are filtered to.</p>
+
+      <h4>Actual result</h4>
+      <p>
+        Placeholder text and nothing else — <em>Start Date</em>, <em>End Date</em> — while a real
+        range is in force. The value lives in a hidden input the flatpickr never mirrors on
+        arrival. A nurse who widens the range, leaves the tab and comes back has no way of
+        telling what they are now looking at.
+      </p>
+
+      <h4>Evidence</h4>
+      <p>
+        <span class="mono">docs/assets/failures/DD-02/screenshot-1.png</span> — the empty boxes
+        above two empty grids, which is the whole of the problem in one picture.
+      </p>
+
+      <h4>Suggested fix</h4>
+      <p>
+        Initialise the visible picker from the same value the hidden input is posted with. Until
+        then, no automated case can assert on what a nurse can actually read there — the suite
+        reads the hidden inputs instead, and says so.
+      </p>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-020 -->
+    <section class="bug sev-medium">
+      <h3><span class="mono">BUG-020</span> — A refused range and a search that matched nothing both answer with a silent empty dashboard</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Nurse Station &gt; Diet Dashboard</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>Medium / P2</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge warn">open</span></td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td>
+              <span class="mono">DD-06</span> (reversed range) — <span class="mono">diet-dashboard.regression.spec.ts:295</span><br />
+              <span class="mono">DD-09</span> (no-match search) — <span class="mono">diet-dashboard.regression.spec.ts:427</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Set <strong>End Date</strong> to a week ago and <strong>Start Date</strong> to today — the range a nurse produces by filling the second box first — and press Show.</li>
+        <li>Separately, search for a patient who is not on the ward.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>
+        A range the app cannot honour is refused, in the field or on screen. A search that matched
+        nothing says it matched nothing.
+      </p>
+
+      <h4>Actual result</h4>
+      <p>
+        Both empty the two grids to bare headers and say nothing at all. That is also exactly what
+        a genuinely quiet day looks like, and what BUG-018's wrong default looks like. Four
+        different situations, one picture.
+      </p>
+
+      <h4>Impact</h4>
+      <p>
+        A nurse cannot tell a filter that matched nothing from one the app would not run, or from
+        a ward that has ordered nothing. This is what made BUG-018 hard to see from the screen
+        alone.
+      </p>
+
+      <h4>Suggested fix</h4>
+      <p>
+        Validate the range at the field and say so when it is backwards. Give both grids an
+        empty-state row — <em>no diet indents in this range</em> — and a distinct one for a search
+        that matched nothing.
+      </p>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-021 -->
+    <section class="bug">
+      <h3><span class="mono">BUG-021</span> — Each grid stops at 120 rows, with no pager and no total</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Nurse Station &gt; Diet Dashboard — both grids</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>High / P1</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge fail">open</span></td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td><span class="mono">DD-07</span> — <span class="mono">diet-dashboard.regression.spec.ts:328</span></td>
+          </tr>
+          <tr>
+            <th>Related</th>
+            <td>BUG-016 — the same shape of defect on the Consultancy bill grid, at fifteen</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Filter the dashboard to the last fortnight and count the rows in each grid.</li>
+        <li>Filter to the last four weeks and count again; compare the oldest indent in each.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>
+        Doubling the window brings back something older. A ward busy enough to fill a grid over a
+        fortnight was busy over the fortnight before it too.
+      </p>
+
+      <h4>Actual result</h4>
+      <p>
+        Both windows come back with exactly <strong>120 rows a grid</strong> and the same oldest
+        indent in each. The list is cut at 120 and the rest is simply not there. There is no
+        pager, no page-size box and no total anywhere on the tab, so nothing says so. Five days
+        of this ward is already enough to fill both grids, which means the cut-off is reached in
+        ordinary use rather than in some extreme case.
+      </p>
+
+      <h4>Impact</h4>
+      <p>
+        Any question about more than a few days of the ward's diets is answered with a silently
+        truncated list. Sorting happens before the cut, so ascending and descending return
+        different sets of rows — which is also why the regression case compares sort
+        <em>direction</em> rather than comparing one list against the reverse of another.
+      </p>
+
+      <h4>Suggested fix</h4>
+      <p>Page both grids, and show the total row count beside each.</p>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-022 -->
+    <section class="bug sev-medium">
+      <h3><span class="mono">BUG-022</span> — Neither grid is labelled, so whether a patient is on a diet is readable only from the button</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Nurse Station &gt; Diet Dashboard — both grids</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>Medium / P2</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge warn">open</span></td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td><span class="mono">DD-12</span> — <span class="mono">diet-dashboard.regression.spec.ts:588</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Open Diet Dashboard with rows in both grids.</li>
+        <li>Try to tell, from the page alone, which list a given row is in.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>
+        Each grid is named — a caption, a heading over the card, or at minimum an accessible
+        label. The upper grid is the diet each patient is currently on; the lower is everything
+        else in the range.
+      </p>
+
+      <h4>Actual result</h4>
+      <p>
+        The two are rendered identically: same classes, the same nine headers, no caption, no
+        heading above either card, no <span class="mono">aria-label</span>. They sit one above
+        the other. Status does not separate them either — Pending, PR Submitted, Served and
+        Reviewed rows appear in both. <strong>The only difference is the button in the last
+        cell:</strong> Stop in the upper grid, Continue in the lower.
+      </p>
+
+      <h4>Impact</h4>
+      <p>
+        Whether the patient in front of you is on that diet <em>now</em> has to be inferred from
+        a button label. Combined with BUG-023 — where that button acts on the first click — the
+        cost of misreading which grid you are in is a patient taken off their meal.
+      </p>
+
+      <h4>Suggested fix</h4>
+      <p>
+        Put a heading over each grid: <em>Running diets</em> and <em>Stopped diets</em>, or
+        whatever the ward calls them. A caption element would serve screen readers at the same
+        time.
+      </p>
+    </section>
+
+    <!-- ------------------------------------------------------------ BUG-023 -->
+    <section class="bug">
+      <h3><span class="mono">BUG-023</span> — Stop takes a patient off their diet on one click, and Continue cancels the running one, both unannounced</h3>
+
+      <table class="meta">
+        <tbody>
+          <tr>
+            <th>Module / page</th>
+            <td>Nurse Station &gt; Diet Dashboard — the Stop and Continue buttons</td>
+          </tr>
+          <tr>
+            <th>Severity / Priority</th>
+            <td>High / P1</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td><span class="badge fail">open</span></td>
+          </tr>
+          <tr>
+            <th>Found by</th>
+            <td>
+              <span class="mono">DD-16</span> (Stop) — <span class="mono">diet-dashboard.regression.spec.ts:769</span><br />
+              <span class="mono">DD-17</span> (Continue) — <span class="mono">diet-dashboard.regression.spec.ts:804</span>
+            </td>
+          </tr>
+          <tr>
+            <th>Related</th>
+            <td>BUG-022 — which grid a row is in is already hard to read</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Steps to reproduce</h4>
+      <ol>
+        <li>Find a patient in the upper grid and press <strong>Stop</strong>. Watch for a confirmation or a message.</li>
+        <li>For the second half: with two indents on one patient, press <strong>Continue</strong> on the older one and watch what happens to the newer.</li>
+      </ol>
+
+      <h4>Expected result</h4>
+      <p>
+        Stopping a patient's diet is a clinical action and is confirmed, or at least acknowledged
+        afterwards. Continue, which displaces whatever the patient is on now, says that it is
+        about to do so.
+      </p>
+
+      <h4>Actual result</h4>
+      <p>
+        <strong>Stop acts on the first click.</strong> Nothing is asked and nothing is shown: by
+        the time anything could be read, the row has already moved to the lower grid and the
+        status is already rewritten. <strong>Continue</strong> is the quiet half of the same gap
+        — it does not only start the diet it was pressed on, it stops the one the patient is on,
+        and that second effect is neither asked about nor reported. In both cases the row moving
+        between two unlabelled grids is the entire feedback.
+      </p>
+
+      <h4>Impact</h4>
+      <p>
+        A patient can be taken off their meal by one mis-click, with no confirmation, no undo and
+        no record on screen that it happened. The ward's own Diet Indent tab guards a far smaller
+        thing — it refuses a repeated food pattern outright — which makes the asymmetry hard to
+        defend.
+      </p>
+
+      <h4>Note on how this was tested</h4>
+      <p>
+        Both cases file their own diet indent first and act only on that one, and both put the
+        ward back before reporting — the assertion fails on purpose, and a failing test runs no
+        further, so the restore has to come first.
+      </p>
+
+      <h4>Suggested fix</h4>
+      <ol>
+        <li>Confirm Stop, naming the patient and the diet.</li>
+        <li>Confirm Continue when it would displace a running diet, naming what is about to be stopped.</li>
+        <li>Acknowledge both afterwards, the way the indent forms acknowledge a save.</li>
+      </ol>
+    </section>
+
     <h2 class="defects-break">6. Automation defect (not an application defect)</h2>
     <section class="bug sev-medium">
       <h3><span class="mono">AUT-001</span> — TC_ADM_002 assumes the registration grid is never empty</h3>
@@ -923,8 +2135,19 @@ Call log:
             <td>Medium / P2 — it is why the 03 Oct run came back red</td>
           </tr>
           <tr>
+            <th>Status</th>
+            <td>
+              <span class="badge pass">fixed</span> — closed 05 Oct 2026.
+              <span class="mono">newestUhid()</span> is now
+              <span class="mono">listedPatient()</span>, which widens the window before
+              reading the grid and reads the name and the UHID off one row in a single call.
+              Verified by TC_ADM_002 passing in 13.2 s on the 05 Oct run, where it had
+              previously timed out twice.
+            </td>
+          </tr>
+          <tr>
             <th>Related</th>
-            <td>BUG-001 (the application behaviour the test runs into)</td>
+            <td>BUG-001 (the application behaviour the test runs into) — <strong>still open</strong></td>
           </tr>
         </tbody>
       </table>
@@ -946,19 +2169,25 @@ Call log:
         the kind of flakiness that gets a red build ignored.
       </p>
 
-      <h4>Fix</h4>
+      <h4>Fix, as applied</h4>
       <ol>
         <li>
-          Widen <strong>Show From</strong> to cover the last 30 days before reading the grid,
-          then press <strong>Show</strong> — the same thing a user would do.
+          <span class="badge pass">done</span> <span class="mono">listedPatient()</span> calls
+          <span class="mono">registrationPage.showLastDays()</span> before reading the grid —
+          the same thing a user would do.
         </li>
         <li>
-          Assert the grid has at least one row first, with a message that names the real cause:
-          <em>"no patients in the registration grid for the selected range"</em>.
+          <span class="badge pass">done</span> The UHID is asserted to be ten digits or more,
+          with the patient named in the failure message, so an empty grid now fails as an
+          empty grid rather than as a thirty-second timeout.
         </li>
         <li>
-          Keep BUG-001 open regardless. The test working around the default filter does not
-          make the default filter right.
+          <span class="badge pass">done</span> Name and UHID are read off the same row in one
+          call, so a re-render cannot hand back two different patients.
+        </li>
+        <li>
+          <span class="badge fail">open</span> <strong>BUG-001 stays open.</strong> The test
+          working around the default filter does not make the default filter right.
         </li>
       </ol>
     </section>
@@ -967,109 +2196,248 @@ Call log:
     <p>
       Everything below is under <span class="mono">docs/assets/failures/</span> and was written
       by <span class="mono">npm run docs:evidence</span>, which reads the Playwright HTML report
-      from the last run. Re-running it rebuilds the folder for whatever the latest run contains.
+      from the last run. One folder per failed case, named by its case ID, plus
+      <span class="mono">manifest.json</span> describing the run.
+    </p>
+    <p class="note">
+      <strong>Two runs are represented.</strong> <span class="mono">DD-02/</span> and
+      <span class="mono">DD-13/</span> are from the 05 Oct run and hold BUG-018 and BUG-019.
+      <span class="mono">TC_ADM_002/</span> is from the 03 Oct run and is kept because BUG-001
+      is still open — the collector was run with <span class="mono">--keep</span> so it was not
+      cleared away. The manifest describes the 05 Oct run only, which is why it lists two
+      failures and not three.
     </p>
     <table>
       <thead>
         <tr>
-          <th style="width: 38%">File</th>
+          <th style="width: 34%">File</th>
           <th style="width: 10%">Size</th>
-          <th style="width: 52%">What it shows</th>
+          <th style="width: 56%">What it shows</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td class="mono">TC_ADM_002/screenshot-1.png</td>
-          <td>52 KB</td>
-          <td>The empty grid at the moment of failure, both date filters on 10/3/2026, pager 0-0 of 0.</td>
+          <td class="mono" colspan="3"><strong>DD-02/</strong> — the dashboard opens filtered to today (BUG-018, BUG-019)</td>
         </tr>
         <tr>
-          <td class="mono">TC_ADM_002/screenshot-2.png</td>
-          <td>52 KB</td>
-          <td>The retry. Byte-identical to attempt 1 — the behaviour is deterministic.</td>
+          <td class="mono">DD-02/screenshot-1.png</td>
+          <td>158 KB</td>
+          <td>
+            The tab as the nurse sees it: both grids rendered to bare headers, and both date
+            boxes showing nothing but their placeholder text, while the hidden inputs carry
+            <span class="mono">2026-10-06</span>. BUG-018 and BUG-019 in one picture.
+          </td>
         </tr>
         <tr>
-          <td class="mono">TC_ADM_002/video-1.webm</td>
-          <td>479 KB</td>
-          <td>Attempt 1, full recording: navigation, grid paint, the 30 s wait.</td>
+          <td class="mono">DD-02/screenshot-2.png</td>
+          <td>158 KB</td>
+          <td>The retry — the same picture. The behaviour is deterministic.</td>
         </tr>
         <tr>
-          <td class="mono">TC_ADM_002/video-2.webm</td>
-          <td>525 KB</td>
-          <td>Attempt 2 (retry), same sequence.</td>
+          <td class="mono">DD-02/video-1.webm · video-2.webm</td>
+          <td>493 KB · 461 KB</td>
+          <td>Both attempts, full recordings: navigation, the tab opening, the 15 s wait on the date value.</td>
         </tr>
         <tr>
-          <td class="mono">TC_ADM_002/trace-2.zip</td>
-          <td>1.7 MB</td>
+          <td class="mono">DD-02/trace-2.zip</td>
+          <td>5.0 MB</td>
           <td>
             Playwright trace of the retry — DOM snapshots, network, console, per-step timings.
             <span class="mono">npx playwright show-trace &lt;file&gt;</span>
           </td>
         </tr>
         <tr>
-          <td class="mono">TC_ADM_002/error-context-1.md</td>
-          <td>12 KB</td>
+          <td class="mono">DD-02/error-context-1.md · -2.md</td>
+          <td>10 KB each</td>
           <td>Accessibility-tree snapshot of the page at failure, plus the failing source lines.</td>
         </tr>
         <tr>
-          <td class="mono">TC_ADM_002/error-context-2.md</td>
-          <td>12 KB</td>
-          <td>The same for the retry.</td>
+          <td class="mono" colspan="3"><strong>DD-13/</strong> — the same default after a tab round trip (BUG-018)</td>
+        </tr>
+        <tr>
+          <td class="mono">DD-13/screenshot-1.png · -2.png</td>
+          <td>158 KB each</td>
+          <td>The dashboard after leaving the tab and coming back: search cleared, range back to the day-ahead default.</td>
+        </tr>
+        <tr>
+          <td class="mono">DD-13/video-1.webm · video-2.webm</td>
+          <td>928 KB · 1.0 MB</td>
+          <td>Both attempts, including the trip out to Diet Indent and back — the nurse who goes to order a meal and returns.</td>
+        </tr>
+        <tr>
+          <td class="mono">DD-13/trace-2.zip</td>
+          <td>12.8 MB</td>
+          <td>Trace of the retry, with the full tab round trip step by step.</td>
+        </tr>
+        <tr>
+          <td class="mono">DD-13/error-context-1.md · -2.md</td>
+          <td>10 KB each</td>
+          <td>Page snapshot at failure and the failing source lines.</td>
+        </tr>
+        <tr>
+          <td class="mono" colspan="3"><strong>TC_ADM_002/</strong> — kept from the 03 Oct run for BUG-001</td>
+        </tr>
+        <tr>
+          <td class="mono">TC_ADM_002/screenshot-1.png · -2.png</td>
+          <td>52 KB each</td>
+          <td>The empty registration grid at the moment of failure, both date filters on 10/3/2026, pager 0-0 of 0. Byte-identical across the two attempts.</td>
+        </tr>
+        <tr>
+          <td class="mono">TC_ADM_002/video-1.webm · video-2.webm</td>
+          <td>479 KB · 525 KB</td>
+          <td>Both attempts: navigation, grid paint, the 30 s wait.</td>
+        </tr>
+        <tr>
+          <td class="mono">TC_ADM_002/trace-2.zip</td>
+          <td>1.7 MB</td>
+          <td>Trace of the retry.</td>
+        </tr>
+        <tr>
+          <td class="mono">TC_ADM_002/error-context-1.md · -2.md</td>
+          <td>12 KB each</td>
+          <td>Page snapshot at failure and the failing source lines.</td>
         </tr>
         <tr>
           <td class="mono">manifest.json</td>
-          <td>3 KB</td>
-          <td>Run statistics, per-attempt status and timings, and the error text, as machine-readable JSON.</td>
+          <td>6 KB</td>
+          <td>The 05 Oct run's statistics, per-attempt status and timings, and the error text, as machine-readable JSON.</td>
         </tr>
       </tbody>
     </table>
+    <p class="note">
+      <strong>The other fifteen defects have no artifacts, by design.</strong> Each is held by a
+      case marked <span class="mono">test.fail()</span>, and Playwright records nothing for a
+      test that failed as expected. The evidence for those is the case itself — its assertion,
+      the comment above it, and the run annotations it writes, which the HTML report carries
+      per test: what Save would have billed and to whom (CS-12), what the catalogue said against
+      what the line charged (CS-14), what the quantity box was given against what the indent
+      recorded (DI-10), and so on. Open <span class="mono">npm run report</span> and read the
+      annotations under each case.
+    </p>
 
-    <h2>8. Recommended order of work</h2>
+    <h2 class="defects-break">8. Recommended order of work</h2>
+    <p>
+      Ordered by what a defect costs the hospital if it is left alone, not by how hard it is to
+      fix. The first four are all cases where a real patient record or a real bill ends up
+      wrong, silently.
+    </p>
     <table>
       <thead>
         <tr>
-          <th style="width: 10%">Order</th>
-          <th style="width: 14%">ID</th>
-          <th style="width: 76%">Reason</th>
+          <th style="width: 8%">Order</th>
+          <th style="width: 22%">ID</th>
+          <th style="width: 70%">Reason</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td>1</td>
-          <td class="mono">BUG-002</td>
-          <td>Money is collected and not recorded. Highest value, and it needs a decision from the module owners before any code is written.</td>
+          <td class="mono">BUG-009, BUG-011</td>
+          <td>
+            Both put a wrong charge on a real patient's bill with no warning and no audit
+            trail — one patient's services billed to the next, and a rate any ward account can
+            type over. Nothing else in this document is as cheap to trigger or as hard to
+            detect after the fact. BUG-010 is the same cart, not cleared on a different
+            trigger, so fix it in the same change.
+          </td>
         </tr>
         <tr>
           <td>2</td>
-          <td class="mono">BUG-001 + AUT-001</td>
-          <td>One day's work between them, and together they turn the suite green and make the patient list usable first thing in the morning.</td>
+          <td class="mono">BUG-018</td>
+          <td>
+            Start with the server's clock and time zone, not with the dashboard. If the server
+            is a day ahead, it is date-stamping saved indents and bill rows too, and that is a
+            much wider problem than one empty grid.
+          </td>
         </tr>
         <tr>
           <td>3</td>
+          <td class="mono">BUG-002</td>
+          <td>
+            Money is collected in the admission wizard and not recorded. Highest value of the
+            older defects, and it needs a decision from the module owners before any code is
+            written.
+          </td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td class="mono">BUG-017, BUG-023</td>
+          <td>
+            Both are patient care rather than money. A ward ordering five meals gets one, and a
+            patient can be taken off their diet by a single mis-click with nothing asked and
+            nothing said.
+          </td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td class="mono">BUG-014, BUG-016, BUG-021</td>
+          <td>
+            Records that cannot be audited or reached: charges with no consultant named, charges
+            past the fifteenth that cannot be seen or cancelled, and diet history past 120 rows
+            that is simply not there. BUG-016 and BUG-021 are the same defect in two grids and
+            may share a fix.
+          </td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td class="mono">BUG-001, BUG-019, BUG-020, BUG-022</td>
+          <td>
+            The "what am I looking at" group — a list filtered to today with no sign of it, a
+            range in force that is nowhere on screen, four different situations that all render
+            as the same empty grid, and two grids that are not labelled. Individually small;
+            together they are why BUG-018 was invisible from the screen alone. Worth one pass by
+            one person.
+          </td>
+        </tr>
+        <tr>
+          <td>7</td>
           <td class="mono">BUG-003</td>
           <td>One mistyped password can stall a whole floor behind the same NAT address.</td>
         </tr>
         <tr>
-          <td>4</td>
+          <td>8</td>
           <td class="mono">BUG-006, BUG-004</td>
-          <td>Both are visible to staff on every working day — a false permissions error on every navigation, and a grid that takes half a minute.</td>
+          <td>
+            Both are visible to staff on every working day — a false permissions error on every
+            navigation, and a grid that takes half a minute.
+          </td>
         </tr>
         <tr>
-          <td>5</td>
+          <td>9</td>
+          <td class="mono">BUG-012, BUG-013</td>
+          <td>
+            Two controls on the Consultancy form that take input and then discard it: the
+            back-date and the discount. Either wire them through or take them off the form.
+          </td>
+        </tr>
+        <tr>
+          <td>10</td>
           <td class="mono">BUG-007, BUG-005</td>
           <td>Infrastructure and platform work; schedule with the next maintenance window.</td>
         </tr>
         <tr>
-          <td>6</td>
-          <td class="mono">BUG-008</td>
-          <td>Cosmetic, but they are the two most-read labels in the registration module. Coordinate with the automation locators.</td>
+          <td>11</td>
+          <td class="mono">BUG-008, BUG-015</td>
+          <td>
+            Cosmetic. The two misspellings are the most-read labels in the registration module,
+            and the blank lookup row is one sentence of text. Coordinate BUG-008 with the
+            automation locators, which match both misspellings on purpose.
+          </td>
         </tr>
       </tbody>
     </table>
+    <p class="note">
+      <strong>How to tell a fix landed.</strong> Sixteen of these defects are held by a
+      regression case marked <span class="mono">test.fail()</span>. When the module is
+      corrected, that case does not quietly start passing — the run reports it as
+      <strong>unexpectedly passing</strong>, which fails the build until the marker is removed.
+      So the suite will tell you, on the next run after the fix, and the defect can be closed
+      against that run. Please flag such a change so the marker comes off in the same release.
+    </p>
 
     <footer class="doc-footer">
-      Bug Report v1.0 · Popular Medical College &amp; Hospital Ltd — Healthcare ERP Test
-      Automation · 03 October 2026 · generated from
+      Bug Report v2.0 · Popular Medical College &amp; Hospital Ltd — Healthcare ERP Test
+      Automation · 05 October 2026 · generated from
       <span class="mono">docs/src/bug-report.html</span> by <span class="mono">npm run docs</span>.
     </footer>
   </body>

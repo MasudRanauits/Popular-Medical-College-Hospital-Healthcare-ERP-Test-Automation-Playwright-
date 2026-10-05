@@ -90,9 +90,15 @@ function readReport() {
 
 /* ------------------------------------------------------------------ evidence */
 
-/** TC_ADM_002 out of "TC_ADM_002 searching a UHID ...", else a slug of the whole title. */
+/**
+ * The case ID a title opens with, else a slug of the whole title.
+ *
+ * Two schemes are in use: TC_ADM_002 out of "TC_ADM_002 searching a UHID ...", and the
+ * shorter CS-12 / DD-02 / DI-06 the Nurse Station suites use, which can carry a letter
+ * suffix (DD-12b).
+ */
 function testId(title) {
-  const tagged = title.match(/^(TC_[A-Z0-9_]+)/);
+  const tagged = title.match(/^(TC_[A-Z0-9_]+|[A-Z]{2}-\d+[a-z]?)(?=\s|$)/);
   if (tagged) return tagged[1];
   return title
     .replace(/[^a-z0-9]+/gi, '-')
