@@ -41,12 +41,13 @@
         </tr>
         <tr>
           <th>Version</th>
-          <td>2.1</td>
+          <td>2.2</td>
         </tr>
         <tr>
           <th>Date raised</th>
           <td>03 October 2026 (BUG-001 … BUG-008), 05 October 2026 (BUG-009 … BUG-023),
-            06 October 2026 (BUG-024 … BUG-037)</td>
+            06 October 2026 (BUG-024 … BUG-037). BUG-018 re-diagnosed and retitled
+            10 October 2026.</td>
         </tr>
         <tr>
           <th>Raised by</th>
@@ -312,11 +313,11 @@
         </tr>
         <tr>
           <td class="mono"><strong>BUG-018</strong></td>
-          <td>Diet Dashboard opens filtered to <em>tomorrow</em>, so the ward's own meals are not on it</td>
-          <td>Diet Dashboard</td>
+          <td>The ERP host's clock runs ~12 hours fast, so from local noon every date the app stamps is tomorrow's</td>
+          <td>Platform / host</td>
           <td>High</td>
           <td>P1</td>
-          <td><span class="badge fail">reproduced</span> 2 screenshots, 4 videos, 2 traces</td>
+          <td><span class="badge warn">held by a case</span> DD-18 · <span class="badge fail">reproduced</span> 2 screenshots, 4 videos, 2 traces</td>
         </tr>
         <tr>
           <td class="mono"><strong>BUG-019</strong></td>
@@ -1678,7 +1679,9 @@ Call log:
       <span class="mono">tests/regression/diet-dashboard.regression.spec.ts</span>.
       <strong>BUG-018</strong> is the one defect in this document that the 05 Oct run turned up
       as a genuine failure, with artifacts; the rest are held by cases marked
-      <span class="mono">test.fail()</span>.
+      <span class="mono">test.fail()</span>. It has since been traced to the host clock rather
+      than to this tab and moved to a case of its own — it is written up under 5c with the
+      Diet defects because that is where it was found, not because the Diet module causes it.
     </p>
 
     <!-- ------------------------------------------------------------ BUG-017 -->
@@ -1761,13 +1764,16 @@ Call log:
 
     <!-- ------------------------------------------------------------ BUG-018 -->
     <section class="bug">
-      <h3><span class="mono">BUG-018</span> — Diet Dashboard opens filtered to <em>tomorrow</em>, so the ward's own meals are not on it</h3>
+      <h3><span class="mono">BUG-018</span> — The ERP host's clock runs ~12 hours fast, so from local noon every date the app stamps is tomorrow's</h3>
 
       <table class="meta">
         <tbody>
           <tr>
             <th>Module / page</th>
-            <td>Nurse Station &gt; Diet Dashboard</td>
+            <td>
+              Platform — the host clock, which stamps every date in the ERP. It was found on
+              Nurse Station &gt; Diet Dashboard, which is where it shows most plainly.
+            </td>
           </tr>
           <tr>
             <th>Severity / Priority</th>
@@ -1776,50 +1782,108 @@ Call log:
           <tr>
             <th>Status</th>
             <td>
-              <span class="badge fail">open</span> — <strong>new in the 05 Oct run</strong>,
-              reproduced on both attempts of both cases
+              <span class="badge fail">open</span> — raised from the 05 Oct run; <strong>root
+              cause identified 10 Oct 2026</strong> and the title corrected with it. It is not a
+              Diet Dashboard defect.
             </td>
           </tr>
           <tr>
-            <th>Found by</th>
+            <th>Held by</th>
             <td>
-              <span class="mono">DD-02</span> — <span class="mono">diet-dashboard.regression.spec.ts:153</span><br />
-              <span class="mono">DD-13</span> — <span class="mono">diet-dashboard.regression.spec.ts:609</span>
+              <span class="mono">DD-18</span> — <span class="mono">diet-dashboard.regression.spec.ts:671</span>,
+              which measures the skew off the host's own HTTP <span class="mono">Date</span> header
+              and is marked <span class="mono">test.fail()</span>.
+              <br />Originally surfaced by <span class="mono">DD-02</span> and
+              <span class="mono">DD-13</span>, which no longer carry the assertion — see
+              <em>Why those two cases changed</em> below.
             </td>
           </tr>
           <tr>
             <th>Reproducibility</th>
             <td>
-              Deterministic within the run: four attempts across the two cases, 15:45 – 15:50
-              UTC on 05 Oct 2026 (21:45 – 21:50 local), all four identical.
+              The skew itself is deterministic — three consecutive readings on 10 Oct 2026 all
+              returned <strong>+718 minutes</strong>. The <em>day-ahead symptom</em> is not: it
+              appears only from roughly local noon onwards, which is why the 05 Oct run (21:45
+              local) saw it on all four attempts and a run before midday does not.
             </td>
           </tr>
         </tbody>
       </table>
 
       <h4>Steps to reproduce</h4>
+      <p class="note">
+        The clock itself — one request, no browser, true at any hour:
+      </p>
+      <pre>curl -skI https://&lt;erp-host&gt;:9006/Account/Login | grep -i ^date
+date -u</pre>
+      <p class="note">The day-ahead symptom, which needs the local clock to be past midday:</p>
       <ol>
-        <li>Open Nurse Station &gt; <strong>Diet Dashboard</strong>.</li>
+        <li>After local noon, open Nurse Station &gt; <strong>Diet Dashboard</strong>.</li>
         <li>Read the <span class="mono">StartDate</span> and <span class="mono">EndDate</span> values the page posts (they are in hidden inputs — see BUG-019).</li>
         <li>Compare them against the client's date.</li>
-        <li>For DD-13: widen the range, go to another tab, come back, and read them again.</li>
+        <li>Widen the range, go to another tab, come back, and read them again.</li>
       </ol>
 
       <h4>Expected result</h4>
       <p>
-        The dashboard opens filtered to <strong>today</strong> at both ends, and returning to the
-        tab puts it back on today. Today is the day the ward is serving meals on.
+        The host keeps the same clock as the ward it serves, so a dashboard that opens on
+        <strong>today</strong> opens on the day the ward is serving meals on.
       </p>
 
       <h4>Actual result</h4>
       <p>
-        Both ends come back as <span class="mono">2026-10-06</span> against a client date of
-        <span class="mono">2026-10-05</span> — one day ahead. Nothing has been ordered for
-        tomorrow, so both grids are empty and the ward's own running diets are not on screen.
-        The same day-ahead value comes back after a tab round trip.
+        The host is <strong>about twelve hours fast</strong>. Its HTTP
+        <span class="mono">Date</span> header read
+        <span class="mono">Sat, 10 Oct 2026 07:02:12 GMT</span> when true UTC was
+        <span class="mono">09 Oct 2026 19:04</span> — <strong>+718 minutes</strong>, the same figure
+        on three consecutive readings.
+      </p>
+      <p>
+        Twelve hours, not a day, and that is the tell. A clock that had merely drifted would be
+        off by seconds or minutes. An offset of almost exactly ±12 h is the signature of a
+        <strong>sign error in the time zone</strong>: Bangladesh is <span class="mono">UTC+6</span>,
+        and a host configured as <span class="mono">UTC−6</span> whose wall clock has been set to
+        the correct local time will convert every local time to a UTC twelve hours out. That fits
+        what the application shows: fields the app fills from local wall-clock time look right —
+        IPD Service Entry's Service Date box read <span class="mono">2026-10-06 16:23</span> at
+        16:23 local — while anything derived from UTC lands half a day later.
+      </p>
+      <p>
+        The consequence for the ward is the one originally reported: from local noon onwards the
+        shifted stamp has rolled past midnight, so the Diet Dashboard opens filtered to
+        <em>tomorrow</em>, both grids come back empty, and the ward's own running diets are not on
+        screen. The 05 Oct run hit it at 21:45 local and saw
+        <span class="mono">2026-10-06</span> against a client date of
+        <span class="mono">2026-10-05</span>. Before local midday the same screen looks correct,
+        which is why this went unexplained for a cycle.
       </p>
 
-      <h4>Error as the run reported it</h4>
+      <h4>Impact beyond the dashboard</h4>
+      <p>
+        The dashboard is the symptom, not the defect. Every date the ERP stamps from its own
+        clock is suspect — saved indents, bill rows, the
+        <span class="mono">Served_By</span> timestamps on IPD services, anything written after
+        local noon. That is worth checking before this is closed, and it is why this item sits
+        above the dashboard defects in the recommended order of work.
+      </p>
+
+      <h4>Why those two cases changed</h4>
+      <p>
+        DD-02 and DD-13 used to assert that the app's date equalled the test host's. That made
+        both of them fail for half of every day over a defect neither case is about, and it is
+        the reason the 05 Oct cycle recorded two red cases. They now read the day off the
+        dashboard itself and assert what the tab is actually responsible for — that both ends of
+        the default range are the same day, that every row listed is from it, and that a tab
+        round trip returns to it. The clock assertion moved to <span class="mono">DD-18</span>,
+        which measures the skew directly and so fails at every hour rather than half of them.
+      </p>
+
+      <h4>Error as the 05 Oct run reported it</h4>
+      <p class="note">
+        Kept as the record of how this was first seen. The line it points at no longer carries
+        the assertion — see <em>Why those two cases changed</em> above; DD-18 reports the skew
+        in minutes instead.
+      </p>
       <pre>Error: expect(locator).toHaveValue(expected) failed
 
 Locator:  locator('input[name="StartDate"]')
@@ -3453,8 +3517,8 @@ Timeout:  15000ms
     </p>
 
     <footer class="doc-footer">
-      Bug Report v2.1 · Popular Medical College &amp; Hospital Ltd — Healthcare ERP Test
-      Automation · 06 October 2026 · generated from
+      Bug Report v2.2 · Popular Medical College &amp; Hospital Ltd — Healthcare ERP Test
+      Automation · 10 October 2026 · generated from
       <span class="mono">docs/src/bug-report.html</span> by <span class="mono">npm run docs</span>.
     </footer>
   </body>

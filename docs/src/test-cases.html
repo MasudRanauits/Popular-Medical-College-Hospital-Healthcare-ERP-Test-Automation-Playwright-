@@ -86,7 +86,7 @@
         Playwright automation suite — Login, Home launcher, Patient Registration, Patient
         Admission, the admission dashboard, the end-to-end patient journey, and the five
         Nurse Station tabs: Medicine Indent, Consultancy Service, IPD Service Entry, Diet
-        Indent and Diet Dashboard. 137 cases, all automated.
+        Indent and Diet Dashboard. 138 cases, all automated.
       </p>
     </header>
 
@@ -99,11 +99,11 @@
         </tr>
         <tr>
           <th>Version</th>
-          <td>2.1</td>
+          <td>2.2</td>
         </tr>
         <tr>
           <th>Date</th>
-          <td>06 October 2026</td>
+          <td>10 October 2026</td>
         </tr>
         <tr>
           <th>Prepared by</th>
@@ -434,10 +434,10 @@
         <tr>
           <td>Regression — Diet Dashboard</td>
           <td class="mono">tests/regression/diet-dashboard.regression.spec.ts</td>
-          <td>18</td>
+          <td>19</td>
+          <td>9</td>
           <td>7</td>
-          <td>6</td>
-          <td>2</td>
+          <td>—</td>
           <td>3</td>
           <td>—</td>
           <td>Signed in</td>
@@ -456,10 +456,10 @@
         <tr>
           <td><strong>Total</strong></td>
           <td></td>
-          <td><strong>137</strong></td>
-          <td><strong>91</strong></td>
-          <td><strong>30</strong></td>
-          <td><strong>2</strong></td>
+          <td><strong>138</strong></td>
+          <td><strong>93</strong></td>
+          <td><strong>31</strong></td>
+          <td><strong>—</strong></td>
           <td><strong>3</strong></td>
           <td><strong>11</strong></td>
           <td></td>
@@ -469,9 +469,41 @@
     <p class="note">
       The 126 cases that ran are the setup plus every regression suite.
       <strong>Known fail</strong> is not a red build: all 30 are cases marked
-      <span class="mono">test.fail()</span>, which Playwright counts as expected. The two real
-      failures are DD-02 and DD-13, both BUG-018, and the three skips are downstream of it.
+      <span class="mono">test.fail()</span>, which Playwright counts as expected. The two red
+      cases of that cycle were DD-02 and DD-13, both BUG-018. <strong>Both are green as of
+      10 Oct 2026</strong> — see the next note. The three skips are not failures: DD-03, DD-04
+      and DD-08 skip when the ward has not ordered a meal yet, which is the right answer at
+      that hour and not downstream of anything.
     </p>
+    <p class="note">
+      <strong>Fix pass of 10 Oct 2026 — three red cases, two causes, one of them ours.</strong>
+    </p>
+    <ul class="note">
+      <li>
+        <strong>DD-02 and DD-13</strong> asserted that the application's idea of today equalled
+        the <em>test host's</em> clock. BUG-018 turned out not to be a Diet Dashboard defect at
+        all: the ERP host runs about twelve hours fast — <span class="mono">+718 minutes</span> on
+        three consecutive readings, the signature of <span class="mono">UTC+6</span> configured as
+        <span class="mono">UTC−6</span> — so from local noon onwards the app's "today" is
+        tomorrow and both cases failed over something neither is about. They now read the day off
+        the dashboard itself and assert what the tab owns; the clock assertion moved to
+        <span class="mono">DD-18</span>, which measures the skew off the host's HTTP
+        <span class="mono">Date</span> header and so is wrong at every hour rather than half of
+        them. BUG-018 stays open, retitled, and is now held the way every other defect here is.
+      </li>
+      <li>
+        <strong>TC_ADMD_006</strong> was a defect in the automation, not in the ERP. The
+        admission grid filters over the Blazor circuit in a little over 200 ms and keeps the
+        previous rows on screen throughout, and the case's own guard did not cover that gap:
+        every case in that suite seeds itself from the <em>first row of the unfiltered grid</em>,
+        so <span class="mono">rowFor(seed)</span> was already visible before the filter had done
+        anything. The case then read ten unfiltered rows, found nine of them in other beds, and
+        failed — and passed whenever the host answered inside the gap, which is why it looked
+        intermittent. <span class="mono">searchFor()</span> now waits for the grid to settle on
+        <em>which</em> admissions it lists, not on how many: at ten rows a page, a count cannot
+        tell one set of ten from another.
+      </li>
+    </ul>
     <p class="note">
       <strong>IPD Service Entry (§20) was run on 06 Oct 2026</strong>, after the figures above
       were taken; the other suites are from the 05 Oct cycle and are unchanged. Its 27 cases
@@ -1883,7 +1915,7 @@
               <li>Type its cabin number into Search.</li>
             </ol>
           </td>
-          <td>Cabin number read live from the grid, e.g. <span class="mono">HDU-48</span></td>
+          <td>Cabin number read live from the grid, e.g. <span class="mono">HCU-27</span></td>
           <td>
             <ul>
               <li>The admission read in step 1 is among the rows returned.</li>
@@ -1891,10 +1923,17 @@
             </ul>
           </td>
           <td>
-            <span class="badge pass">as expected</span>
+            <span class="badge pass">as expected</span><br /><span class="note">
+              Was intermittently red until 10 Oct 2026, and the fault was the suite's. The grid
+              takes a little over 200 ms to filter and shows the old rows meanwhile, and this is
+              the only case in the suite that asserts something about <em>every</em> row — the
+              others read one row, the seed's own, which is visible either way. It was reading
+              the unfiltered page. <span class="mono">searchFor()</span> now settles the grid
+              first. The application was never at fault: a ward-wide check of 250 admissions
+              found no bed name appearing anywhere outside its own column.</span>
           </td>
           <td>P2</td>
-          <td><span class="badge pass">pass</span><br /><span class="note">4.4 s</span></td>
+          <td><span class="badge pass">pass</span><br /><span class="note">6.5 s</span></td>
         </tr>
         <tr>
           <td class="id">TC_ADMD_007<br /><span class="note">line 143</span></td>
@@ -3404,9 +3443,16 @@
     <p class="note">
       <strong>Run date note.</strong> Every case reads the live ward. A day the ward has not
       ordered on yet leaves the dashboard empty, which is the right answer and not a failure, so
-      the cases that need rows skip rather than fail when there are none. In the 05 Oct run
-      DD-03, DD-04 and DD-08 skipped for exactly that reason — downstream of
-      <strong>BUG-018</strong>, which had the dashboard filtered to a day with nothing on it.
+      the cases that need rows skip rather than fail when there are none. DD-03, DD-04 and DD-08
+      skipped in the 05 Oct run and again on 10 Oct — on 05 Oct because <strong>BUG-018</strong>
+      had the dashboard filtered to a day with nothing on it, on 10 Oct because the run was at
+      01:30 and the ward had genuinely not ordered yet.
+    </p>
+    <p class="note">
+      <strong>DD-18 is not a Diet Dashboard case.</strong> It measures the ERP host's clock,
+      which stamps every date in the system, and it lives in this suite because this is the tab
+      where the skew shows — and because DD-02 and DD-13 used to carry the assertion and failed
+      for half of every day over it. See the fix-pass note under section 4.
     </p>
     <p class="note">
       <strong>DD-14 … DD-17 write.</strong> Each files its own diet indent through the Diet
@@ -3470,15 +3516,15 @@
               <li>Read the date boxes the nurse actually sees.</li>
             </ol>
           </td>
-          <td>Today, as <span class="mono">daysAgo(0)</span> builds it from the test host's local calendar</td>
+          <td>The day is read off the dashboard's own hidden Start Date input, not off the test host's clock — see the Actual column</td>
           <td>
-            <ul><li>The filter is <strong>today</strong> at both ends, and every row on screen was raised today.</li><li>The boxes on screen show the range in force.</li></ul>
+            <ul><li>The filter is a <strong>single day</strong> — both hidden inputs carry the same date — and every row on screen was raised on it.</li><li>The boxes on screen show the range in force.</li></ul>
           </td>
           <td>
-            <strong>Failed.</strong> Both hidden inputs came back <span class="mono">2026-10-06</span> against a client date of <span class="mono">2026-10-05</span> — the dashboard opened on <em>tomorrow</em>, so both grids were empty and the ward’s own meals were not on it. Raised as <strong>BUG-018</strong>.<br />The case failed here, at its first assertion, before reaching the expected-to-fail marker below. That marker covers the second half: the date boxes showed nothing but placeholder text — <strong>BUG-019</strong>.
+            <strong>Rewritten 10 Oct 2026.</strong> It used to assert that the app's date equalled <span class="mono">daysAgo(0)</span> from the test host, and failed on 05 Oct with <span class="mono">2026-10-06</span> against a client date of <span class="mono">2026-10-05</span>. That turned out to be the host clock running ~12 h fast (<strong>BUG-018</strong>), not a Diet Dashboard defect — and it made this case fail for half of every day over something it is not about. The clock assertion now lives in <span class="mono">DD-18</span>; this case reads the day off the app and asserts what the tab owns.<br />The expected-to-fail marker still covers the second half: the date boxes show nothing but placeholder text — <strong>BUG-019</strong>.
           </td>
           <td>P1</td>
-          <td><span class="badge fail">fail</span><br /><span class="note">46.5 s · BUG-018</span></td>
+          <td><span class="badge warn">known fail</span><br /><span class="note">22.8 s · BUG-019</span></td>
         </tr>
         <tr>
           <td class="id">DD-03<br /><span class="note">line 192</span></td>
@@ -3763,7 +3809,7 @@
           <td><span class="badge warn">known fail</span><br /><span class="note">7.5 s · BUG-022</span></td>
         </tr>
         <tr>
-          <td class="id">DD-13<br /><span class="note">line 609</span></td>
+          <td class="id">DD-13<br /><span class="note">line 629</span></td>
           <td>Leaving the tab and coming back puts the dashboard back on today</td>
           <td>Signed in; Diet Dashboard open. Test timeout raised to 180 s.</td>
           <td>
@@ -3773,15 +3819,34 @@
               <li>Read the search box, the hidden date inputs and every row.</li>
             </ol>
           </td>
-          <td>Week window and a one-character search</td>
+          <td>Week window and a one-character search; the day the dashboard opened on, captured before anything is changed</td>
           <td>
-            <ul><li>The tab refetches from scratch: the search box is empty again and the range is back to <strong>today</strong>, with every row on screen raised today.</li></ul>
+            <ul><li>The tab refetches from scratch: the search box is empty again and the range is back to <strong>the day the dashboard opened on</strong>, with every row on screen raised on it.</li></ul>
           </td>
           <td>
-            <strong>Failed.</strong> The search box did clear. The range came back to <span class="mono">2026-10-06</span> — the same day-ahead default as DD-02. Raised as <strong>BUG-018</strong>.<br />Worth pinning because the alternative — a stale list from the last visit — is what would make a nurse act on a diet that is no longer running.
+            <span class="badge pass">as expected</span> — the search box clears and the range goes back to the opening day.<br /><strong>Rewritten 10 Oct 2026</strong> for the reason DD-02 gives: it used to compare the range against the test host's clock and so failed on 05 Oct for <strong>BUG-018</strong>, which is the host clock, not this tab. It now pins the round trip against the day the dashboard itself opened on — which is what makes the case worth having, the alternative being a stale list from the last visit that would let a nurse act on a diet no longer running.
           </td>
           <td>P1</td>
-          <td><span class="badge fail">fail</span><br /><span class="note">1 m 14 s · BUG-018</span></td>
+          <td><span class="badge pass">pass</span><br /><span class="note">22.8 s</span></td>
+        </tr>
+        <tr>
+          <td class="id">DD-18<br /><span class="note">line 671</span></td>
+          <td>The ERP host and the ward keep the same clock</td>
+          <td>Signed in. Not really a Diet Dashboard case — it lives here because this is the tab where the defect shows.</td>
+          <td>
+            <ol>
+              <li>Send one <span class="mono">HEAD</span> request to the host and read its HTTP <span class="mono">Date</span> header — the host's own clock, in GMT, by definition.</li>
+              <li>Compare it against this machine's clock and record the difference in minutes.</li>
+              <li>Open the dashboard and record the day it opened on, for the annotation.</li>
+            </ol>
+          </td>
+          <td>Tolerance of 10 minutes — wide enough that ordinary drift and the round trip never trip it</td>
+          <td>The host keeps the same clock as the ward it serves.</td>
+          <td>
+            The host is <strong>~12 hours fast</strong>: <span class="mono">+718 minutes</span> on three consecutive readings on 10 Oct 2026. Almost exactly ±12 h is the signature of a time-zone sign error — <span class="mono">UTC+6</span> configured as <span class="mono">UTC−6</span> — rather than of a drifting clock. <strong>BUG-018</strong>.<br />Measured off the header rather than off a date on screen on purpose: the header is wrong at <em>every</em> hour, where the day-ahead symptom only appears from local noon. A case that compared dates would pass all morning and fail all afternoon, which is what DD-02 and DD-13 used to do.
+          </td>
+          <td>P1</td>
+          <td><span class="badge warn">known fail</span><br /><span class="note">8.3 s · BUG-018</span></td>
         </tr>
         <tr>
           <td class="id">DD-14<br /><span class="note">line 684</span></td>
@@ -4598,8 +4663,8 @@
     </table>
 
     <footer class="doc-footer">
-      Test Case Document v2.1 · Popular Medical College &amp; Hospital Ltd — Healthcare ERP
-      Test Automation · 06 October 2026 · generated from
+      Test Case Document v2.2 · Popular Medical College &amp; Hospital Ltd — Healthcare ERP
+      Test Automation · 10 October 2026 · generated from
       <span class="mono">docs/src/test-cases.html</span> by
       <span class="mono">npm run docs</span>.
     </footer>

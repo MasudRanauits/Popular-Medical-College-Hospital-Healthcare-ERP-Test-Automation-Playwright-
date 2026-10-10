@@ -87,10 +87,19 @@ export class AdmissionDashboardPage extends BasePage {
   }
 
   /**
-   * Types `term` into the search box and leaves the grid to filter.
+   * Types `term` into the search box and waits for the grid to finish filtering.
    *
-   * The caller asserts on what comes back - rowFor and the count assertions retry, so
-   * there is nothing here to wait on explicitly.
+   * The wait is what makes the result readable, and leaving it out is subtler than it
+   * looks. The grid filters over the Blazor circuit - measured at a little over 200ms on a
+   * quiet host, longer under a full suite - and the rows from before the search stay on
+   * screen for the whole of that window, with no spinner to say so.
+   *
+   * A caller cannot cover that with its own assertion either, because the obvious guard
+   * does not guard. Every case here seeds itself from the *first row of the unfiltered
+   * grid*, so `rowFor(seed)` is already visible before the filter has done anything at
+   * all - it passes instantly against the list the search was meant to replace. TC_ADMD_006
+   * then read ten unfiltered rows, found nine of them in other beds, and failed; it passed
+   * whenever the host happened to answer inside the gap. That is what this wait closes.
    *
    * One trap, for a name: the NAME column renders the patient's title in front of the
    * name ("Mr Jalal Miah") but the search matches the name as it was registered, without
@@ -100,12 +109,53 @@ export class AdmissionDashboardPage extends BasePage {
   async searchFor(term: string): Promise<void> {
     await this.search.fill('');
     await this.search.fill(term);
+    await this.settle();
   }
 
   /** Clears the search box and waits for the grid to come back unfiltered. */
   async clearSearch(): Promise<void> {
     await this.search.fill('');
     await expect(this.rows.first()).toBeVisible({ timeout: 30_000 });
+    await this.settle();
+  }
+
+  /**
+   * Waits for the grid to stop changing - `stable` readings of the same rows, a second
+   * apart.
+   *
+   * Settled on *which* admissions are listed rather than on how many, which a row count
+   * cannot tell apart: the grid shows ten rows a page, so a search that narrows ten
+   * admissions down to ten different ones reads as unchanged throughout. The admission
+   * numbers are what actually move.
+   *
+   * Non-fatal on an empty grid: a term that matches nothing settles at no rows at all,
+   * which is a perfectly good answer and one of the things the cases assert.
+   */
+  async settle(stable = 2): Promise<void> {
+    let previous = '';
+    let unchanged = -1;
+
+    await expect
+      .poll(
+        async () => {
+          const signature = (
+            await this.rows.locator(`td:nth-child(${AdmissionDashboardPage.COLUMN.admissionNo + 1})`)
+              .allInnerTexts()
+              .catch(() => [] as string[])
+          )
+            .map((text) => text.trim())
+            .join(',');
+          unchanged = signature === previous ? unchanged + 1 : 0;
+          previous = signature;
+          return unchanged;
+        },
+        {
+          timeout: 30_000,
+          intervals: new Array(30).fill(1_000),
+          message: 'the admission grid never stopped changing',
+        }
+      )
+      .toBeGreaterThanOrEqual(stable);
   }
 
   /**

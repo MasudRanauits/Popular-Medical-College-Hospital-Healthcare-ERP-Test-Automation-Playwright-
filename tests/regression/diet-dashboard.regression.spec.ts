@@ -157,10 +157,30 @@ test.describe('Diet Dashboard @regression', () => {
 
     await dietDashboardPage.openDashboard();
 
-    // The filter really is today: the hidden inputs the app posts carry today's date at
-    // both ends, and every row on screen was raised today. That much the tab gets right.
-    await expect(dietDashboardPage.startDateValue).toHaveValue(dates.today);
-    await expect(dietDashboardPage.endDateValue).toHaveValue(dates.today);
+    // The filter really is a single day: the hidden inputs the app posts carry the same
+    // date at both ends, and every row on screen was raised on it. That much the tab gets
+    // right.
+    //
+    // Which day is read off the app rather than off this machine's clock, and that is not
+    // a weaker assertion - it is the only honest one. The ERP host's clock runs about
+    // twelve hours fast (BUG-018, and DD-18 is the case that measures it), so from local
+    // noon onwards the app's "today" is tomorrow by the test host's reckoning. Asserting
+    // the two agree here made DD-02 fail for half of every day over a defect that has
+    // nothing to do with this tab, and told the reader nothing that DD-18 does not say
+    // better.
+    const opened = await dietDashboardPage.startDateValue.inputValue();
+    expect(opened, 'the dashboard did not open on a date at all').toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    await expect(
+      dietDashboardPage.endDateValue,
+      'the dashboard opened on a range rather than on a single day'
+    ).toHaveValue(opened);
+
+    if (opened !== dates.today) {
+      test.info().annotations.push({
+        type: 'the app and this host disagree about what day it is',
+        description: `the dashboard opened on ${opened}; this host says ${dates.today} — see DD-18 / BUG-018`,
+      });
+    }
 
     const { running, stopped } = await dietDashboardPage.readBoth();
     // Early in the morning the ward has ordered nothing yet, and an empty dashboard is the
@@ -168,7 +188,7 @@ test.describe('Diet Dashboard @regression', () => {
     // some. The hidden inputs above are what this case actually turns on.
     for (const row of [...running, ...stopped]) {
       expect(row.indentDate, `${row.indentNo} is not from the day the dashboard opened on`).toBe(
-        gridDate(dates.today)
+        gridDate(opened)
       );
     }
 
@@ -613,6 +633,11 @@ test.describe('Diet Dashboard @regression', () => {
     const dates = dietDashboard();
 
     await dietDashboardPage.openDashboard();
+    // What the tab opened on, before anything is changed - read off the app rather than
+    // off this machine's clock, for the reason DD-02 gives.
+    const opened = await dietDashboardPage.startDateValue.inputValue();
+    expect(opened, 'the dashboard did not open on a date at all').toMatch(/^\d{4}-\d{2}-\d{2}$/);
+
     await dietDashboardPage.filterByDates(dates.window.start, dates.window.end);
     await dietDashboardPage.searchFor('a');
 
@@ -625,16 +650,66 @@ test.describe('Diet Dashboard @regression', () => {
     // to today. Worth pinning because the alternative - a stale list from the last visit -
     // is what would make a nurse act on a diet that is no longer running.
     await expect(dietDashboardPage.search, 'the search survived the tab switch').toHaveValue('');
-    await expect(dietDashboardPage.startDateValue).toHaveValue(dates.today);
-    await expect(dietDashboardPage.endDateValue).toHaveValue(dates.today);
+    await expect(
+      dietDashboardPage.startDateValue,
+      'the range did not go back to the day the dashboard opened on'
+    ).toHaveValue(opened);
+    await expect(
+      dietDashboardPage.endDateValue,
+      'the range did not go back to the day the dashboard opened on'
+    ).toHaveValue(opened);
 
     const { running, stopped } = await dietDashboardPage.readBoth();
     for (const row of [...running, ...stopped]) {
       expect(
         row.indentDate,
-        `${row.indentNo} is from ${row.indentDate}, not from today`
-      ).toBe(gridDate(dates.today));
+        `${row.indentNo} is from ${row.indentDate}, not from the day the dashboard went back to`
+      ).toBe(gridDate(opened));
     }
+  });
+
+  test('DD-18 the ERP host and the ward keep the same clock', async ({ dietDashboardPage }) => {
+    const dates = dietDashboard();
+
+    // Not really a Diet Dashboard case: the host's clock stamps every date in the ERP. It
+    // lives here because this is the tab where it shows, and because DD-02 and DD-13 used
+    // to carry the assertion and failed for half of every day over it.
+    //
+    // Measured off the HTTP Date header rather than off anything on screen. That header is
+    // the host's own clock in GMT, by definition, so it is the one reading that does not
+    // depend on what the application does with a date afterwards - and, unlike the
+    // dashboard's default range, it is wrong at every hour rather than only after local
+    // noon. A case that compared dates instead would pass all morning and fail all
+    // afternoon, which is no use to anybody.
+    const response = await dietDashboardPage.page.request.head('/Account/Login');
+    const stamped = response.headers()['date'];
+    expect(stamped, 'the host answered without a Date header, so its clock cannot be read').toBeTruthy();
+
+    const skewMinutes = Math.round((new Date(stamped).getTime() - Date.now()) / 60_000);
+    const opened = await dietDashboardPage.openDashboard().then(async () => {
+      return dietDashboardPage.startDateValue.inputValue();
+    });
+
+    test.info().annotations.push({
+      type: 'what the ERP host thinks the time is',
+      description:
+        `host says ${stamped}; this machine says ${new Date().toUTCString()} — ` +
+        `${skewMinutes >= 0 ? '+' : ''}${skewMinutes} minutes. ` +
+        `The dashboard opened on ${opened}; this machine's date is ${dates.today}.`,
+    });
+
+    // Expected-to-fail: the host runs about twelve hours fast - 718 minutes on every
+    // reading taken on 10 Oct - which is the signature of a UTC+6 zone configured as
+    // UTC-6 rather than of a clock that has merely drifted. Everything the ERP date-stamps
+    // from its own clock is affected, not just this dashboard: from local noon onwards the
+    // dashboard's "today" is tomorrow, and saved rows carry the same shifted stamp. Ten
+    // minutes is the tolerance - wide enough that ordinary drift and the round trip never
+    // trip it, narrow enough that a twelve-hour error cannot hide. See BUG-018.
+    test.fail();
+    expect(
+      Math.abs(skewMinutes),
+      `the ERP host's clock is ${skewMinutes} minutes away from this machine's`
+    ).toBeLessThan(10);
   });
 });
 
