@@ -5,20 +5,30 @@ Two deliverables, each a separate document, both built from the sources in `src/
 | Document | PDF | Source | Pages |
 | --- | --- | --- | --- |
 | **Test Case Document** — all 138 cases in one file | [`TEST_CASES.pdf`](TEST_CASES.pdf) | [`src/test-cases.html`](src/test-cases.html) | 56, A4 landscape |
-| **Bug Report** — 37 defects + 1 closed automation defect, with screenshots and video | [`BUG_REPORT.pdf`](BUG_REPORT.pdf) | [`src/bug-report.html`](src/bug-report.html) | 32, A4 portrait |
+| **Bug Report** — 37 defects (2 closed 22 Oct) + 1 closed automation defect, with screenshots and video | [`BUG_REPORT.pdf`](BUG_REPORT.pdf) | [`src/bug-report.html`](src/bug-report.html) | 32, A4 portrait |
 
 Both reflect the full regression run of **05 Oct 2026, 15:28 UTC** — 99 tests in 33 m 33 s:
 94 expected (78 passed, 16 expected-to-fail), 2 failed, 3 skipped — plus the **IPD Service
 Entry run of 06 Oct 2026**: 27 cases, 13 passed and 14 expected-to-fail, nothing unexpected
 and nothing skipped. That suite is new; every other suite is unchanged.
 
-**Expected-to-fail is not a broken test.** Thirty cases are marked `test.fail()`: each asserts
+**Expected-to-fail is not a broken test.** Twenty-nine cases are marked `test.fail()`: each asserts
 the behaviour the module is supposed to have, fails on every run, and is reported as
 *unexpectedly passing* — which fails the build — the day the module is corrected. Each is a
 defect in the bug report (BUG-009 … BUG-037). The two red cases of the 05 Oct cycle, DD-02 and
 DD-13, were resolved on 10 Oct: BUG-018 turned out to be the ERP host clock running ~12 hours
 fast, not a Diet Dashboard defect, and the assertion moved to DD-18, which measures the skew
-directly and is marked `test.fail()` like every other held defect.
+directly.
+
+**Two defects closed on 22 Oct 2026, both by the mechanism working as designed.** The host
+clock was corrected (skew `+0`, down from `+718` minutes) and the IPD bill grid's `End End`
+header became `End Date`. `DD-18` and `IS-26` each reported as *unexpectedly passing*, their
+markers came off, and both assertions stay as live guards. The same ERP pass relabelled a
+handful of columns and reworded two messages across IPD Service Entry and Consultancy Service;
+behaviour did not change anywhere, and the page objects were updated to match. Two faults in
+the suite itself turned up with it — `IS-26` was reading CSS-uppercased header text and so
+could never have passed, and `IS-09` reused a stale lookup index across a re-search — both
+fixed.
 
 **IPD Service Entry has no evidence folder, on purpose.** That tab offers no way to take a
 saved service off a bill again (BUG-027), so no case in its suite presses Save against a cart

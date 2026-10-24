@@ -30,8 +30,8 @@ function pricedService(options: IpdServiceOption[]): number {
  *
  * How the tab works, since nothing on it says
  * -------------------------------------------
- * The ward list fills a patient panel of six read-only boxes — Inv.No, Name, Gender, Age,
- * Assigned Doctor, CabinNo. Under that is one line entry row — Service, Code, Remarks,
+ * The ward list fills a patient panel of six read-only boxes — Invoice No, Name, Gender,
+ * Age, Assigned Doctor, Cabin No. Under that is one line entry row — Service, Code, Remarks,
  * Service Date, Start Date Time, End Date Time, Rate, Qty — and *Enter on Qty* is what
  * commits a line: there is no Add button, the only buttons under the cart being Save and
  * Print All. The upper grid is the cart, lines costed but not yet billed, with Total Amount
@@ -53,25 +53,32 @@ function pricedService(options: IpdServiceOption[]): number {
  * recorded as such in the Known coverage gaps section of the Test Case Document, and it
  * stays a gap until the tab offers a way back.
  *
- * Fourteen findings, and why they are marked rather than written around
+ * Thirteen findings, and why they are marked rather than written around
  * --------------------------------------------------------------------
  * Each is a case marked test.fail(), so a run reports it as expected-to-fail and reports it
  * as *unexpectedly passing* on the day the module is corrected — which is the signal to
  * drop the marker and keep the assertion. Nothing here is rewritten to match the defect,
  * which would turn it into a documented feature and leave nothing watching for the fix.
  *
+ * There were fourteen. IS-26 was fixed by the ERP between 06 and 22 Oct 2026 — the bill
+ * grid's eighth column read "End End" and now reads "End Date" — and the case kept its
+ * assertion and lost its marker, which is the whole point of marking them. "S.Date",
+ * "Served_By", "Service Change", "Inv.No", "CabinNo" and "OTName" were relabelled in the
+ * same pass: cosmetic throughout, and no control name moved with them.
+ *
  *   - IS-13 The cart is not emptied when another patient is picked. Lines entered for the
  *     patient in bed A are still in the cart, and still in Total Amount, after the nurse
- *     clicks the patient in bed B — and Save then bills them to B. The worst of the
- *     fourteen: one mis-click puts one patient's services on another patient's bill, and
+ *     clicks the patient in bed B — and Save then bills them to B. The worst of them:
+ *     one mis-click puts one patient's services on another patient's bill, and
  *     nothing on screen says so happened. The same defect Consultancy Service carries.
  *   - IS-14 The same lines also survive leaving the tab and coming back, and that round
- *     trip *does* reset the patient panel — Inv.No goes back to 0 — so the cart can be
+ *     trip *does* reset the patient panel — Invoice No goes back to 0 — so the cart can be
  *     sitting there, with a total under it, against no patient at all.
  *   - IS-15 The Rate box is editable, and whatever is typed into it is what the line
  *     carries. A service the catalogue prices at 1000 goes into the cart at 1 because
  *     somebody typed 1.
- *   - IS-16 Service Change — the discount box under Total Amount — is read by nothing. It
+ *   - IS-16 Service Charge — the discount box under Total Amount, labelled "Service
+ *     Change" until the 22 Oct relabel — is read by nothing. It
  *     takes a number, the commit resets it to 0, and neither the cart line nor Total Amount
  *     carries it.
  *   - IS-17 Committing a line puts Service Date back to the moment of the commit, so a
@@ -92,7 +99,6 @@ function pricedService(options: IpdServiceOption[]): number {
  *     and no total anywhere on the tab. A sixteenth service saved against such a patient is
  *     charged and then cannot be seen here at all.
  *   - IS-24 There is no bin, no edit and no cancel on a bill row — see above.
- *   - IS-26 The bill grid's eighth column is headed "End End".
  *   - IS-07 A line with no service picked is refused in silence: nothing is added to the
  *     cart and nothing is said. Compare IS-06, where a bad quantity *is* worded.
  *
@@ -425,18 +431,29 @@ test.describe('IPD Service Entry @regression', () => {
     const matches = await ipdServiceEntryPage.serviceOptions(data.serviceSearch);
     const index = pricedService(matches);
     test.skip(index === -1, `nothing matching "${data.serviceSearch}" carries a rate today`);
-    const option = matches[index];
 
     // Two lines of different quantities, so the one that survives can be told from the one
     // that went: the cart prints no identifier of its own beyond what was typed into it.
+    //
+    // Each line is checked against what the cart says it cost, not against a rate read out
+    // of the catalogue before the loop started. Re-searching the lookup is not guaranteed
+    // to bring the rows back in the same order, so the row at `index` on the second pass is
+    // not always the service that was there on the first — and on 22 Oct it was not: the
+    // two lines went in at different rates and the case failed on a total of 5000 against
+    // an expected 3000. It had been asserting the catalogue's arithmetic, which IS-05
+    // already covers, rather than its own subject: that the bin takes off exactly one line
+    // and Total Amount follows it.
+    const lines = [];
     const [first, second] = [data.quantities[0], data.quantities[0] + 1];
     for (const quantity of [first, second]) {
       await ipdServiceEntryPage.serviceOptions(data.serviceSearch);
       await ipdServiceEntryPage.pickRow(index);
-      await ipdServiceEntryPage.addLine({ remarks: `${data.mark}-${quantity}`, qty: quantity });
+      lines.push(
+        await ipdServiceEntryPage.addLine({ remarks: `${data.mark}-${quantity}`, qty: quantity })
+      );
     }
     expect(await ipdServiceEntryPage.total(), 'Total Amount is not the sum of the two lines').toBe(
-      option.rate * (first + second)
+      lines[0].amount + lines[1].amount
     );
 
     await ipdServiceEntryPage.removeCartLine(0);
@@ -447,7 +464,7 @@ test.describe('IPD Service Entry @regression', () => {
     expect(
       await ipdServiceEntryPage.total(),
       'Total Amount did not drop with the line that was taken off'
-    ).toBe(option.rate * second);
+    ).toBe(lines[1].amount);
   });
 
   test('IS-10 Total Amount is the sum of the cart', async ({ ipdServiceEntryPage }) => {
@@ -1138,23 +1155,29 @@ test.describe('IPD Service Entry @regression', () => {
     const ward = await ipdServiceEntryPage.wardPatient(data.wardIndex);
     await ipdServiceEntryPage.selectPatient(ward.admissionNo);
 
+    // allTextContents, not allInnerTexts. The headers are uppercased by CSS, and innerText
+    // applies that — so a case reading them that way compares against the stylesheet and
+    // can never match the markup's own casing. This case did exactly that, which meant it
+    // would have gone on failing even once the typo was fixed; it only looked right while
+    // the typo was there to fail on. IS-01 was never affected: toHaveText reads
+    // textContent, which is why it passed on the day this did not.
     const headers = await ipdServiceEntryPage.billGrid
       .locator('thead th .sortable-column-header')
-      .allInnerTexts();
+      .allTextContents();
 
     test.info().annotations.push({
       type: 'the bill grid as it heads its columns',
       description: headers.map((text) => text.trim()).join(' | '),
     });
 
-    // Expected-to-fail: the eighth column is headed "End End". It sits beside "Start Date"
-    // and holds the end of the service window, so what it should read is "End Date" — the
-    // name the cart grid uses for the same value one grid up. Cosmetic, and on the screen a
-    // ward nurse reads all day. See the file header.
-    test.fail();
+    // This was BUG-037, and it is fixed. The eighth column read "End End" when the suite
+    // was written; on 22 Oct 2026 it read "End Date", the name the cart grid uses for the
+    // same value one grid up, and the marker came off on the run that reported this case
+    // as unexpectedly passing. "S.Date" and "Served_By" were tidied in the same pass —
+    // BILL_COLUMNS carries the new spelling and IS-01 asserts the whole list.
     expect(
       headers.map((text) => text.trim()),
-      'the bill grid heads its end-of-window column "End End"'
+      'the bill grid no longer names its end-of-window column "End Date"'
     ).toContain('End Date');
   });
 
@@ -1186,7 +1209,7 @@ test.describe('IPD Service Entry @regression', () => {
     const windowed = rows.reduce((sum, bed) => sum + bed.withWindow, 0);
 
     test.info().annotations.push({
-      type: 'saved services carrying a Start Date or an End End',
+      type: 'saved services carrying a Start Date or an End Date',
       description:
         `${windowed} of ${saved} across ${rows.length} bed(s) — ` +
         rows.map((bed) => `${bed.bed}: ${bed.withWindow}/${bed.total}`).join(' · '),

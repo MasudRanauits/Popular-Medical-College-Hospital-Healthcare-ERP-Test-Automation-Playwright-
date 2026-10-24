@@ -11,7 +11,7 @@ export interface IpdWardPatient {
 
 /** The read-only panel the tab fills in once a patient is picked out of the ward list. */
 export interface IpdPatient {
-  /** "Inv.No" - the admission number, not an invoice number of its own. '0' when empty. */
+  /** "Invoice No" - the admission number, not an invoice number of its own. '0' when empty. */
   invoiceNo: string;
   name: string;
   /** "Gender" - one of the two panel boxes with no name attribute, so reached by label. */
@@ -20,7 +20,7 @@ export interface IpdPatient {
   age: string;
   /** "Assigned Doctor" - the consultant the admission is under. Often long. */
   assignedDoctor: string;
-  /** "CabinNo", e.g. "P(HCU-33)". */
+  /** "Cabin No", e.g. "P(HCU-33)". */
   cabinNo: string;
 }
 
@@ -52,12 +52,12 @@ export interface IpdBilledLine {
   qty: number;
   amount: number;
   discount: number;
-  /** "S.Date", as the grid prints it: M/d/yyyy h:mm:ss AM/PM. */
+  /** "Service Date", as the grid prints it: M/d/yyyy h:mm:ss AM/PM. */
   serviceDate: string;
   startDate: string;
-  /** The column the grid heads "End End". See IS-26. */
+  /** "End Date" - headed "End End" until the ERP relabelled the grid. See IS-26. */
   endDate: string;
-  /** "Served_By" - the username that saved it. */
+  /** "Served By" - the username that saved it. */
   servedBy: string;
 }
 
@@ -87,7 +87,7 @@ export interface IpdLineInput {
   startDateTime?: string;
   /** End Date Time, as YYYY-MM-DD HH:mm. */
   endDateTime?: string;
-  /** The Service Change box under Total Amount. See IS-16. */
+  /** The Service Charge box under Total Amount. See IS-16. */
   serviceChange?: number;
   qty: number;
 }
@@ -103,12 +103,12 @@ export interface IpdLineInput {
  * -----------------------
  * Down the left, the ward list - every admitted patient, one card per bed, with a search
  * box over it. Top right, a patient panel of six disabled boxes that the card fills in:
- * Inv.No, Name, Gender, Age, Assigned Doctor, CabinNo. Under that, the line entry row:
+ * Invoice No, Name, Gender, Age, Assigned Doctor, Cabin No. Under that, the line entry row:
  * Service, Code, Remarks, Service Date, Start Date Time, End Date Time, Rate, Qty. Then
  * two MudBlazor grids, one above the other, with Save between them:
  *
  *   - the upper grid is the cart - lines entered and costed but not yet billed, with
- *     Total Amount and Service Change under it, and a bin on each row;
+ *     Total Amount and Service Charge under it, and a bin on each row;
  *   - the lower grid is the bill - every service already saved against this admission,
  *     with who saved it and when, and *no* control of any kind on the row.
  *
@@ -119,15 +119,15 @@ export interface IpdLineInput {
  * cart are Save and Print All - so a line that is typed and never committed is simply not
  * part of the bill. The same shape Medicine Indent and Consultancy Service use.
  *
- * Qty has a guard: zero and negative are refused with "Please input correct Qty.", which is
+ * Qty has a guard: zero and negative are refused with "Please enter a valid Qty.", which is
  * the one refusal the tab words. A commit with no service picked is refused *in silence* -
  * nothing is added and nothing is said, which is IS-07.
  *
  * Rate arrives from the catalogue but the box is editable, and whatever is in it at the
  * moment of the Enter is what the line carries. IS-15.
  *
- * Service Change - the discount box under Total Amount - is read by nothing, and the commit
- * resets it to 0. IS-16.
+ * Service Charge - the discount box under Total Amount, labelled "Service Change" until the
+ * 22 Oct relabel - is read by nothing, and the commit resets it to 0. IS-16.
  *
  * Service Date is a flatpickr carrying a date *and a time*, and committing a line puts it
  * back to the moment of the commit, so a service performed yesterday cannot be entered as
@@ -147,6 +147,12 @@ export interface IpdLineInput {
  * carries no bin* - unlike Consultancy Service, a service saved here cannot be taken off
  * again from this tab at all (IS-24). Together those are why nothing in the suite saves.
  * See BILL_ROW_CAP and the spec's file header.
+ *
+ * The tab was relabelled by the ERP between 06 and 22 Oct 2026. "End End" became
+ * "End Date", which closed BUG-037, and "S.Date", "Served_By", "Service Change", "Inv.No",
+ * "CabinNo" and "OTName" were tidied with it. Only the two column lists and the bill
+ * grid's own locator had to move: every control name in the markup stayed as it was, which
+ * is the payoff for locating fields by name rather than by the label beside them.
  *
  * Framework mix, as everywhere in this ERP: the form is Bootstrap (div.form-group holding a
  * label.form-label), the Service picker is a Radzen lookup, both grids are MudBlazor, the
@@ -180,7 +186,7 @@ export class IpdServiceEntryPage extends BasePage {
     'Schedule',
     'Rate',
     'Qty',
-    'Service Change',
+    'Service Charge',
     'Remarks',
     'Start Date',
     'End Date',
@@ -190,8 +196,12 @@ export class IpdServiceEntryPage extends BasePage {
   /**
    * The bill grid's columns, in order. There is no tenth - this grid has no bin.
    *
-   * "End End" is not a transcription slip here. It is what the header says, and IS-26 is
-   * the case that reports it.
+   * Relabelled by the ERP between 06 and 22 Oct 2026, along with most of the tab: the
+   * eighth column used to read "End End" (BUG-037, now fixed and held by IS-26), the sixth
+   * "S.Date" and the ninth "Served_By". The cart's discount column was "Service Change"
+   * and the form's patient panel said "Inv.No", "CabinNo" and "OTName". None of the
+   * underlying control names changed with them, which is why only the two column lists and
+   * the bill grid's own locator needed touching.
    */
   static readonly BILL_COLUMNS = [
     'Service Name',
@@ -199,10 +209,10 @@ export class IpdServiceEntryPage extends BasePage {
     'Qty',
     'Amount',
     'Discount',
-    'S.Date',
+    'Service Date',
     'Start Date',
-    'End End',
-    'Served_By',
+    'End Date',
+    'Served By',
   ] as const;
 
   /**
@@ -224,10 +234,16 @@ export class IpdServiceEntryPage extends BasePage {
    * Short, because this tab mostly says nothing: a line it will not take is refused in
    * silence unless the quantity is what is wrong with it. There is deliberately no entry
    * for a successful save - nothing in the suite saves, so nothing has read one.
+   *
+   * Both were reworded by the ERP between 06 and 22 Oct 2026, in the same polish pass that
+   * relabelled the columns: "Please input items" became "Please add at least one
+   * service." and "Please input correct Qty." became "Please enter a valid Qty." The
+   * behaviour behind them did not change - both still refuse - and IS-06 and IS-25 caught
+   * the rewording, which is what pinning the words is for.
    */
   static readonly MESSAGES = {
-    emptyCart: 'Please input items',
-    badQuantity: 'Please input correct Qty.',
+    emptyCart: 'Please add at least one service.',
+    badQuantity: 'Please enter a valid Qty.',
   } as const;
 
   /** Ward list down the left: its search box and the patient cards under it. */
@@ -870,11 +886,11 @@ export class IpdServiceEntryPage extends BasePage {
       .first();
   }
 
-  /** The bill - services already saved against this admission. Taken by its Served_By column. */
+  /** The bill - services already saved against this admission. Taken by its Served By column. */
   get billGrid(): Locator {
     return this.page
       .locator('table.mud-table-root:visible')
-      .filter({ has: this.page.locator('th', { hasText: 'Served_By' }) })
+      .filter({ has: this.page.locator('th', { hasText: 'Served By' }) })
       .first();
   }
 

@@ -41,7 +41,7 @@
         </tr>
         <tr>
           <th>Version</th>
-          <td>2.2</td>
+          <td>2.3</td>
         </tr>
         <tr>
           <th>Date raised</th>
@@ -313,11 +313,11 @@
         </tr>
         <tr>
           <td class="mono"><strong>BUG-018</strong></td>
-          <td>The ERP host's clock runs ~12 hours fast, so from local noon every date the app stamps is tomorrow's</td>
+          <td>The ERP host's clock ran ~12 hours fast, so from local noon every date the app stamped was tomorrow's</td>
           <td>Platform / host</td>
           <td>High</td>
           <td>P1</td>
-          <td><span class="badge warn">held by a case</span> DD-18 · <span class="badge fail">reproduced</span> 2 screenshots, 4 videos, 2 traces</td>
+          <td><span class="badge pass">fixed</span> — verified 22 Oct 2026 by DD-18</td>
         </tr>
         <tr>
           <td class="mono"><strong>BUG-019</strong></td>
@@ -465,11 +465,11 @@
         </tr>
         <tr>
           <td class="mono"><strong>BUG-037</strong></td>
-          <td>The bill grid heads its end-of-window column "End End"</td>
+          <td>The bill grid headed its end-of-window column "End End"</td>
           <td>IPD Service Entry</td>
           <td>Low</td>
           <td>P3</td>
-          <td><span class="badge warn">held by a case</span> IS-26</td>
+          <td><span class="badge pass">fixed</span> — verified 22 Oct 2026 by IS-26</td>
         </tr>
       </tbody>
     </table>
@@ -1782,15 +1782,16 @@ Call log:
           <tr>
             <th>Status</th>
             <td>
-              <span class="badge fail">open</span> — raised from the 05 Oct run; <strong>root
-              cause identified 10 Oct 2026</strong> and the title corrected with it. It is not a
-              Diet Dashboard defect.
+              <span class="badge pass">fixed</span> — <strong>closed 22 Oct 2026</strong>. Raised
+              from the 05 Oct run; root cause identified 10 Oct and the title corrected with it
+              (it is not a Diet Dashboard defect); the host clock read <span class="mono">+0</span>
+              on 22 Oct. See <em>Fix verified</em> below.
             </td>
           </tr>
           <tr>
             <th>Held by</th>
             <td>
-              <span class="mono">DD-18</span> — <span class="mono">diet-dashboard.regression.spec.ts:671</span>,
+              <span class="mono">DD-18</span> — <span class="mono">diet-dashboard.regression.spec.ts:675</span>,
               which measures the skew off the host's own HTTP <span class="mono">Date</span> header
               and is marked <span class="mono">test.fail()</span>.
               <br />Originally surfaced by <span class="mono">DD-02</span> and
@@ -1876,6 +1877,29 @@ date -u</pre>
         the default range are the same day, that every row listed is from it, and that a tab
         round trip returns to it. The clock assertion moved to <span class="mono">DD-18</span>,
         which measures the skew directly and so fails at every hour rather than half of them.
+      </p>
+
+      <h4>Fix verified</h4>
+      <p>
+        On <strong>22 Oct 2026</strong> the host's HTTP <span class="mono">Date</span> header read
+        <span class="mono">Thu, 22 Oct 2026 05:24:29 GMT</span> against a client clock of
+        <span class="mono">Thu, 22 Oct 2026 05:24:29 GMT</span> — a skew of
+        <strong>+0 minutes</strong>, down from +718. The run reported
+        <span class="mono">DD-18</span> as <em>“Expected to fail, but passed.”</em>, which is
+        precisely what that marker exists to produce, and the marker came off in the same change.
+      </p>
+      <p>
+        <span class="mono">DD-18</span> was <strong>kept as a live guard</strong> rather than
+        deleted. A clock is the kind of thing that is corrected once and returns after a reboot
+        or a rebuild, and everything the ERP date-stamps from its own clock rides on it. It now
+        fails the build if the skew ever exceeds ten minutes again.
+      </p>
+      <p class="note">
+        <strong>Still worth checking before this is filed away:</strong> records written while
+        the clock was wrong carry the shifted stamp. Anything saved between the first sighting
+        on 05 Oct and the fix on 22 Oct — indents, bill rows, <span class="mono">Served_By</span>
+        timestamps — may be dated up to half a day out. Correcting the clock does not correct
+        those.
       </p>
 
       <h4>Error as the 05 Oct run reported it</h4>
@@ -2064,8 +2088,8 @@ Timeout:  15000ms
           <tr>
             <th>Found by</th>
             <td>
-              <span class="mono">DD-06</span> (reversed range) — <span class="mono">diet-dashboard.regression.spec.ts:295</span><br />
-              <span class="mono">DD-09</span> (no-match search) — <span class="mono">diet-dashboard.regression.spec.ts:427</span>
+              <span class="mono">DD-06</span> (reversed range) — <span class="mono">diet-dashboard.regression.spec.ts:319</span><br />
+              <span class="mono">DD-09</span> (no-match search) — <span class="mono">diet-dashboard.regression.spec.ts:451</span>
             </td>
           </tr>
         </tbody>
@@ -2125,7 +2149,7 @@ Timeout:  15000ms
           </tr>
           <tr>
             <th>Found by</th>
-            <td><span class="mono">DD-07</span> — <span class="mono">diet-dashboard.regression.spec.ts:328</span></td>
+            <td><span class="mono">DD-07</span> — <span class="mono">diet-dashboard.regression.spec.ts:352</span></td>
           </tr>
           <tr>
             <th>Related</th>
@@ -2187,7 +2211,7 @@ Timeout:  15000ms
           </tr>
           <tr>
             <th>Found by</th>
-            <td><span class="mono">DD-12</span> — <span class="mono">diet-dashboard.regression.spec.ts:588</span></td>
+            <td><span class="mono">DD-12</span> — <span class="mono">diet-dashboard.regression.spec.ts:612</span></td>
           </tr>
         </tbody>
       </table>
@@ -2250,8 +2274,8 @@ Timeout:  15000ms
           <tr>
             <th>Found by</th>
             <td>
-              <span class="mono">DD-16</span> (Stop) — <span class="mono">diet-dashboard.regression.spec.ts:769</span><br />
-              <span class="mono">DD-17</span> (Continue) — <span class="mono">diet-dashboard.regression.spec.ts:804</span>
+              <span class="mono">DD-16</span> (Stop) — <span class="mono">diet-dashboard.regression.spec.ts:853</span><br />
+              <span class="mono">DD-17</span> (Continue) — <span class="mono">diet-dashboard.regression.spec.ts:888</span>
             </td>
           </tr>
           <tr>
@@ -2354,7 +2378,7 @@ Timeout:  15000ms
           </tr>
           <tr>
             <th>Found by</th>
-            <td><span class="mono">IS-13</span> — <span class="mono">ipd-service-entry.regression.spec.ts:551</span></td>
+            <td><span class="mono">IS-13</span> — <span class="mono">ipd-service-entry.regression.spec.ts:568</span></td>
           </tr>
           <tr>
             <th>Reproducibility</th>
@@ -2428,7 +2452,7 @@ Timeout:  15000ms
           </tr>
           <tr>
             <th>Found by</th>
-            <td><span class="mono">IS-14</span> — <span class="mono">ipd-service-entry.regression.spec.ts:614</span></td>
+            <td><span class="mono">IS-14</span> — <span class="mono">ipd-service-entry.regression.spec.ts:631</span></td>
           </tr>
           <tr>
             <th>Related</th>
@@ -2483,7 +2507,7 @@ Timeout:  15000ms
           </tr>
           <tr>
             <th>Found by</th>
-            <td><span class="mono">IS-15</span> — <span class="mono">ipd-service-entry.regression.spec.ts:661</span></td>
+            <td><span class="mono">IS-15</span> — <span class="mono">ipd-service-entry.regression.spec.ts:678</span></td>
           </tr>
           <tr>
             <th>Related</th>
@@ -2554,7 +2578,7 @@ Timeout:  15000ms
           </tr>
           <tr>
             <th>Found by</th>
-            <td><span class="mono">IS-24</span> — <span class="mono">ipd-service-entry.regression.spec.ts:1060</span></td>
+            <td><span class="mono">IS-24</span> — <span class="mono">ipd-service-entry.regression.spec.ts:1077</span></td>
           </tr>
           <tr>
             <th>Related</th>
@@ -2626,7 +2650,7 @@ Timeout:  15000ms
           </tr>
           <tr>
             <th>Found by</th>
-            <td><span class="mono">IS-23</span> — <span class="mono">ipd-service-entry.regression.spec.ts:1008</span></td>
+            <td><span class="mono">IS-23</span> — <span class="mono">ipd-service-entry.regression.spec.ts:1025</span></td>
           </tr>
           <tr>
             <th>Related</th>
@@ -2687,7 +2711,7 @@ Timeout:  15000ms
           </tr>
           <tr>
             <th>Found by</th>
-            <td><span class="mono">IS-17</span> — <span class="mono">ipd-service-entry.regression.spec.ts:747</span></td>
+            <td><span class="mono">IS-17</span> — <span class="mono">ipd-service-entry.regression.spec.ts:764</span></td>
           </tr>
           <tr>
             <th>Related</th>
@@ -2752,7 +2776,7 @@ Timeout:  15000ms
           </tr>
           <tr>
             <th>Found by</th>
-            <td><span class="mono">IS-16</span> — <span class="mono">ipd-service-entry.regression.spec.ts:700</span></td>
+            <td><span class="mono">IS-16</span> — <span class="mono">ipd-service-entry.regression.spec.ts:717</span></td>
           </tr>
           <tr>
             <th>Related</th>
@@ -2816,7 +2840,7 @@ Timeout:  15000ms
           </tr>
           <tr>
             <th>Found by</th>
-            <td><span class="mono">IS-20</span> — <span class="mono">ipd-service-entry.regression.spec.ts:897</span></td>
+            <td><span class="mono">IS-20</span> — <span class="mono">ipd-service-entry.regression.spec.ts:914</span></td>
           </tr>
         </tbody>
       </table>
@@ -2876,7 +2900,7 @@ Timeout:  15000ms
           </tr>
           <tr>
             <th>Found by</th>
-            <td><span class="mono">IS-21</span> — <span class="mono">ipd-service-entry.regression.spec.ts:939</span></td>
+            <td><span class="mono">IS-21</span> — <span class="mono">ipd-service-entry.regression.spec.ts:956</span></td>
           </tr>
           <tr>
             <th>Related</th>
@@ -2936,7 +2960,7 @@ Timeout:  15000ms
           </tr>
           <tr>
             <th>Found by</th>
-            <td><span class="mono">IS-19</span> — <span class="mono">ipd-service-entry.regression.spec.ts:859</span></td>
+            <td><span class="mono">IS-19</span> — <span class="mono">ipd-service-entry.regression.spec.ts:876</span></td>
           </tr>
         </tbody>
       </table>
@@ -2991,7 +3015,7 @@ Timeout:  15000ms
           </tr>
           <tr>
             <th>Found by</th>
-            <td><span class="mono">IS-18</span> — <span class="mono">ipd-service-entry.regression.spec.ts:812</span></td>
+            <td><span class="mono">IS-18</span> — <span class="mono">ipd-service-entry.regression.spec.ts:829</span></td>
           </tr>
         </tbody>
       </table>
@@ -3042,7 +3066,7 @@ Timeout:  15000ms
           </tr>
           <tr>
             <th>Found by</th>
-            <td><span class="mono">IS-07</span> — <span class="mono">ipd-service-entry.regression.spec.ts:342</span></td>
+            <td><span class="mono">IS-07</span> — <span class="mono">ipd-service-entry.regression.spec.ts:348</span></td>
           </tr>
         </tbody>
       </table>
@@ -3101,7 +3125,7 @@ Timeout:  15000ms
           </tr>
           <tr>
             <th>Found by</th>
-            <td><span class="mono">IS-22</span> — <span class="mono">ipd-service-entry.regression.spec.ts:980</span></td>
+            <td><span class="mono">IS-22</span> — <span class="mono">ipd-service-entry.regression.spec.ts:997</span></td>
           </tr>
           <tr>
             <th>Related</th>
@@ -3130,7 +3154,7 @@ Timeout:  15000ms
 
     <!-- ------------------------------------------------------------ BUG-037 -->
     <section class="bug">
-      <h3><span class="mono">BUG-037</span> — The bill grid heads its end-of-window column "End End"</h3>
+      <h3><span class="mono">BUG-037</span> — The bill grid headed its end-of-window column "End End"</h3>
 
       <table class="meta">
         <tbody>
@@ -3144,11 +3168,11 @@ Timeout:  15000ms
           </tr>
           <tr>
             <th>Status</th>
-            <td><span class="badge fail">open</span></td>
+            <td><span class="badge pass">fixed</span> — <strong>closed 22 Oct 2026</strong>, see <em>Fix verified</em> below</td>
           </tr>
           <tr>
             <th>Found by</th>
-            <td><span class="mono">IS-26</span> — <span class="mono">ipd-service-entry.regression.spec.ts:1134</span></td>
+            <td><span class="mono">IS-26</span> — <span class="mono">ipd-service-entry.regression.spec.ts:1151</span></td>
           </tr>
           <tr>
             <th>Related</th>
@@ -3168,19 +3192,41 @@ Timeout:  15000ms
         row up uses for the same value.
       </p>
 
-      <h4>Actual result</h4>
+      <h4>Actual result, as raised on 06 Oct</h4>
       <p>
-        It reads <span class="mono">End End</span>. The grid's other labels are inconsistent in
+        It read <span class="mono">End End</span>. The grid's other labels were inconsistent in
         the same spirit — <span class="mono">S.Date</span> and
         <span class="mono">Served_By</span> against the cart's
         <span class="mono">Service Name</span> and <span class="mono">Start Date</span> — so the
-        header row is worth a pass as a whole.
+        report asked for the header row to be taken as a whole.
       </p>
 
-      <h4>Note for whoever fixes it</h4>
+      <h4>Fix verified</h4>
       <p>
-        The automation matches these headers exactly, including the misspelling, so that IS-01
-        guards the grid's shape. Flag the change and the constant comes off in the same release.
+        Done, and done as asked: on <strong>22 Oct 2026</strong> the eighth column reads
+        <span class="mono">End Date</span>, and the rest of the row went with it —
+        <span class="mono">S.Date</span> is now <span class="mono">Service Date</span> and
+        <span class="mono">Served_By</span> is <span class="mono">Served By</span>. The cart's
+        discount column and the form's patient panel were tidied in the same pass:
+        <span class="mono">Service Change</span> → <span class="mono">Service Charge</span>,
+        <span class="mono">Inv.No</span> → <span class="mono">Invoice No</span>,
+        <span class="mono">CabinNo</span> → <span class="mono">Cabin No</span>,
+        <span class="mono">OTName</span> → <span class="mono">OT Name</span>.
+      </p>
+      <p>
+        <span class="mono">IS-26</span> reported as <em>unexpectedly passing</em> and its marker
+        came off; the assertion stays as a guard. <span class="mono">IS-01</span>, which asserts
+        the whole header list, went red on the same run — the intended consequence of pinning
+        the grid's shape, and the signal to update the two column constants, which was done in
+        the same change.
+      </p>
+      <p class="note">
+        Nothing but labels moved. Every control name in the markup —
+        <span class="mono">TotalServiceCharge</span>,
+        <span class="mono">SelectedLeftGridItem.InvoiceNo</span>,
+        <span class="mono">OTNameId</span> and the rest — stayed as it was, so only the two
+        column lists and the bill grid's own locator needed touching. None of the other twelve
+        IPD defects moved with it.
       </p>
     </section>
 
@@ -3508,8 +3554,10 @@ Timeout:  15000ms
       </tbody>
     </table>
     <p class="note">
-      <strong>How to tell a fix landed.</strong> Thirty of these defects are held by a
-      regression case marked <span class="mono">test.fail()</span>. When the module is
+      <strong>How to tell a fix landed.</strong> Twenty-eight of these defects are held by a
+      regression case marked <span class="mono">test.fail()</span>, and two more were closed
+      that way on 22 Oct 2026 — BUG-018 and BUG-037 both reported as <em>unexpectedly
+      passing</em>, which is the mechanism working as designed. When the module is
       corrected, that case does not quietly start passing — the run reports it as
       <strong>unexpectedly passing</strong>, which fails the build until the marker is removed.
       So the suite will tell you, on the next run after the fix, and the defect can be closed
@@ -3517,8 +3565,8 @@ Timeout:  15000ms
     </p>
 
     <footer class="doc-footer">
-      Bug Report v2.2 · Popular Medical College &amp; Hospital Ltd — Healthcare ERP Test
-      Automation · 10 October 2026 · generated from
+      Bug Report v2.3 · Popular Medical College &amp; Hospital Ltd — Healthcare ERP Test
+      Automation · 22 October 2026 · generated from
       <span class="mono">docs/src/bug-report.html</span> by <span class="mono">npm run docs</span>.
     </footer>
   </body>

@@ -99,11 +99,11 @@
         </tr>
         <tr>
           <th>Version</th>
-          <td>2.2</td>
+          <td>2.3</td>
         </tr>
         <tr>
           <th>Date</th>
-          <td>10 October 2026</td>
+          <td>22 October 2026</td>
         </tr>
         <tr>
           <th>Prepared by</th>
@@ -147,7 +147,7 @@
           <th>Companion document</th>
           <td>
             <span class="mono">docs/BUG_REPORT.pdf</span> — the 37 defects raised against
-            these cases, with screenshots and video.
+            these cases, two of them now closed, with screenshots and video.
           </td>
         </tr>
       </tbody>
@@ -435,8 +435,8 @@
           <td>Regression — Diet Dashboard</td>
           <td class="mono">tests/regression/diet-dashboard.regression.spec.ts</td>
           <td>19</td>
-          <td>9</td>
-          <td>7</td>
+          <td>10</td>
+          <td>6</td>
           <td>—</td>
           <td>3</td>
           <td>—</td>
@@ -446,8 +446,8 @@
           <td>Regression — IPD Service Entry</td>
           <td class="mono">tests/regression/ipd-service-entry.regression.spec.ts</td>
           <td>27</td>
-          <td>13</td>
           <td>14</td>
+          <td>13</td>
           <td>—</td>
           <td>—</td>
           <td>—</td>
@@ -457,8 +457,8 @@
           <td><strong>Total</strong></td>
           <td></td>
           <td><strong>138</strong></td>
-          <td><strong>93</strong></td>
-          <td><strong>31</strong></td>
+          <td><strong>95</strong></td>
+          <td><strong>29</strong></td>
           <td><strong>—</strong></td>
           <td><strong>3</strong></td>
           <td><strong>11</strong></td>
@@ -469,7 +469,8 @@
     <p class="note">
       The 126 cases that ran are the setup plus every regression suite.
       <strong>Known fail</strong> is not a red build: all 30 are cases marked
-      <span class="mono">test.fail()</span>, which Playwright counts as expected. The two red
+      <span class="mono">test.fail()</span>, which Playwright counts as expected — 29 of them
+      after the 22 Oct pass closed two. The two red
       cases of that cycle were DD-02 and DD-13, both BUG-018. <strong>Both are green as of
       10 Oct 2026</strong> — see the next note. The three skips are not failures: DD-03, DD-04
       and DD-08 skip when the ward has not ordered a meal yet, which is the right answer at
@@ -502,6 +503,57 @@
         intermittent. <span class="mono">searchFor()</span> now waits for the grid to settle on
         <em>which</em> admissions it lists, not on how many: at ten rows a page, a count cannot
         tell one set of ten from another.
+      </li>
+    </ul>
+    <p class="note">
+      <strong>Verification pass of 22 Oct 2026 — two defects closed by the ERP, two found in
+      the suite.</strong>
+    </p>
+    <ul class="note">
+      <li>
+        <strong>BUG-018 is fixed.</strong> The host clock read <span class="mono">+0</span>
+        against this machine, down from <span class="mono">+718</span> minutes.
+        <span class="mono">DD-18</span> reported as <em>unexpectedly passing</em> — exactly what
+        its marker was for — and the marker came off. The assertion stays as a live guard: a
+        clock is the kind of thing that is corrected once and comes back after a reboot. Note
+        that records written while it was wrong still carry the shifted stamp; correcting the
+        clock does not correct those.
+      </li>
+      <li>
+        <strong>BUG-037 is fixed, and more besides.</strong> The bill grid's
+        <span class="mono">End End</span> now reads <span class="mono">End Date</span>, and the
+        rest of the header row went with it: <span class="mono">S.Date</span> →
+        <span class="mono">Service Date</span>, <span class="mono">Served_By</span> →
+        <span class="mono">Served By</span>, <span class="mono">Service Change</span> →
+        <span class="mono">Service Charge</span>, <span class="mono">Inv.No</span> →
+        <span class="mono">Invoice No</span>, <span class="mono">CabinNo</span> →
+        <span class="mono">Cabin No</span>, <span class="mono">OTName</span> →
+        <span class="mono">OT Name</span>. Two messages were reworded with them:
+        <span class="mono">Please input items</span> → <span class="mono">Please add at least
+        one service.</span> and <span class="mono">Please input correct Qty.</span> →
+        <span class="mono">Please enter a valid Qty.</span> Behaviour did not change anywhere;
+        IS-01, IS-06 and IS-25 caught the wording, which is what pinning it is for.
+        <span class="mono">Servedby</span> → <span class="mono">Served By</span> on Consultancy
+        Service was part of the same pass and would have taken CS-01 … CS-23 down on the next
+        full run; both page objects were updated.
+      </li>
+      <li>
+        <strong>IS-26 could never have passed</strong>, and only looked sound while the typo
+        was there to fail on. It read the headers with <span class="mono">allInnerTexts()</span>,
+        which applies the CSS that uppercases them, so it was comparing
+        <span class="mono">END DATE</span> against <span class="mono">End Date</span> and would
+        have gone on failing after the fix. It now reads
+        <span class="mono">allTextContents()</span>, the markup's own casing — which is what
+        IS-01 was doing all along, and why IS-01 passed on the day IS-26 did not.
+      </li>
+      <li>
+        <strong>IS-09 was asserting the wrong thing.</strong> It read a catalogue rate once,
+        then re-searched the lookup before each of its two lines and picked the row at the same
+        index — but the lookup does not guarantee the order, so the second line went in at a
+        different service's rate and the case failed on a total of 5000 against an expected
+        3000. It now checks each line against what the cart says it cost. Its subject was never
+        the catalogue's arithmetic (IS-05 covers that) but that the bin takes off exactly one
+        line and Total Amount follows.
       </li>
     </ul>
     <p class="note">
@@ -3527,7 +3579,7 @@
           <td><span class="badge warn">known fail</span><br /><span class="note">22.8 s · BUG-019</span></td>
         </tr>
         <tr>
-          <td class="id">DD-03<br /><span class="note">line 192</span></td>
+          <td class="id">DD-03<br /><span class="note">line 216</span></td>
           <td>Every row carries a complete diet indent record</td>
           <td>Signed in; Diet Dashboard open. Skips when the ward has not ordered a meal yet.</td>
           <td>
@@ -3551,7 +3603,7 @@
           <td><span class="badge idle">skipped</span><br /><span class="note">7.1 s · no rows (BUG-018)</span></td>
         </tr>
         <tr>
-          <td class="id">DD-04<br /><span class="note">line 224</span></td>
+          <td class="id">DD-04<br /><span class="note">line 248</span></td>
           <td>A patient is on one diet at a time, and no indent is in both grids</td>
           <td>Signed in; Diet Dashboard open. Skips when no patient is on a diet today.</td>
           <td>
@@ -3576,7 +3628,7 @@
           <td><span class="badge idle">skipped</span><br /><span class="note">7.3 s · no rows (BUG-018)</span></td>
         </tr>
         <tr>
-          <td class="id">DD-05<br /><span class="note">line 260</span></td>
+          <td class="id">DD-05<br /><span class="note">line 284</span></td>
           <td>The date range filters both grids</td>
           <td>Signed in; Diet Dashboard open. Test timeout raised to 180 s.</td>
           <td>
@@ -3603,7 +3655,7 @@
           <td><span class="badge pass">pass</span><br /><span class="note">18.1 s</span></td>
         </tr>
         <tr>
-          <td class="id">DD-06<br /><span class="note">line 295</span></td>
+          <td class="id">DD-06<br /><span class="note">line 319</span></td>
           <td>A date range that runs backwards is refused, not silently emptied</td>
           <td>Signed in; Diet Dashboard open. Test timeout raised to 180 s.</td>
           <td>
@@ -3624,7 +3676,7 @@
           <td><span class="badge warn">known fail</span><br /><span class="note">26.4 s · BUG-020</span></td>
         </tr>
         <tr>
-          <td class="id">DD-07<br /><span class="note">line 328</span></td>
+          <td class="id">DD-07<br /><span class="note">line 352</span></td>
           <td>A wide date range is not silently cut off at 120 rows</td>
           <td>
             Signed in; Diet Dashboard open. Skips if the ward raised fewer than 120 indents in
@@ -3648,7 +3700,7 @@
           <td><span class="badge warn">known fail</span><br /><span class="note">18.1 s · BUG-021</span></td>
         </tr>
         <tr>
-          <td class="id">DD-08<br /><span class="note">line 374</span></td>
+          <td class="id">DD-08<br /><span class="note">line 398</span></td>
           <td>Search filters both grids, on any column and in any case</td>
           <td>
             Signed in; Diet Dashboard open. Skips when no diet indent was raised today to
@@ -3677,7 +3729,7 @@
           <td><span class="badge idle">skipped</span><br /><span class="note">7.1 s · no rows (BUG-018)</span></td>
         </tr>
         <tr>
-          <td class="id">DD-09<br /><span class="note">line 427</span></td>
+          <td class="id">DD-09<br /><span class="note">line 451</span></td>
           <td>A search that matches nothing says so</td>
           <td>Signed in; Diet Dashboard open.</td>
           <td>
@@ -3698,7 +3750,7 @@
           <td><span class="badge warn">known fail</span><br /><span class="note">25.3 s · BUG-020</span></td>
         </tr>
         <tr>
-          <td class="id">DD-10<br /><span class="note">line 445</span></td>
+          <td class="id">DD-10<br /><span class="note">line 469</span></td>
           <td>Each grid sorts on its own, without disturbing the other</td>
           <td>
             Signed in; Diet Dashboard open, filtered to the last week. Skips if either grid has
@@ -3731,7 +3783,7 @@
           <td><span class="badge pass">pass</span><br /><span class="note">20.3 s</span></td>
         </tr>
         <tr>
-          <td class="id">DD-12b<br /><span class="note">line 488</span></td>
+          <td class="id">DD-12b<br /><span class="note">line 512</span></td>
           <td>The header says which column the grid is sorted by, and which way</td>
           <td>
             Signed in; Diet Dashboard open, filtered to the last week. Skips if the running grid
@@ -3760,7 +3812,7 @@
           <td><span class="badge pass">pass</span><br /><span class="note">19.6 s</span></td>
         </tr>
         <tr>
-          <td class="id">DD-11<br /><span class="note">line 542</span></td>
+          <td class="id">DD-11<br /><span class="note">line 566</span></td>
           <td>Indent Date and Indent Time sort chronologically, not as text</td>
           <td>
             Signed in; Diet Dashboard open, filtered to the last week. Skips if the running grid
@@ -3790,7 +3842,7 @@
           <td><span class="badge pass">pass</span><br /><span class="note">20.2 s</span></td>
         </tr>
         <tr>
-          <td class="id">DD-12<br /><span class="note">line 588</span></td>
+          <td class="id">DD-12<br /><span class="note">line 612</span></td>
           <td>Each grid is labelled, so a nurse can tell which list a row is in</td>
           <td>Signed in; Diet Dashboard open.</td>
           <td>
@@ -3809,7 +3861,7 @@
           <td><span class="badge warn">known fail</span><br /><span class="note">7.5 s · BUG-022</span></td>
         </tr>
         <tr>
-          <td class="id">DD-13<br /><span class="note">line 629</span></td>
+          <td class="id">DD-13<br /><span class="note">line 633</span></td>
           <td>Leaving the tab and coming back puts the dashboard back on today</td>
           <td>Signed in; Diet Dashboard open. Test timeout raised to 180 s.</td>
           <td>
@@ -3830,7 +3882,7 @@
           <td><span class="badge pass">pass</span><br /><span class="note">22.8 s</span></td>
         </tr>
         <tr>
-          <td class="id">DD-18<br /><span class="note">line 671</span></td>
+          <td class="id">DD-18<br /><span class="note">line 675</span></td>
           <td>The ERP host and the ward keep the same clock</td>
           <td>Signed in. Not really a Diet Dashboard case — it lives here because this is the tab where the defect shows.</td>
           <td>
@@ -3843,13 +3895,13 @@
           <td>Tolerance of 10 minutes — wide enough that ordinary drift and the round trip never trip it</td>
           <td>The host keeps the same clock as the ward it serves.</td>
           <td>
-            The host is <strong>~12 hours fast</strong>: <span class="mono">+718 minutes</span> on three consecutive readings on 10 Oct 2026. Almost exactly ±12 h is the signature of a time-zone sign error — <span class="mono">UTC+6</span> configured as <span class="mono">UTC−6</span> — rather than of a drifting clock. <strong>BUG-018</strong>.<br />Measured off the header rather than off a date on screen on purpose: the header is wrong at <em>every</em> hour, where the day-ahead symptom only appears from local noon. A case that compared dates would pass all morning and fail all afternoon, which is what DD-02 and DD-13 used to do.
+            <span class="badge pass">as expected</span> since 22 Oct 2026 — <strong>BUG-018 fixed</strong>, the skew now reads <span class="mono">+0</span>. It was <strong>+718 minutes</strong> on three consecutive readings on 10 Oct 2026: almost exactly ±12 h, the signature of a time-zone sign error (<span class="mono">UTC+6</span> configured as <span class="mono">UTC−6</span>) rather than of a drifting clock. The marker came off on the run that reported this case as unexpectedly passing; the assertion stays as a live guard, because a clock is the kind of thing that is corrected once and comes back after a reboot.<br />Measured off the header rather than off a date on screen on purpose: the header is wrong at <em>every</em> hour, where the day-ahead symptom only appears from local noon. A case that compared dates would pass all morning and fail all afternoon, which is what DD-02 and DD-13 used to do.
           </td>
           <td>P1</td>
-          <td><span class="badge warn">known fail</span><br /><span class="note">8.3 s · BUG-018</span></td>
+          <td><span class="badge pass">pass</span><br /><span class="note">9.3 s</span></td>
         </tr>
         <tr>
-          <td class="id">DD-14<br /><span class="note">line 684</span></td>
+          <td class="id">DD-14<br /><span class="note">line 768</span></td>
           <td>
             An indent saved on Diet Indent appears as that patient's running diet
             <br /><span class="badge warn">writes</span>
@@ -3881,7 +3933,7 @@
           <td><span class="badge pass">pass</span><br /><span class="note">21.6 s</span></td>
         </tr>
         <tr>
-          <td class="id">DD-15<br /><span class="note">line 721</span></td>
+          <td class="id">DD-15<br /><span class="note">line 805</span></td>
           <td>
             Stop takes the patient off the diet, and Continue puts them back
             <br /><span class="badge warn">writes</span>
@@ -3912,7 +3964,7 @@
           <td><span class="badge pass">pass</span><br /><span class="note">24.6 s</span></td>
         </tr>
         <tr>
-          <td class="id">DD-16<br /><span class="note">line 769</span></td>
+          <td class="id">DD-16<br /><span class="note">line 853</span></td>
           <td>
             Stop asks before taking a patient off the diet they are on
             <br /><span class="badge warn">writes</span>
@@ -3939,7 +3991,7 @@
           <td><span class="badge warn">known fail</span><br /><span class="note">23.8 s · BUG-023</span></td>
         </tr>
         <tr>
-          <td class="id">DD-17<br /><span class="note">line 804</span></td>
+          <td class="id">DD-17<br /><span class="note">line 888</span></td>
           <td>
             Continue on an older indent warns that the running diet will be displaced
             <br /><span class="badge warn">writes</span>
@@ -4028,7 +4080,7 @@
       </thead>
       <tbody>
         <tr>
-          <td class="id">IS-01<br /><span class="note">line 113</span></td>
+          <td class="id">IS-01<br /><span class="note">line 119</span></td>
           <td>IPD Service Entry opens from the Nurse Station tab strip, with both grids</td>
           <td>Signed in; on the launcher.</td>
           <td>
@@ -4049,7 +4101,7 @@
           <td><span class="badge pass">pass</span><br /><span class="note">9.0 s</span></td>
         </tr>
         <tr>
-          <td class="id">IS-02<br /><span class="note">line 153</span></td>
+          <td class="id">IS-02<br /><span class="note">line 159</span></td>
           <td>The ward list narrows to a bed or an admission number</td>
           <td>Signed in; patients on the ward.</td>
           <td>
@@ -4072,7 +4124,7 @@
           <td><span class="badge pass">pass</span><br /><span class="note">19.8 s</span></td>
         </tr>
         <tr>
-          <td class="id">IS-03<br /><span class="note">line 198</span></td>
+          <td class="id">IS-03<br /><span class="note">line 204</span></td>
           <td>Picking a ward patient fills the patient panel, and none of it can be typed into</td>
           <td>Signed in; IPD Service Entry open.</td>
           <td>
@@ -4093,7 +4145,7 @@
           <td><span class="badge pass">pass</span><br /><span class="note">16.6 s</span></td>
         </tr>
         <tr>
-          <td class="id">IS-04<br /><span class="note">line 247</span></td>
+          <td class="id">IS-04<br /><span class="note">line 253</span></td>
           <td>The Service lookup answers a search with the services it matches, and their rates</td>
           <td>Signed in; a patient picked.</td>
           <td>
@@ -4119,7 +4171,7 @@
           <td><span class="badge pass">pass</span><br /><span class="note">16.0 s</span></td>
         </tr>
         <tr>
-          <td class="id">IS-05<br /><span class="note">line 282</span></td>
+          <td class="id">IS-05<br /><span class="note">line 288</span></td>
           <td>Picking a service puts its catalogue rate on the form</td>
           <td>Signed in; a patient picked. Skips if nothing matching the term carries a rate today.</td>
           <td>
@@ -4140,7 +4192,7 @@
           <td><span class="badge pass">pass</span><br /><span class="note">19.9 s</span></td>
         </tr>
         <tr>
-          <td class="id">IS-06<br /><span class="note">line 315</span></td>
+          <td class="id">IS-06<br /><span class="note">line 321</span></td>
           <td>Qty refuses zero and negatives, and says why</td>
           <td>Signed in; a free service picked.</td>
           <td>
@@ -4153,7 +4205,7 @@
           <td>Qty 0 and −1</td>
           <td>
             <ul>
-              <li>Both are refused with <span class="mono">Please input correct Qty.</span></li>
+              <li>Both are refused with <span class="mono">Please enter a valid Qty.</span> — the wording until 22 Oct 2026 was <span class="mono">Please input correct Qty.</span></li>
               <li>The cart is still empty, and the service is left on the form so the nurse can correct the number.</li>
             </ul>
           </td>
@@ -4161,7 +4213,7 @@
           <td><span class="badge pass">pass</span><br /><span class="note">42.0 s</span></td>
         </tr>
         <tr>
-          <td class="id">IS-07<br /><span class="note">line 342</span></td>
+          <td class="id">IS-07<br /><span class="note">line 348</span></td>
           <td>A line with no service is refused, and the tab says so</td>
           <td>Signed in; a patient picked; nothing picked in the Service lookup.</td>
           <td>
@@ -4178,7 +4230,7 @@
           <td><span class="badge warn">known fail</span><br /><span class="note">45.8 s · BUG-035</span></td>
         </tr>
         <tr>
-          <td class="id">IS-08<br /><span class="note">line 376</span></td>
+          <td class="id">IS-08<br /><span class="note">line 382</span></td>
           <td>Enter on Qty commits the line, and the cart carries what was entered</td>
           <td>Signed in; a priced service picked; cart empty.</td>
           <td>
@@ -4199,7 +4251,7 @@
           <td><span class="badge pass">pass</span><br /><span class="note">36.0 s</span></td>
         </tr>
         <tr>
-          <td class="id">IS-09<br /><span class="note">line 415</span></td>
+          <td class="id">IS-09<br /><span class="note">line 421</span></td>
           <td>The cart bin takes a line off, and Total Amount drops with it</td>
           <td>Signed in; two lines in the cart.</td>
           <td>
@@ -4209,7 +4261,7 @@
               <li>Click the bin on the first row.</li>
             </ol>
           </td>
-          <td>Quantities <span class="mono">n</span> and <span class="mono">n+1</span>, so the survivor can be told from the one removed</td>
+          <td>Quantities <span class="mono">n</span> and <span class="mono">n+1</span>, so the survivor can be told from the one removed; each line checked against what the cart says it cost</td>
           <td>
             <ul>
               <li>Exactly one row goes, and it is the one whose bin was clicked.</li>
@@ -4220,7 +4272,7 @@
           <td><span class="badge pass">pass</span><br /><span class="note">1.1 m</span></td>
         </tr>
         <tr>
-          <td class="id">IS-10<br /><span class="note">line 453</span></td>
+          <td class="id">IS-10<br /><span class="note">line 470</span></td>
           <td>Total Amount is the sum of the cart</td>
           <td>Signed in; a priced service available.</td>
           <td>
@@ -4236,7 +4288,7 @@
           <td><span class="badge pass">pass</span><br /><span class="note">1.1 m</span></td>
         </tr>
         <tr>
-          <td class="id">IS-11<br /><span class="note">line 491</span></td>
+          <td class="id">IS-11<br /><span class="note">line 508</span></td>
           <td>The Remarks typed on a line reach the cart row</td>
           <td>Signed in; a free service picked.</td>
           <td>
@@ -4252,7 +4304,7 @@
           <td><span class="badge pass">pass</span><br /><span class="note">34.7 s</span></td>
         </tr>
         <tr>
-          <td class="id">IS-12<br /><span class="note">line 514</span></td>
+          <td class="id">IS-12<br /><span class="note">line 531</span></td>
           <td>The service window typed on a line reaches the cart row</td>
           <td>Signed in; a free service picked.</td>
           <td>
@@ -4268,7 +4320,7 @@
           <td><span class="badge pass">pass</span><br /><span class="note">36.2 s</span></td>
         </tr>
         <tr>
-          <td class="id">IS-13<br /><span class="note">line 551</span></td>
+          <td class="id">IS-13<br /><span class="note">line 568</span></td>
           <td>The cart is emptied when another patient is picked</td>
           <td>Signed in; one line entered for the patient in bed A.</td>
           <td>
@@ -4285,7 +4337,7 @@
           <td><span class="badge warn">known fail</span><br /><span class="note">47.2 s · BUG-024</span></td>
         </tr>
         <tr>
-          <td class="id">IS-14<br /><span class="note">line 614</span></td>
+          <td class="id">IS-14<br /><span class="note">line 631</span></td>
           <td>The cart does not outlive leaving the tab</td>
           <td>Signed in; one line in the cart.</td>
           <td>
@@ -4302,7 +4354,7 @@
           <td><span class="badge warn">known fail</span><br /><span class="note">41.2 s · BUG-025</span></td>
         </tr>
         <tr>
-          <td class="id">IS-15<br /><span class="note">line 661</span></td>
+          <td class="id">IS-15<br /><span class="note">line 678</span></td>
           <td>The catalogue rate cannot be typed over on the form</td>
           <td>Signed in; a priced service picked.</td>
           <td>
@@ -4319,7 +4371,7 @@
           <td><span class="badge warn">known fail</span><br /><span class="note">48.4 s · BUG-026</span></td>
         </tr>
         <tr>
-          <td class="id">IS-16<br /><span class="note">line 700</span></td>
+          <td class="id">IS-16<br /><span class="note">line 717</span></td>
           <td>Service Change comes off the amount</td>
           <td>Signed in; a service priced above the discount.</td>
           <td>
@@ -4336,7 +4388,7 @@
           <td><span class="badge warn">known fail</span><br /><span class="note">41.0 s · BUG-030</span></td>
         </tr>
         <tr>
-          <td class="id">IS-17<br /><span class="note">line 747</span></td>
+          <td class="id">IS-17<br /><span class="note">line 764</span></td>
           <td>The Service Date chosen survives committing the line</td>
           <td>Signed in; a free service picked.</td>
           <td>
@@ -4353,7 +4405,7 @@
           <td><span class="badge warn">known fail</span><br /><span class="note">21.4 s · BUG-029</span></td>
         </tr>
         <tr>
-          <td class="id">IS-18<br /><span class="note">line 812</span></td>
+          <td class="id">IS-18<br /><span class="note">line 829</span></td>
           <td>A committed line carries the schedule its column is for</td>
           <td>Signed in; a free service picked.</td>
           <td>
@@ -4370,7 +4422,7 @@
           <td><span class="badge warn">known fail</span><br /><span class="note">39.7 s · BUG-034</span></td>
         </tr>
         <tr>
-          <td class="id">IS-19<br /><span class="note">line 859</span></td>
+          <td class="id">IS-19<br /><span class="note">line 876</span></td>
           <td>Picking a service fills the Code box</td>
           <td>Signed in; a patient picked.</td>
           <td>
@@ -4387,7 +4439,7 @@
           <td><span class="badge warn">known fail</span><br /><span class="note">36.7 s · BUG-033</span></td>
         </tr>
         <tr>
-          <td class="id">IS-20<br /><span class="note">line 897</span></td>
+          <td class="id">IS-20<br /><span class="note">line 914</span></td>
           <td>An End Date Time before the Start Date Time is refused</td>
           <td>Signed in; a free service picked.</td>
           <td>
@@ -4404,7 +4456,7 @@
           <td><span class="badge warn">known fail</span><br /><span class="note">38.3 s · BUG-031</span></td>
         </tr>
         <tr>
-          <td class="id">IS-21<br /><span class="note">line 939</span></td>
+          <td class="id">IS-21<br /><span class="note">line 956</span></td>
           <td>The service window is cleared with the rest of the line</td>
           <td>Signed in; one line committed with a window.</td>
           <td>
@@ -4421,7 +4473,7 @@
           <td><span class="badge warn">known fail</span><br /><span class="note">41.3 s · BUG-032</span></td>
         </tr>
         <tr>
-          <td class="id">IS-22<br /><span class="note">line 980</span></td>
+          <td class="id">IS-22<br /><span class="note">line 997</span></td>
           <td>A lookup search that matches nothing says so</td>
           <td>Signed in; a patient picked.</td>
           <td>
@@ -4438,7 +4490,7 @@
           <td><span class="badge warn">known fail</span><br /><span class="note">34.8 s · BUG-036</span></td>
         </tr>
         <tr>
-          <td class="id">IS-23<br /><span class="note">line 1008</span></td>
+          <td class="id">IS-23<br /><span class="note">line 1025</span></td>
           <td>The bill lists every service charged, however many there are</td>
           <td>Signed in. Skips if no patient in the first eighteen beds has fifteen services on the bill.</td>
           <td>
@@ -4455,7 +4507,7 @@
           <td><span class="badge warn">known fail</span><br /><span class="note">16.4 s · BUG-028</span></td>
         </tr>
         <tr>
-          <td class="id">IS-24<br /><span class="note">line 1060</span></td>
+          <td class="id">IS-24<br /><span class="note">line 1077</span></td>
           <td>A service saved by mistake can be taken off the bill</td>
           <td>Signed in. Skips if no patient in reach has a service on the bill.</td>
           <td>
@@ -4472,7 +4524,7 @@
           <td><span class="badge warn">known fail</span><br /><span class="note">27.0 s · BUG-027</span></td>
         </tr>
         <tr>
-          <td class="id">IS-25<br /><span class="note">line 1106</span></td>
+          <td class="id">IS-25<br /><span class="note">line 1123</span></td>
           <td>Save refuses an empty cart</td>
           <td>Signed in; a patient picked; cart asserted empty.</td>
           <td>
@@ -4483,12 +4535,12 @@
             </ol>
           </td>
           <td>None</td>
-          <td>Save refuses with <span class="mono">Please input items</span> and writes nothing.</td>
+          <td>Save refuses with <span class="mono">Please add at least one service.</span> — the wording until 22 Oct 2026 was <span class="mono">Please input items</span> — and writes nothing.</td>
           <td><span class="badge pass">as expected</span><br /><span class="note">The only Save this suite presses, and the emptiness of the cart is asserted rather than assumed.</span></td>
           <td><span class="badge pass">pass</span><br /><span class="note">11.8 s</span></td>
         </tr>
         <tr>
-          <td class="id">IS-26<br /><span class="note">line 1134</span></td>
+          <td class="id">IS-26<br /><span class="note">line 1151</span></td>
           <td>The bill grid names its columns</td>
           <td>Signed in; a patient picked.</td>
           <td>
@@ -4499,12 +4551,14 @@
           </td>
           <td>None</td>
           <td>The eighth column reads <span class="mono">End Date</span> — the name the cart grid uses for the same value one grid up.</td>
-          <td>It reads <span class="mono">End End</span>. Cosmetic, and on a screen a ward nurse reads all day. <strong>BUG-037</strong></td>
+          <td>
+            <span class="badge pass">as expected</span> since 22 Oct 2026 — <strong>BUG-037 fixed</strong>, with <span class="mono">S.Date</span> and <span class="mono">Served_By</span> tidied in the same pass.<br /><span class="note">The case had a fault of its own as well: it read the headers with <span class="mono">allInnerTexts()</span>, which applies the CSS that uppercases them, so it was comparing <span class="mono">END DATE</span> against <span class="mono">End Date</span> and could never have passed. It now reads <span class="mono">allTextContents()</span>, which is what IS-01 was doing all along.</span>
+          </td>
           <td>P3</td>
-          <td><span class="badge warn">known fail</span><br /><span class="note">11.2 s · BUG-037</span></td>
+          <td><span class="badge pass">pass</span><br /><span class="note">8.4 s</span></td>
         </tr>
         <tr>
-          <td class="id">IS-27<br /><span class="note">line 1161</span></td>
+          <td class="id">IS-27<br /><span class="note">line 1184</span></td>
           <td>Saved services carry the window they were entered with</td>
           <td>Signed in. Skips if no patient in reach has a service on the bill.</td>
           <td>
@@ -4663,8 +4717,8 @@
     </table>
 
     <footer class="doc-footer">
-      Test Case Document v2.2 · Popular Medical College &amp; Hospital Ltd — Healthcare ERP
-      Test Automation · 10 October 2026 · generated from
+      Test Case Document v2.3 · Popular Medical College &amp; Hospital Ltd — Healthcare ERP
+      Test Automation · 22 October 2026 · generated from
       <span class="mono">docs/src/test-cases.html</span> by
       <span class="mono">npm run docs</span>.
     </footer>

@@ -162,12 +162,16 @@ test.describe('Diet Dashboard @regression', () => {
     // right.
     //
     // Which day is read off the app rather than off this machine's clock, and that is not
-    // a weaker assertion - it is the only honest one. The ERP host's clock runs about
-    // twelve hours fast (BUG-018, and DD-18 is the case that measures it), so from local
-    // noon onwards the app's "today" is tomorrow by the test host's reckoning. Asserting
-    // the two agree here made DD-02 fail for half of every day over a defect that has
-    // nothing to do with this tab, and told the reader nothing that DD-18 does not say
-    // better.
+    // a weaker assertion - it is the only honest one. This case used to assert the two
+    // agreed, and for as long as the ERP host's clock ran twelve hours fast (BUG-018, now
+    // fixed) that made DD-02 fail for half of every day over a defect with nothing to do
+    // with this tab.
+    //
+    // It is left reading the app's own day even though the clocks now agree. Whose clock
+    // the host keeps is DD-18's question and it answers it directly, in minutes; this case
+    // is about what the tab does with whatever day it has decided on, and tying it to a
+    // second machine's calendar only gives it a second way to fail for someone else's
+    // reason.
     const opened = await dietDashboardPage.startDateValue.inputValue();
     expect(opened, 'the dashboard did not open on a date at all').toMatch(/^\d{4}-\d{2}-\d{2}$/);
     await expect(
@@ -698,14 +702,19 @@ test.describe('Diet Dashboard @regression', () => {
         `The dashboard opened on ${opened}; this machine's date is ${dates.today}.`,
     });
 
-    // Expected-to-fail: the host runs about twelve hours fast - 718 minutes on every
-    // reading taken on 10 Oct - which is the signature of a UTC+6 zone configured as
-    // UTC-6 rather than of a clock that has merely drifted. Everything the ERP date-stamps
-    // from its own clock is affected, not just this dashboard: from local noon onwards the
-    // dashboard's "today" is tomorrow, and saved rows carry the same shifted stamp. Ten
-    // minutes is the tolerance - wide enough that ordinary drift and the round trip never
-    // trip it, narrow enough that a twelve-hour error cannot hide. See BUG-018.
-    test.fail();
+    // This was BUG-018, and it is fixed: the host ran about twelve hours fast - 718 minutes
+    // on every reading taken on 10 Oct 2026, the signature of a UTC+6 zone configured as
+    // UTC-6 rather than of a clock that had merely drifted - and on 22 Oct 2026 it read
+    // +0. The case was marked test.fail() until then; the marker came off on the run that
+    // reported it as unexpectedly passing, which is what that marker is for.
+    //
+    // It stays as a live guard rather than being deleted. A clock is exactly the kind of
+    // thing that is fixed once and then comes back after a reboot or a rebuild, and
+    // everything the ERP date-stamps from its own clock rides on it - saved indents, bill
+    // rows, the Served_By timestamps on IPD services - not just this dashboard.
+    //
+    // Ten minutes is the tolerance: wide enough that ordinary drift and the round trip
+    // never trip it, narrow enough that a twelve-hour error cannot hide.
     expect(
       Math.abs(skewMinutes),
       `the ERP host's clock is ${skewMinutes} minutes away from this machine's`

@@ -174,7 +174,7 @@ export class ConsultancyServicePage extends BasePage {
     'Discount',
     'Amount',
     'ServiceDate',
-    'Servedby',
+    'Served By',
   ] as const;
 
   /** What the Schedule lookup offers. There is no third option and no blank. */
@@ -776,11 +776,18 @@ export class ConsultancyServicePage extends BasePage {
       .first();
   }
 
-  /** The bill - services already saved against this admission. Taken by its Servedby column. */
+  /**
+   * The bill - services already saved against this admission. Taken by its Served By column.
+   *
+   * The header read "Servedby" until the ERP relabelled it between 06 and 22 Oct 2026, in
+   * the same pass that tidied IPD Service Entry's grids. Only this one word moved on this
+   * tab - "ServiceDate", "Service Change", "Inv.No" and "CabinNo" are all still spelled
+   * the way they were - so BILL_COLUMNS and this locator were the only two places to touch.
+   */
   get billGrid(): Locator {
     return this.page
       .locator('table.mud-table-root:visible')
-      .filter({ has: this.page.locator('th', { hasText: 'Servedby' }) })
+      .filter({ has: this.page.locator('th', { hasText: 'Served By' }) })
       .first();
   }
 
