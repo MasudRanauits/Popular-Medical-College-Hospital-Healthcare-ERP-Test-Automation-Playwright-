@@ -1,7 +1,7 @@
-import { test, expect } from '../../fixtures';
-import { ConsultancyServicePage } from '../../pages';
-import type { ConsultancyWardPatient, ServiceOption } from '../../pages';
-import { consultancyService } from '../../data/test-data';
+import { test, expect } from '../../../fixtures';
+import { ConsultancyServicePage } from '../../../pages';
+import type { ConsultancyWardPatient, ServiceOption } from '../../../pages';
+import { consultancyService } from '../../../data/test-data';
 
 const { CART_COLUMNS, BILL_COLUMNS, SCHEDULES, CANCEL_REASONS, MESSAGES, BILL_ROW_CAP } =
   ConsultancyServicePage;

@@ -1,7 +1,7 @@
-import { test, expect } from '../../fixtures';
-import type { RegistrationPage } from '../../pages';
-import { primaryUser } from '../../data/users';
-import { admissionData, medicineIndent, registrationPatient } from '../../data/test-data';
+import { test, expect } from '../../../fixtures';
+import type { RegistrationPage } from '../../../pages';
+import { primaryUser } from '../../../data/users';
+import { admissionData, medicineIndent, registrationPatient } from '../../../data/test-data';
 
 /**
  * Admission @regression — TC_ADM_001 … TC_ADM_002, TC_FLOW_001.

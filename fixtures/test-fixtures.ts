@@ -11,6 +11,8 @@ import {
   DietDashboardPage,
   ConsultancyServicePage,
   IpdServiceEntryPage,
+  HospitalMenuPage,
+  CabinDashboardPage,
 } from '../pages';
 
 /**
@@ -30,6 +32,9 @@ type Pages = {
   dietDashboardPage: DietDashboardPage;
   consultancyServicePage: ConsultancyServicePage;
   ipdServiceEntryPage: IpdServiceEntryPage;
+  /** The Hospital module's drawer. The screens behind it are built per-case, from HOSPITAL_MENU. */
+  hospitalMenuPage: HospitalMenuPage;
+  cabinDashboardPage: CabinDashboardPage;
 };
 
 export const test = base.extend<Pages>({
@@ -65,6 +70,12 @@ export const test = base.extend<Pages>({
   },
   ipdServiceEntryPage: async ({ page }, use) => {
     await use(new IpdServiceEntryPage(page));
+  },
+  hospitalMenuPage: async ({ page }, use) => {
+    await use(new HospitalMenuPage(page));
+  },
+  cabinDashboardPage: async ({ page }, use) => {
+    await use(new CabinDashboardPage(page));
   },
 });
 

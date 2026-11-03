@@ -1,7 +1,7 @@
-import { test, expect } from '../../fixtures';
-import { NurseStationPage } from '../../pages';
-import type { NurseStationPage as NurseStation } from '../../pages/nurse-station.page';
-import { medicineIndent } from '../../data/test-data';
+import { test, expect } from '../../../fixtures';
+import { NurseStationPage } from '../../../pages';
+import type { NurseStationPage as NurseStation } from '../../../pages/nurse-station.page';
+import { medicineIndent } from '../../../data/test-data';
 
 /**
  * Nurse Station @regression — TC_NS_001 … TC_NS_011.

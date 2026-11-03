@@ -1,5 +1,5 @@
-import { test, expect } from '../../fixtures';
-import { AdmissionDashboardPage } from '../../pages';
+import { test, expect } from '../../../fixtures';
+import { AdmissionDashboardPage } from '../../../pages';
 
 /**
  * Admission dashboard @regression — TC_ADMD_001 … TC_ADMD_007.

@@ -1,6 +1,6 @@
-import { test, expect } from '../../fixtures';
-import { DietIndentPage } from '../../pages';
-import { dietIndent } from '../../data/test-data';
+import { test, expect } from '../../../fixtures';
+import { DietIndentPage } from '../../../pages';
+import { dietIndent } from '../../../data/test-data';
 
 const { MESSAGES } = DietIndentPage;
 

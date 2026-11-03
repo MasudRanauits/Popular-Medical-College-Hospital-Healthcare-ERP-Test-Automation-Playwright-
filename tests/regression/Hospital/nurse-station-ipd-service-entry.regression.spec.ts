@@ -1,7 +1,7 @@
-import { test, expect } from '../../fixtures';
-import { IpdServiceEntryPage } from '../../pages';
-import type { IpdServiceOption } from '../../pages';
-import { ipdServiceEntry } from '../../data/test-data';
+import { test, expect } from '../../../fixtures';
+import { IpdServiceEntryPage } from '../../../pages';
+import type { IpdServiceOption } from '../../../pages';
+import { ipdServiceEntry } from '../../../data/test-data';
 
 const { CART_COLUMNS, BILL_COLUMNS, MESSAGES, BILL_ROW_CAP, TAB } = IpdServiceEntryPage;
 

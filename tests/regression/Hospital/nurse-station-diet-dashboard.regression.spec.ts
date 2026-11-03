@@ -1,7 +1,7 @@
-import { test, expect } from '../../fixtures';
-import { DietDashboardPage, DietIndentPage } from '../../pages';
-import type { DietDashboardRow, DietGrid } from '../../pages';
-import { dietDashboard, dietIndent } from '../../data/test-data';
+import { test, expect } from '../../../fixtures';
+import { DietDashboardPage, DietIndentPage } from '../../../pages';
+import type { DietDashboardRow, DietGrid } from '../../../pages';
+import { dietDashboard, dietIndent } from '../../../data/test-data';
 
 const { COLUMNS, ACTIONS, STATUSES, ROW_CAP } = DietDashboardPage;
 
